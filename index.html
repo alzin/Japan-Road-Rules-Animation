@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Japan Road Rules — the rules of the road, animated in 3D</title>
+<title>Japan Road Rules Animation — Learn the Rules in 3D</title>
 <meta name="description" content="An interactive 3D guide to the rules of the road in Japan: keep left, 止まれ stop signs, crosswalk priority, railway crossings, the 2026 30 km/h residential limit, expressways, alcohol, phones, bicycles and more.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -55,6 +55,7 @@
       <button type="button" id="prevBtn" aria-label="Previous chapter"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h2v12H6zm3.5 6L18 6v12z"/></svg></button>
       <button type="button" id="playBtn" aria-label="Pause"><svg viewBox="0 0 24 24" id="playIco" aria-hidden="true"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg></button>
       <button type="button" id="replayBtn" aria-label="Replay this chapter"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg></button>
+      <button type="button" id="narrationBtn" aria-label="Turn narration off" aria-pressed="true" title="Narration on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6L8 10H4z"/><path d="M16 9c1.3 1.7 1.3 4.3 0 6M19 6c3.2 3.3 3.2 8.7 0 12"/></svg></button>
       <div class="timeline"><input type="range" id="scrub" min="0" max="1000" value="0" aria-label="Scene position">
       <span class="time" id="time">0:00 / 0:00</span></div><span class="transport-label" data-i18n="sceneLabel">Animated lesson</span>
       <button type="button" id="nextBtn" aria-label="Next chapter"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg></button>
@@ -1220,6 +1221,8 @@ const ICONS={
   expand:'<path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5"/>',
   collapse:'<path d="M3 8h5V3M21 8h-5V3M8 21v-5H3M16 21v-5h5"/>',
   close:'<path d="m6 6 12 12M6 18 18 6"/>',
+  volumeOn:'<path d="M4 10v4h4l5 4V6l-5 4H4z"/><path d="M16 9c1.3 1.7 1.3 4.3 0 6M19 6c3.2 3.3 3.2 8.7 0 12"/>',
+  volumeOff:'<path d="M4 10v4h4l5 4V6l-5 4H4z"/><path d="m16 10 5 5m0-5-5 5"/>',
   check:'<path d="m5 12 4 4L19 6"/>',
   arrow:'<path d="M4 12h16m-6-6 6 6-6 6"/>',
   bulb:'<path d="M9 18h6M10 21h4M8 14a6 6 0 1 1 8 0c-1 1-1 2-1 2H9s0-1-1-2"/>',
@@ -1240,6 +1243,8 @@ const UI={
 };
 let cur=-1,chapter=null,t=0,playing=!REDUCE,lastFrame=0,capIndex=-1,visible3D=true,introUntil=0,hintTimer=null,captionTimer=null;
 let activeTab=null,exploring=false,toastTimer=null;
+const canNarrate='speechSynthesis' in window&&'SpeechSynthesisUtterance' in window;
+let narrationEnabled=canNarrate,narrationUtterance=null;
 let fullscreenActive=false,fullscreenPending=false,fullscreenFocus=null,fullscreenScroll=0;
 let fullscreenInert=[];
 const tabScroll={learn:0,signs:0,penalties:0,quiz:0};
@@ -1285,12 +1290,46 @@ function renderDetail(){
     else loadChapter(cur+1,{scroll:true,focus:true});
   });
 }
-function updateCaption(tt,force){
+function cancelNarration(){
+  if(!canNarrate) return;
+  speechSynthesis.cancel(); narrationUtterance=null;
+}
+function narrationRate(text,idx){
+  const caps=TEXT[ORDER[cur]].caps,start=caps[idx][0],end=idx+1<caps.length?caps[idx+1][0]:(chapter?chapter.dur:start+4);
+  const seconds=Math.max(2,end-start-.15);
+  const units=lang==='ja'?text.replace(/[\s。、！？「」『』（）・]/g,'').length:text.trim().split(/\s+/).filter(Boolean).length;
+  const normalPerSecond=lang==='ja'?5.2:2.8;
+  return Math.max(.9,Math.min(1.7,units/seconds/normalPerSecond));
+}
+function speakCaption(idx=capIndex){
+  if(!canNarrate||!narrationEnabled||!playing||activeTab!=='learn'||!visible3D||document.hidden||cur<0||idx<0) return;
+  const c=TEXT[ORDER[cur]].caps[idx],text=lang==='ja'?c[2]:c[1],locale=lang==='ja'?'ja-JP':'en-US';
+  cancelNarration();
+  const utterance=new SpeechSynthesisUtterance(text); narrationUtterance=utterance;
+  utterance.lang=locale; utterance.rate=narrationRate(text,idx); utterance.pitch=1; utterance.volume=1;
+  const voices=speechSynthesis.getVoices(),normalized=locale.toLowerCase();
+  utterance.voice=voices.find(v=>v.lang.replace('_','-').toLowerCase()===normalized)||voices.find(v=>v.lang.toLowerCase().startsWith(lang))||null;
+  utterance.onend=utterance.onerror=()=>{ if(narrationUtterance===utterance) narrationUtterance=null; };
+  speechSynthesis.speak(utterance);
+}
+function updateNarrationButton(){
+  const button=$('#narrationBtn'); if(!button) return;
+  const on=canNarrate&&narrationEnabled;
+  button.innerHTML=icon(on?'volumeOn':'volumeOff'); button.setAttribute('aria-pressed',String(on)); button.disabled=!canNarrate||!threeOK;
+  const label=!canNarrate?(lang==='ja'?'このブラウザでは音声読み上げを利用できません':'Narration is unavailable in this browser'):(lang==='ja'?(on?'音声読み上げをオフにする':'音声読み上げをオンにする'):(on?'Turn narration off':'Turn narration on'));
+  button.setAttribute('aria-label',label); button.title=!canNarrate?label:(lang==='ja'?(on?'音声読み上げ：オン':'音声読み上げ：オフ'):(on?'Narration on':'Narration off'));
+}
+function setNarration(on){
+  narrationEnabled=canNarrate&&on; try{ localStorage.setItem('dj-narration',narrationEnabled?'on':'off'); }catch(e){}
+  cancelNarration(); updateNarrationButton(); if(narrationEnabled&&playing) speakCaption();
+}
+function updateCaption(tt,force,narrate=true){
   const caps=TEXT[ORDER[cur]].caps; let idx=0; for(let k=0;k<caps.length;k++) if(tt>=caps[k][0]) idx=k;
   if(idx===capIndex&&!force) return; capIndex=idx; clearTimeout(captionTimer); const c=caps[idx],el=$('#cap'),P=$('#capP'),S=$('#capS');
   const swap=()=>{ P.textContent=lang==='ja'?c[2]:c[1]; S.textContent=lang==='ja'?c[1]:c[2]; P.lang=lang; S.lang=lang==='ja'?'en':'ja'; };
-  if(REDUCE||force){ swap(); el.classList.remove('swap'); return; }
-  el.classList.add('swap'); captionTimer=setTimeout(()=>{ swap(); el.classList.remove('swap'); },150);
+  const present=()=>{ swap(); el.classList.remove('swap'); if(narrate) speakCaption(idx); };
+  if(REDUCE||force){ present(); return; }
+  el.classList.add('swap'); captionTimer=setTimeout(present,150);
 }
 function fmt(s){ s=Math.max(0,Math.floor(s)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
 function updateTime(){
@@ -1354,7 +1393,7 @@ async function toggleFullscreen(){
   } finally { fullscreenPending=false; }
 }
 function loadChapter(i,opts={}){
-  if(!Number.isInteger(i)||i<0||i>=ORDER.length) return; const first=cur<0; cur=i; const id=ORDER[i];
+  if(!Number.isInteger(i)||i<0||i>=ORDER.length) return; cancelNarration(); const first=cur<0; cur=i; const id=ORDER[i];
   renderChapterList(); renderDetail(); hudHide(); setSceneTransition(0); orbit.az=0; orbit.el=0; orbit.zoom=1; setExplore(false); t=0; playing=opts.autoplay!==false; capIndex=-1; updateCaption(0,true);
   if(threeOK){ clearStage(); VEH=[]; PEOPLE=[]; chapter=BUILD[id](); camInit=false; chapter.update(0,0,0); resetDynamics(); if(first&&!REDUCE) introUntil=performance.now()+1800; }
   else { chapter={dur:TEXT[id].caps[TEXT[id].caps.length-1][0]+4}; playing=false; }
@@ -1362,7 +1401,7 @@ function loadChapter(i,opts={}){
   $('#lessonDuration').textContent=lang==='ja'?`${Math.ceil(chapter.dur)}秒`:`${Math.ceil(chapter.dur)} sec`;
   $('#prevBtn').disabled=cur===0; $('#nextBtn').disabled=cur===ORDER.length-1;
   ['playBtn','replayBtn','scrub','exploreBtn','resetView','fullscreenBtn'].forEach(id=>$('#'+id).disabled=!threeOK);
-  setPlayIcon(); updateTime(); try{ localStorage.setItem('dj-chapter',String(i)); }catch(e){}
+  setPlayIcon(); updateNarrationButton(); updateTime(); try{ localStorage.setItem('dj-chapter',String(i)); }catch(e){}
   if(opts.focus) $(fullscreenActive?'#stage':'#lessonTitle').focus({preventScroll:true});
   if(opts.scroll&&!fullscreenActive) $('.stagewrap').scrollIntoView({behavior:REDUCE?'auto':'smooth',block:'start'});
 }
@@ -1378,7 +1417,7 @@ function frame(now){
   requestAnimationFrame(frame);
   if(!threeOK||!chapter||!visible3D||document.hidden||$('#chapterSheet').open){ lastFrame=now; return; }
   const dt=Math.min(0.05,Math.max(0,(now-lastFrame)/1000)); lastFrame=now; const wall=t;
-  if(playing){ t+=dt; if(t>=chapter.dur){ t=chapter.dur-0.001; playing=false; setPlayIcon(); } }
+  if(playing){ t+=dt; if(t>=chapter.dur){ t=chapter.dur-0.001; playing=false; cancelNarration(); setPlayIcon(); } }
   chapter.update(t,playing?dt:0,wall); VEH.forEach(v=>tickVehicle(v,playing?dt:0,wall));
   updateCaption(t); updateTime(); applyCamera(chapter.cam(t),dt,now); renderer.render(scene,camera);
 }
@@ -1389,6 +1428,7 @@ function showTab(name,opts={}){
   if(activeTab) tabScroll[activeTab]=window.scrollY;
   activeTab=name; $$('.tabs button').forEach(b=>{ const selected=b.dataset.tab===name; b.setAttribute('aria-selected',String(selected)); b.tabIndex=selected?0:-1; });
   $$('.view').forEach(v=>v.classList.toggle('on',v.id===name)); visible3D=name==='learn'; setExplore(false);
+  if(name==='learn'&&playing) speakCaption(); else cancelNarration();
   if(name==='learn'&&threeOK) resize();
   if(opts.history!==false&&location.hash!=='#'+name) history.pushState({tab:name},'','#'+name);
   window.scrollTo({top:tabScroll[name]||0,behavior:'instant'});
@@ -1405,7 +1445,7 @@ function applyStrings(){
   $('#signSearch').placeholder=lang==='ja'?'日本語・英語で標識を検索':'Search signs in English or Japanese'; $('#chapterSearch').placeholder=lang==='ja'?'チャプターを検索…':'Find a chapter…';
   const labels={prevBtn:['Previous chapter','前のチャプター'],nextBtn:['Next chapter','次のチャプター'],replayBtn:['Replay this chapter','チャプターを再生し直す'],scrub:['Scene position','再生位置'],resetView:['Reset camera','視点をリセット'],closeSheet:['Close chapters','一覧を閉じる'],stage:['Interactive 3D driving scene','インタラクティブ3Dシーン']};
   Object.entries(labels).forEach(([id,label])=>$('#'+id).setAttribute('aria-label',label[lang==='ja'?1:0]));
-  setPlayIcon(); updateThemeButton(); updateFullscreenButton(); setExplore(exploring); if(cur>=0) updateProgress();
+  setPlayIcon(); updateNarrationButton(); updateThemeButton(); updateFullscreenButton(); setExplore(exploring); if(cur>=0) updateProgress();
 }
 function setLang(l){
   lang=l; try{ localStorage.setItem('dj-lang',l); }catch(e){}
@@ -1420,11 +1460,16 @@ function updateThemeButton(){
 function setTheme(mode){ document.documentElement.setAttribute('data-theme',mode); try{ localStorage.setItem('dj-theme',mode); }catch(e){} updateThemeButton(); }
 function toast(message){ clearTimeout(toastTimer); $('#toast').textContent=message; $('#toast').classList.add('on'); toastTimer=setTimeout(()=>$('#toast').classList.remove('on'),3200); }
 function openChapters(push=true){
-  $('#chapterSearch').value=''; chapterButtons($('#sheetList')); updateProgress(); $('#chapterSheet').showModal(); document.body.classList.add('sheet-open');
+  cancelNarration(); $('#chapterSearch').value=''; chapterButtons($('#sheetList')); updateProgress(); $('#chapterSheet').showModal(); document.body.classList.add('sheet-open');
   if(push!==false) history.pushState({sheet:true},'',location.href);
 }
 function closeChapters(){ if(!$('#chapterSheet').open) return; $('#chapterSheet').close(); if(history.state&&history.state.sheet) history.back(); }
-function togglePlay(){ if(!threeOK) return; if(!playing&&t>=chapter.dur-.01){ t=0; resetDynamics(); } playing=!playing; setPlayIcon(); }
+function togglePlay(){
+  if(!threeOK) return;
+  if(playing){ playing=false; cancelNarration(); }
+  else { if(t>=chapter.dur-.01){ t=0; resetDynamics(); updateCaption(0,true,false); } playing=true; speakCaption(); }
+  setPlayIcon();
+}
 function bind(){
   $$('.tabs button').forEach(b=>{
     b.addEventListener('click',()=>showTab(b.dataset.tab));
@@ -1442,15 +1487,17 @@ function bind(){
   matchMedia('(prefers-color-scheme:dark)').addEventListener('change',updateThemeButton);
   $('#chapterPicker').addEventListener('click',openChapters); $('#closeSheet').addEventListener('click',closeChapters);
   $('#chapterSheet').addEventListener('cancel',e=>{ e.preventDefault(); closeChapters(); });
-  $('#chapterSheet').addEventListener('close',()=>document.body.classList.remove('sheet-open'));
+  $('#chapterSheet').addEventListener('close',()=>{ document.body.classList.remove('sheet-open'); if(playing) speakCaption(); });
   $('#chapterSheet').addEventListener('click',e=>{ if(e.target!==$('#chapterSheet')) return; const r=e.target.getBoundingClientRect(); if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom) closeChapters(); });
   $('#chapterSearch').addEventListener('input',e=>chapterButtons($('#sheetList'),e.target.value));
   $('#signSearch').addEventListener('input',e=>{ signQuery=e.target.value; renderSignResults(); });
   $$('[data-filter]').forEach(b=>b.addEventListener('click',()=>{ signFilter=b.dataset.filter; $$('[data-filter]').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); renderSignResults(); }));
   $('#playBtn').addEventListener('click',togglePlay);
+  $('#narrationBtn').addEventListener('click',()=>setNarration(!narrationEnabled));
   $('#replayBtn').addEventListener('click',()=>{ t=0; playing=true; setPlayIcon(); resetDynamics(); updateCaption(0,true); });
   $('#prevBtn').addEventListener('click',()=>loadChapter(cur-1,{focus:true})); $('#nextBtn').addEventListener('click',()=>loadChapter(cur+1,{focus:true}));
-  $('#scrub').addEventListener('input',e=>{ if(!chapter) return; t=e.target.value/1000*chapter.dur; resetDynamics(); if(chapter.update) chapter.update(t,0,performance.now()/1000); updateCaption(t,true); updateTime(); });
+  $('#scrub').addEventListener('input',e=>{ if(!chapter) return; cancelNarration(); t=e.target.value/1000*chapter.dur; resetDynamics(); if(chapter.update) chapter.update(t,0,performance.now()/1000); updateCaption(t,true,false); updateTime(); });
+  $('#scrub').addEventListener('change',()=>{ if(playing) speakCaption(); });
   $('#exploreBtn').addEventListener('click',()=>setExplore(!exploring));
   $('#fullscreenBtn').addEventListener('click',toggleFullscreen);
   const syncFullscreen=()=>setFullscreen(nativeFullscreenElement()===$('.stagewrap'));
@@ -1485,11 +1532,14 @@ function bind(){
     else if(e.key==='PageDown'||e.key==='n'){ e.preventDefault(); loadChapter(cur+1,{focus:true}); }
     else if(e.key==='PageUp'||e.key==='p'){ e.preventDefault(); loadChapter(cur-1,{focus:true}); }
   });
-  document.addEventListener('visibilitychange',()=>{ lastFrame=performance.now(); });
-  if('IntersectionObserver' in window) new IntersectionObserver(entries=>{ visible3D=activeTab==='learn'&&entries[0].isIntersecting; },{rootMargin:'120px'}).observe(st);
+  document.addEventListener('visibilitychange',()=>{ lastFrame=performance.now(); if(document.hidden) cancelNarration(); else if(playing) speakCaption(); });
+  if('IntersectionObserver' in window) new IntersectionObserver(entries=>{
+    const visible=activeTab==='learn'&&entries[0].isIntersecting; if(visible===visible3D) return; visible3D=visible;
+    if(visible&&playing) speakCaption(); else cancelNarration();
+  },{rootMargin:'120px'}).observe(st);
 }
 function boot(){
-  let stored=null; try{ stored=localStorage.getItem('dj-lang'); const th=localStorage.getItem('dj-theme'); if(th==='dark'||th==='light') document.documentElement.setAttribute('data-theme',th); }catch(e){}
+  let stored=null; try{ stored=localStorage.getItem('dj-lang'); const th=localStorage.getItem('dj-theme'),audio=localStorage.getItem('dj-narration'); if(th==='dark'||th==='light') document.documentElement.setAttribute('data-theme',th); if(audio==='off') narrationEnabled=false; else if(audio==='on') narrationEnabled=canNarrate; }catch(e){}
   if(stored==='ja'||stored==='en') lang=stored; else if((navigator.language||'').toLowerCase().startsWith('ja')) lang='ja';
   applyStrings(); renderSigns(); renderPenalties(); renderQuiz(); bind();
   threeOK=(typeof THREE!=='undefined')&&initThree();

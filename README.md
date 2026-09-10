@@ -1,4 +1,4 @@
-# Japan Road Rules
+# Japan Road Rules Animation
 
 An interactive 3D guide to the rules of the road in Japan — keep left, 止まれ stop
 signs, crosswalk priority, railway crossings, expressways, alcohol, phones,
@@ -6,7 +6,7 @@ bicycles and more. Every rule is shown as a small animated scene you can scrub
 through, alongside the penalty points and the article of the Road Traffic Act it
 comes from.
 
-**[▶ Open the guide](https://alzin.github.io/japan-road-rules/)**
+**[▶ Open the guide](https://alzin.github.io/Japan-Road-Rules-Animation/)**
 
 Bilingual: English / 日本語.
 
@@ -17,8 +17,9 @@ on your device. The 3D viewer leaves normal page scrolling available — tap
 **Explore** to look around, then **Done** to return to scrolling. Selecting a
 chapter starts its animation automatically. Use the fullscreen button in the
 viewer to expand the animation with its captions and playback controls; use the
-same button or Escape to exit. Reduced-motion preferences pause the initial
-lesson on page load, while chapter selections still play immediately.
+same button or Escape to exit. The speaker button reads each caption in the
+selected English or Japanese language. Reduced-motion preferences pause the
+initial lesson on page load, while chapter selections still play immediately.
 
 ## Chapters
 
