@@ -45,6 +45,7 @@
       <canvas id="c" aria-label="Animated illustration of the selected road rule"></canvas>
       <div class="chip-scene" id="sceneChip"><span class="dot"></span><span id="sceneChipText">Loading 3D scene…</span></div>
       <div class="hud" id="hud"><b id="hudNum">60</b><small id="hudUnit">km/h</small></div>
+      <div class="scene-transition" id="sceneTransition" aria-hidden="true"><span>次の道路 · Next road type</span><b>高速道路 · Expressway</b><small>法定速度 · Default 100 km/h</small></div>
       <div class="hint" id="hint">Drag to look around</div>
       <div class="scene-tools"><button type="button" id="exploreBtn" aria-pressed="false"><span data-icon="move"></span><span data-i18n="explore">Explore</span></button><button type="button" id="resetView" aria-label="Reset camera"><span data-icon="reset"></span></button><button type="button" id="fullscreenBtn" aria-label="Enter fullscreen" aria-pressed="false" title="Enter fullscreen"><span data-icon="expand"></span></button></div>
       <div class="nofx" id="nofx"><div><p><b>The 3D engine could not start.</b></p><p>Your browser may not support WebGL, or the three.js script was blocked. The chapter text on this page still works.</p></div></div>
@@ -102,7 +103,7 @@ speed:{num:2,ja:'法定速度',en:'Speed limits',tag:{en:'60, 30 since September
  caps:[[0,'With no sign posted, an ordinary road that has a centre line defaults to 60 km/h.','標識がなければ、中央線のある一般道路の法定速度は60km/hです。'],
   [5,'Since 1 September 2026, a road with no centre line or lane markings defaults to 30 km/h — even with no sign at all.','2026年9月1日から、中央線も車両通行帯もない道路（生活道路）は、標識がなくても法定速度30km/hになりました。'],
   [10,'A posted sign always overrides the default. A blue circle shows the maximum for that road.','標識があればそちらが優先。青い丸の標識がその道路の最高速度です。'],
-  [14.5,'Expressways: 100 km/h by default, 120 on some sections — and never slower than 50 km/h.','高速道路は原則100km/h（一部区間は120km/h）。最低速度は50km/hです。']],
+  [14.65,'Expressways: 100 km/h by default, 120 on some sections — and never slower than 50 km/h.','高速道路は原則100km/h（一部区間は120km/h）。最低速度は50km/hです。']],
  pts:[{en:'Defaults with no sign: 60 km/h on a road with a centre line; 30 km/h on a road without a centre line, lanes or median (from 1 Sep 2026); 100 km/h on expressways.',ja:'標識なしの法定速度：中央線のある道路60km/h、中央線・車両通行帯・中央分離帯のない道路30km/h（2026年9月1日〜）、高速道路100km/h。'},
   {en:'The 30 km/h rule covers roughly 70% of Japan\u2019s road length — residential streets, school routes, most roads narrower than 5.5 m.',ja:'30km/hの対象は全国の道路延長の約7割。住宅街、通学路、幅5.5m未満の道路など。'},
   {en:'Speed cameras (オービス) and unmarked cars are common; tolerance is small and 30 km/h over on an ordinary road (40 on expressways) is a criminal “red ticket”.',ja:'オービスや覆面パトカーが多い。一般道30km/h超（高速40km/h超）は赤切符で刑事処分。'},
@@ -633,6 +634,7 @@ let VEH=[],PEOPLE=[];
 const BUILD={};
 function hudSet(n,unit,warn){ const h=$('#hud'); h.classList.add('on'); h.classList.toggle('warn',!!warn); $('#hudNum').textContent=n; $('#hudUnit').textContent=unit||'km/h'; }
 function hudHide(){ $('#hud').classList.remove('on'); }
+function setSceneTransition(opacity){ const el=$('#sceneTransition'); el.style.opacity=opacity; el.classList.toggle('on',opacity>0.001); }
 function bez(p0,p1,p2,u){ const a=(1-u)*(1-u),b=2*(1-u)*u,c=u*u; return [a*p0[0]+b*p1[0]+c*p2[0],a*p0[1]+b*p1[1]+c*p2[1]]; }
 function bezDir(p0,p1,p2,u){ return [2*(1-u)*(p1[0]-p0[0])+2*u*(p2[0]-p1[0]),2*(1-u)*(p1[1]-p0[1])+2*u*(p2[1]-p1[1])]; }
 function placeBez(obj,p0,p1,p2,u){ const p=bez(p0,p1,p2,u),d=bezDir(p0,p1,p2,u); obj.position.x=p[0]; obj.position.z=p[1]; if(Math.abs(d[0])+Math.abs(d[1])>1e-4) heading(obj,d[0],d[1]); }
@@ -675,20 +677,31 @@ BUILD.speed=function(){
   const s40=signPost(texSpeed(40)); s40.position.set(44,0.12,-3.4); s40.rotation.y=FACE.toW; g.add(s40);
   const hg=new THREE.Group(); hg.position.z=300; makeHighway(hg,{noGround:true,ramp:false,L0:-120,L1:130,signX:60}); g.add(hg);
   const a=makeCar(0x2f6db3); g.add(a); VEH.push(a);
-  const h=makeCar(0xc8242c),tr=makeTruck(); hg.add(h,tr); VEH.push(h,tr);
+  const h=makeCar(0x2f6db3),tr=makeTruck(); hg.add(h,tr); VEH.push(h,tr);
   const lab=makeLabel('中央線なし = 30 · no centre line = 30',{w:6.4,bg:YELB,fg:'#1b1f24'}),lab2=makeLabel('標識が優先 · the sign wins',{w:4.6}); g.add(lab,lab2);
+  let onHighway=false;
   return {dur:19,chip:{en:'Ordinary road → residential street → expressway',ja:'一般道 → 生活道路 → 高速道路'},
     update(t){
       const ax=kf(t,[[0,-95],[5,-10],[5.8,0],[10,36],[11.5,50],[14.5,84]]);
       const az=kf(t,[[0,-1.75],[5,-1.75],[5.8,0],[14.5,0]]); a.position.set(ax,0,az); a.rotation.y=DIR.E;
-      const hx=kf(t,[[14,-70],[19,65]]); h.position.set(hx,0,-9.25); h.rotation.y=DIR.E;
-      const tx=kf(t,[[14,-25],[19,85]]); tr.position.set(tx,0,-9.25); tr.rotation.y=DIR.E;
-      const spd=kf(t,[[0,60],[4.6,60],[5.8,30],[10.2,30],[11.6,40],[14.4,40],[14.5,100],[19,100]]);
+      const hx=kf(t,[[14.55,-70],[19,65]]); h.position.set(hx,0,-9.25); h.rotation.y=DIR.E;
+      const tx=kf(t,[[14.55,-25],[19,85]]); tr.position.set(tx,0,-9.25); tr.rotation.y=DIR.E;
+      const spd=kf(t,[[0,60],[4.6,60],[5.8,30],[10.2,30],[11.6,40],[14.65,40],[15.15,100],[19,100]]);
       hudSet(Math.round(spd),'km/h',t>=5.3&&t<10.3);
       lab.visible=within(t,5.4,10); lab.position.set(ax+6,2.9,-3.2);
       lab2.visible=within(t,10.2,14.2); lab2.position.set(44,3.6,-3.4);
+      let fade=0;
+      if(t>=13.9&&t<14.3) fade=smooth((t-13.9)/0.4);
+      else if(t>=14.3&&t<14.65) fade=1;
+      else if(t>=14.65&&t<15.15) fade=1-smooth((t-14.65)/0.5);
+      setSceneTransition(fade);
+      const highway=t>=14.55; if(highway!==onHighway){ onHighway=highway; camInit=false; }
     },
-    cam(t){ if(t<14.5) return follow(a,[-12,5,6.5],[9,0.6,-1]); return follow(h,[-16,6,8],[12,0.5,-2]); }};
+    cam(t){
+      if(t<13.35) return follow(a,[-12,5,6.5],[9,0.6,-1]);
+      if(t<14.55){ const near=follow(a,[-12,5,6.5],[9,0.6,-1]),rise=follow(a,[-18,16,18],[13,0.2,0]); return blendWin(t,13.35,14.25,near,rise); }
+      return follow(h,[-16,6,8],[12,0.5,-2]);
+    }};
 };
 
 /* 3 — stop sign */
@@ -1317,7 +1330,7 @@ async function toggleFullscreen(){
 }
 function loadChapter(i,opts={}){
   if(!Number.isInteger(i)||i<0||i>=ORDER.length) return; const first=cur<0; cur=i; const id=ORDER[i];
-  renderChapterList(); renderDetail(); hudHide(); orbit.az=0; orbit.el=0; orbit.zoom=1; setExplore(false); t=0; playing=opts.autoplay!==false; capIndex=-1; updateCaption(0,true);
+  renderChapterList(); renderDetail(); hudHide(); setSceneTransition(0); orbit.az=0; orbit.el=0; orbit.zoom=1; setExplore(false); t=0; playing=opts.autoplay!==false; capIndex=-1; updateCaption(0,true);
   if(threeOK){ clearStage(); VEH=[]; PEOPLE=[]; chapter=BUILD[id](); camInit=false; chapter.update(0,0,0); resetDynamics(); if(first&&!REDUCE) introUntil=performance.now()+1800; }
   else { chapter={dur:TEXT[id].caps[TEXT[id].caps.length-1][0]+4}; playing=false; }
   $('#sceneChipText').textContent=chapter.chip?T(chapter.chip):(lang==='ja'?TEXT[id].ja:TEXT[id].en);

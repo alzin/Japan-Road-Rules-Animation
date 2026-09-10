@@ -609,10 +609,46 @@ button:focus-visible {
 .hud.warn b {
   color: #b93f31;
 }
+.scene-transition {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-content: center;
+  gap: 6px;
+  padding: 24px;
+  background: linear-gradient(135deg, #163d31fa, #0f2823fa);
+  color: #fff;
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.scene-transition.on {
+  visibility: visible;
+}
+.scene-transition span,
+.scene-transition small {
+  color: #c9ddd5;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.scene-transition b {
+  font-size: clamp(24px, 4vw, 38px);
+  letter-spacing: -0.025em;
+}
+.scene-transition small {
+  color: #f2c23b;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
 .scene-tools {
   position: absolute;
   right: 14px;
   bottom: 14px;
+  z-index: 3;
   display: flex;
   align-items: center;
   gap: 6px;
