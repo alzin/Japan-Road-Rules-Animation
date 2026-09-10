@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drive Japan — Japanese driving rules, animated in 3D</title>
+<meta name="description" content="An interactive 3D guide to the rules of the road in Japan: keep left, 止まれ stop signs, crosswalk priority, railway crossings, the 2026 30 km/h residential limit, expressways, alcohol, phones, bicycles and more.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E4E8EC; --panel:#FFFFFF; --panel-2:#F2F4F6; --ink:#1B1F24; --muted:#535C66; --line:#CBD2D9;
+  --blue-bg:#1F4E9C; --blue-fg:#1F4E9C; --green-bg:#0B6B45; --green-fg:#0B6B45; --red-bg:#C8242C; --red-fg:#B8202A; --yellow:#F0C23B;
+  --focus:#1F4E9C;
+  --shadow:0 10px 30px rgba(27,31,36,.10);
+  --font:"Overpass","Zen Kaku Gothic New","Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",system-ui,sans-serif;
+  --fontja:"Zen Kaku Gothic New","Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic","Meiryo",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#14171B; --panel:#1E2226; --panel-2:#262B31; --ink:#EDF0F3; --muted:#A4ADB7; --line:#373E46;
+    --blue-bg:#2D63BF; --blue-fg:#8FB8F0; --green-bg:#137A50; --green-fg:#55C892; --red-bg:#D0343B; --red-fg:#F27A78; --yellow:#F5CF5E;
+    --focus:#8FB8F0; --shadow:0 10px 30px rgba(0,0,0,.35); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14171B; --panel:#1E2226; --panel-2:#262B31; --ink:#EDF0F3; --muted:#A4ADB7; --line:#373E46;
+  --blue-bg:#2D63BF; --blue-fg:#8FB8F0; --green-bg:#137A50; --green-fg:#55C892; --red-bg:#D0343B; --red-fg:#F27A78; --yellow:#F5CF5E;
+  --focus:#8FB8F0; --shadow:0 10px 30px rgba(0,0,0,.35); color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;min-height:100vh}
+:lang(ja){font-family:var(--fontja)}
+.ja{font-family:var(--fontja)}
+h1,h2,h3{margin:0;line-height:1.2;font-weight:700}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:var(--blue-fg)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:6px}
+.sr{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+
+/* ---------- header ---------- */
+.top{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;min-width:0}
+.brand svg{width:34px;height:34px;flex:none}
+.brand b{font-size:19px;font-weight:800;letter-spacing:-.01em;white-space:nowrap}
+.brand span{display:block;font-size:12px;color:var(--muted);line-height:1.15;white-space:nowrap}
+.tabs{display:flex;gap:4px;margin-left:auto;background:var(--panel-2);padding:4px;border-radius:12px}
+.tabs button{border:0;background:transparent;padding:8px 14px;border-radius:9px;min-height:40px;color:var(--muted);font-weight:600;transition:background .18s,color .18s}
+.tabs button[aria-selected="true"]{background:var(--green-bg);color:#fff}
+.tabs button:hover:not([aria-selected="true"]){background:var(--line)}
+.ctl{display:flex;gap:6px}
+.ctl button{border:1px solid var(--line);background:var(--panel);border-radius:9px;min-width:44px;min-height:40px;padding:6px 10px;font-weight:700;transition:background .18s}
+.ctl button:hover{background:var(--panel-2)}
+.ctl button[aria-pressed="true"]{background:var(--blue-bg);color:#fff;border-color:var(--blue-bg)}
+.ctl svg{width:20px;height:20px;vertical-align:-5px}
+
+/* ---------- learn layout ---------- */
+.view{display:none}
+.view.on{display:block}
+#learn.on{display:grid;grid-template-columns:270px minmax(0,1fr) 380px;min-height:calc(100vh - 62px)}
+.rail{border-right:1px solid var(--line);background:var(--panel);overflow-y:auto;max-height:calc(100vh - 62px);position:sticky;top:62px}
+.rail h2{font-size:13px;font-weight:600;color:var(--muted);padding:16px 18px 6px}
+.chap{display:flex;gap:12px;align-items:center;width:100%;text-align:left;border:0;background:transparent;padding:10px 18px;min-height:52px;border-left:4px solid transparent;transition:background .18s}
+.chap:hover{background:var(--panel-2)}
+.chap[aria-current="true"]{background:var(--panel-2);border-left-color:var(--green-bg)}
+.chap .n{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;background:var(--panel-2);color:var(--muted);border:1px solid var(--line)}
+.chap[aria-current="true"] .n{background:var(--green-bg);color:#fff;border-color:var(--green-bg)}
+.chap .t{min-width:0}
+.chap .t b{display:block;font-size:15px;font-weight:700;line-height:1.25}
+.chap .t i{display:block;font-style:normal;font-size:12.5px;color:var(--muted);line-height:1.25;margin-top:2px}
+.chap.done .n{border-color:var(--green-fg);color:var(--green-fg)}
+
+.stagewrap{position:relative;background:#0f1216;min-height:420px}
+#stage{position:absolute;inset:0;overflow:hidden;touch-action:none;cursor:grab}
+#stage.drag{cursor:grabbing}
+#c{display:block;width:100%;height:100%}
+.hud{position:absolute;top:14px;right:14px;display:none;flex-direction:column;align-items:flex-end;padding:8px 12px;border-radius:12px;background:rgba(20,24,28,.78);color:#fff;backdrop-filter:blur(6px);min-width:96px}
+.hud.on{display:flex}
+.hud b{font-size:34px;font-weight:800;line-height:1;letter-spacing:-.02em}
+.hud small{font-size:12px;opacity:.85}
+.hud.warn b{color:#F5CF5E}
+.chip-scene{position:absolute;top:14px;left:14px;display:flex;gap:8px;align-items:center;padding:7px 12px;border-radius:999px;background:rgba(20,24,28,.72);color:#fff;font-size:13px;font-weight:600;backdrop-filter:blur(6px)}
+.chip-scene .dot{width:8px;height:8px;border-radius:50%;background:#F0C23B}
+.hint{position:absolute;bottom:126px;left:50%;transform:translateX(-50%);padding:6px 12px;border-radius:999px;background:rgba(20,24,28,.6);color:#fff;font-size:12.5px;opacity:0;transition:opacity .4s;pointer-events:none;white-space:nowrap}
+.hint.on{opacity:1}
+.cap{position:absolute;left:14px;right:14px;bottom:64px;display:flex;flex-direction:column;gap:3px;padding:14px 18px;border-radius:14px;background:rgba(20,24,28,.82);color:#fff;backdrop-filter:blur(8px);box-shadow:0 8px 30px rgba(0,0,0,.35);max-width:760px;margin:0 auto;transition:opacity .25s,transform .25s}
+.cap.swap{opacity:0;transform:translateY(6px)}
+.cap .p{font-size:17px;font-weight:600;line-height:1.35}
+.cap .s{font-size:13.5px;opacity:.78;line-height:1.35}
+.transport{position:absolute;left:14px;right:14px;bottom:12px;display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;background:rgba(20,24,28,.82);color:#fff;backdrop-filter:blur(8px);max-width:760px;margin:0 auto}
+.transport button{border:0;background:rgba(255,255,255,.08);color:#fff;border-radius:9px;width:40px;height:40px;display:grid;place-items:center;flex:none;transition:background .18s}
+.transport button:hover{background:rgba(255,255,255,.18)}
+.transport svg{width:20px;height:20px;fill:currentColor}
+.transport input[type=range]{flex:1;accent-color:#F0C23B;min-width:60px;height:34px;cursor:pointer}
+.transport .time{font-variant-numeric:tabular-nums;font-size:13px;opacity:.85;min-width:74px;text-align:center}
+.nofx{position:absolute;inset:0;display:none;place-items:center;text-align:center;padding:24px;color:#fff;background:#1a1f26}
+.nofx.on{display:grid}
+
+.detail{border-left:1px solid var(--line);background:var(--panel);padding:22px 22px 30px;overflow-y:auto;max-height:calc(100vh - 62px);position:sticky;top:62px}
+.detail .kicker{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:8px}
+.detail .kicker .n{width:26px;height:26px;border-radius:50%;background:var(--green-bg);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:800}
+.detail h2{font-size:26px;letter-spacing:-.01em}
+.detail h2 small{display:block;font-size:15px;color:var(--muted);font-weight:500;margin-top:4px}
+.detail .tag{margin:10px 0 18px;color:var(--muted);font-size:15px}
+.detail h3{font-size:13px;font-weight:600;color:var(--muted);margin:20px 0 8px}
+.pts{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px}
+.pts li{position:relative;padding-left:22px;font-size:15px;line-height:1.45}
+.pts li::before{content:"";position:absolute;left:0;top:.55em;width:10px;height:10px;border-radius:50%;background:var(--green-bg)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;flex-direction:column;padding:8px 12px;border-radius:10px;background:var(--panel-2);border:1px solid var(--line);min-width:110px}
+.chip small{font-size:11.5px;color:var(--muted)}
+.chip b{font-size:15px;font-weight:800}
+.chip.red{background:var(--red-bg);border-color:var(--red-bg);color:#fff}
+.chip.red small{color:rgba(255,255,255,.85)}
+.chip.blue{background:var(--blue-bg);border-color:var(--blue-bg);color:#fff}
+.chip.blue small{color:rgba(255,255,255,.85)}
+.law{font-size:13.5px;color:var(--muted);padding:10px 12px;border-left:3px solid var(--blue-bg);background:var(--panel-2);border-radius:0 8px 8px 0}
+.tip{margin-top:18px;padding:12px 14px;border-radius:10px;background:var(--panel-2);border:1px dashed var(--line);font-size:14px}
+.tip b{display:block;font-size:12.5px;color:var(--green-fg);margin-bottom:4px}
+.navbtns{display:flex;gap:8px;margin-top:22px}
+.navbtns button{flex:1;border:1px solid var(--line);background:var(--panel);border-radius:10px;min-height:44px;font-weight:700;transition:background .18s}
+.navbtns button:hover{background:var(--panel-2)}
+.navbtns button.primary{background:var(--green-bg);color:#fff;border-color:var(--green-bg)}
+
+/* ---------- content pages ---------- */
+.page{max-width:1080px;margin:0 auto;padding:34px 20px 70px}
+.page h1{font-size:34px;letter-spacing:-.015em;margin-bottom:6px}
+.page .lead{font-size:17px;color:var(--muted);max-width:70ch;margin:0 0 26px}
+.page h2{font-size:22px;margin:34px 0 12px}
+.page p{max-width:72ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.sign{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.sign svg{width:96px;height:96px;flex:none}
+.sign b{font-size:16px;line-height:1.3}
+.sign span{font-size:14px;color:var(--muted);line-height:1.4}
+.sign .cat{font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--panel-2);border:1px solid var(--line);color:var(--muted)}
+.sign .cat.reg{color:var(--red-fg)} .sign .cat.warn{color:#9A6B00} .sign .cat.ins{color:var(--blue-fg)}
+:root[data-theme="dark"] .sign .cat.warn,:root:not([data-theme="light"]) .sign .cat.warn{color:var(--yellow)}
+.marks{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.mark{display:flex;gap:14px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.mark svg{width:120px;height:70px;flex:none}
+.mark b{display:block;font-size:15px}
+.mark span{font-size:13.5px;color:var(--muted)}
+table{border-collapse:collapse;width:100%;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:14.5px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--panel-2);font-weight:700;font-size:13px}
+tr:last-child td{border-bottom:0}
+td.num{font-weight:800;white-space:nowrap}
+.tw{overflow-x:auto;border-radius:12px}
+.red-t{color:var(--red-fg);font-weight:800}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+.card h3{font-size:16px;margin-bottom:8px}
+.card p{font-size:14.5px;color:var(--muted);margin:0}
+.ticket{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:6px;border:1px solid rgba(0,0,0,.2)}
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0;border-left:3px solid var(--line);margin-left:8px}
+.tl li{position:relative;padding:0 0 18px 22px}
+.tl li::before{content:"";position:absolute;left:-9px;top:6px;width:13px;height:13px;border-radius:50%;background:var(--green-bg);border:2px solid var(--panel)}
+.tl b{display:block;font-size:14px;color:var(--green-fg)}
+.tl span{font-size:14.5px}
+.tl li.future b{color:var(--muted)}
+
+/* ---------- quiz ---------- */
+.qbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:26px;max-width:760px}
+.qbox .prog{display:flex;gap:4px;margin-bottom:18px}
+.qbox .prog i{flex:1;height:5px;border-radius:3px;background:var(--line)}
+.qbox .prog i.ok{background:var(--green-bg)} .qbox .prog i.ng{background:var(--red-bg)} .qbox .prog i.cur{background:var(--blue-bg)}
+.qbox .qn{font-size:13px;color:var(--muted);font-weight:600}
+.qbox .q{font-size:21px;font-weight:700;margin:6px 0 4px;line-height:1.4}
+.qbox .qs{font-size:15px;color:var(--muted);margin-bottom:18px}
+.qbtns{display:flex;gap:10px}
+.qbtns button{flex:1;min-height:56px;border-radius:12px;border:2px solid var(--line);background:var(--panel-2);font-size:17px;font-weight:800;transition:background .18s,border-color .18s}
+.qbtns button:hover{border-color:var(--blue-bg)}
+.qbtns button.pick.ok{background:var(--green-bg);border-color:var(--green-bg);color:#fff}
+.qbtns button.pick.ng{background:var(--red-bg);border-color:var(--red-bg);color:#fff}
+.qbtns button.reveal{border-color:var(--green-fg)}
+.qbtns button:disabled{cursor:default}
+.expl{margin-top:16px;padding:14px;border-radius:10px;background:var(--panel-2);font-size:15px;display:none}
+.expl.on{display:block}
+.expl b{display:block;margin-bottom:4px}
+.qnext{margin-top:16px;display:flex;justify-content:flex-end;gap:10px}
+.qnext button{min-height:44px;padding:0 18px;border-radius:10px;border:0;background:var(--green-bg);color:#fff;font-weight:700}
+.qnext button.ghost{background:var(--panel-2);color:var(--ink);border:1px solid var(--line)}
+.score{font-size:44px;font-weight:800;letter-spacing:-.02em}
+
+footer{border-top:1px solid var(--line);padding:22px 20px 40px;font-size:13px;color:var(--muted);text-align:center}
+footer p{max-width:80ch;margin:0 auto 8px}
+
+/* ---------- responsive ---------- */
+@media (max-width:1180px){
+  #learn.on{grid-template-columns:minmax(0,1fr) 360px;grid-template-rows:auto auto}
+  .rail{grid-column:1/-1;position:static;max-height:none;border-right:0;border-bottom:1px solid var(--line);display:flex;overflow-x:auto;padding:8px 10px;gap:6px;scrollbar-width:thin}
+  .rail h2{display:none}
+  .chap{flex:none;width:auto;padding:8px 12px 8px 8px;border-left:0;border-radius:10px;border:1px solid transparent;min-height:44px}
+  .chap[aria-current="true"]{border-color:var(--green-bg)}
+  .chap .t i{display:none}
+  .stagewrap{min-height:460px}
+  .detail{position:static;max-height:none}
+}
+@media (max-width:840px){
+  #learn.on{grid-template-columns:1fr}
+  .stagewrap{min-height:min(62vh,520px)}
+  .detail{border-left:0;border-top:1px solid var(--line);padding:18px 16px 28px}
+  .top{padding:8px 10px;gap:8px;flex-wrap:wrap}
+  .brand span{display:none}
+  .tabs{margin-left:auto;order:3;width:100%;justify-content:space-between}
+  .tabs button{padding:8px 8px;flex:1;font-size:14px}
+  .cap{bottom:60px;padding:11px 13px}
+  .cap .p{font-size:15px} .cap .s{font-size:12.5px}
+  .hud b{font-size:26px}
+  .chip-scene{font-size:12px;padding:6px 10px}
+  .hint{display:none}
+  .page{padding:22px 14px 60px}
+  .page h1{font-size:26px}
+  .qbox{padding:18px}
+  .qbox .q{font-size:18px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important}
+  .cap.swap{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="#" id="brand">
+    <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M4 6h32L20 36z" fill="#C8242C"/><path d="M8.6 9h22.8L20 30.5z" fill="none" stroke="#fff" stroke-width="2.2"/><text x="20" y="20" text-anchor="middle" font-size="9.5" font-weight="700" fill="#fff" font-family="Zen Kaku Gothic New, Hiragino Sans, sans-serif">止まれ</text></svg>
+    <div><b>Drive Japan</b><span>The rules of the road, animated in 3D</span></div>
+  </a>
+  <div class="tabs" role="tablist" aria-label="Sections">
+    <button role="tab" aria-selected="true" data-tab="learn" id="tab-learn">Learn</button>
+    <button role="tab" aria-selected="false" data-tab="signs" id="tab-signs">Signs</button>
+    <button role="tab" aria-selected="false" data-tab="penalties" id="tab-penalties">Penalties</button>
+    <button role="tab" aria-selected="false" data-tab="quiz" id="tab-quiz">Quiz</button>
+  </div>
+  <div class="ctl">
+    <button id="langBtn" aria-pressed="false" title="Switch language / 言語を切り替え">日本語</button>
+    <button id="themeBtn" aria-label="Toggle dark mode" title="Toggle dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+  </div>
+</header>
+
+<main>
+<section id="learn" class="view on" role="tabpanel" aria-labelledby="tab-learn">
+  <nav class="rail" aria-label="Chapters">
+    <h2>16 chapters</h2>
+    <div id="chapList"></div>
+  </nav>
+  <div class="stagewrap">
+    <div id="stage">
+      <canvas id="c"></canvas>
+      <div class="chip-scene" id="sceneChip"><span class="dot"></span><span id="sceneChipText">Loading 3D scene…</span></div>
+      <div class="hud" id="hud"><b id="hudNum">60</b><small id="hudUnit">km/h</small></div>
+      <div class="hint" id="hint">Drag to look around · scroll to zoom</div>
+      <div class="cap" id="cap" aria-live="polite"><div class="p" id="capP"></div><div class="s" id="capS"></div></div>
+      <div class="transport">
+        <button id="prevBtn" aria-label="Previous chapter"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6L18 6v12z"/></svg></button>
+        <button id="playBtn" aria-label="Pause"><svg viewBox="0 0 24 24" id="playIco"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg></button>
+        <button id="replayBtn" aria-label="Replay this chapter"><svg viewBox="0 0 24 24"><path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg></button>
+        <input type="range" id="scrub" min="0" max="1000" value="0" aria-label="Scene position">
+        <span class="time" id="time">0:00 / 0:00</span>
+        <button id="nextBtn" aria-label="Next chapter"><svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg></button>
+      </div>
+      <div class="nofx" id="nofx"><div><p><b>The 3D engine could not start.</b></p><p>Your browser may not support WebGL, or the three.js script was blocked. The chapter text on this page still works.</p></div></div>
+    </div>
+  </div>
+  <aside class="detail" id="detail"></aside>
+</section>
+
+<section id="signs" class="view" role="tabpanel" aria-labelledby="tab-signs">
+  <div class="page">
+    <h1 id="signsTitle">Signs and markings you must recognise</h1>
+    <p class="lead" id="signsLead">Japanese regulatory signs are round or triangular and mostly wordless, except for three famous exceptions: 止まれ (stop), 徐行 (slow down) and 通行止め (road closed). Warning signs are yellow diamonds; instruction signs are blue.</p>
+    <div class="grid" id="signGrid"></div>
+    <h2 id="marksTitle">Driver marks</h2>
+    <div class="marks" id="markGrid"></div>
+    <h2 id="lineTitle">Lines on the road</h2>
+    <div class="grid" id="lineGrid"></div>
+  </div>
+</section>
+
+<section id="penalties" class="view" role="tabpanel" aria-labelledby="tab-penalties">
+  <div class="page" id="penPage"></div>
+</section>
+
+<section id="quiz" class="view" role="tabpanel" aria-labelledby="tab-quiz">
+  <div class="page">
+    <h1 id="quizTitle">Test yourself, licence-conversion style</h1>
+    <p class="lead" id="quizLead">Since October 2025 the knowledge test for converting a foreign licence (外免切替) has 50 true/false questions and needs 90% to pass. Here are 15 in the same spirit — each explains the rule behind it.</p>
+    <div class="qbox" id="qbox"></div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <p id="foot1">Built from the Road Traffic Act (道路交通法) and public guidance from the National Police Agency, JAF and prefectural police, current to September 2026. Points and fines shown are for a standard passenger car (普通車); larger vehicles pay more.</p>
+  <p id="foot2">This is a learning aid, not legal advice. Posted signs and police instructions always override the defaults described here.</p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const REDUCE=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let lang='en';
+const T=(o)=>o?(o[lang]||o.en):'';
+
+/* ===================== CHAPTER TEXT ===================== */
+const TEXT={
+left:{num:1,ja:'左側通行',en:'Keep left',tag:{en:'Vehicles on the left, pedestrians on the right',ja:'車は左、人は右'},
+ caps:[[0,'In Japan every vehicle keeps to the left side of the road.','日本では、すべての車両が道路の左側を通行します。'],
+  [3.5,'The steering wheel is on the right, so the driver sits beside the centre line.','運転席は右側。ドライバーはセンターライン側に座ります。'],
+  [7,'Oncoming traffic passes on your right. Overtaking is done on the right.','対向車はあなたの右側を通過します。追い越しも右側から行います。'],
+  [11,'Where there is no sidewalk, pedestrians walk on the right, facing the traffic.','歩道のない道路では、歩行者は右側（車と向かい合う側）を歩きます。']],
+ pts:[{en:'Drive on the left; overtake on the right.',ja:'左側通行。追い越しは右側から。'},
+  {en:'Most cars are right-hand drive. The driver sits next to the centre line, so keep the car\u2019s left side away from the kerb by sight, not feel.',ja:'多くの車は右ハンドル。左側の感覚がつかみにくいので、車両左側の間隔を目で確認する。'},
+  {en:'Pedestrians without a sidewalk walk on the right (Art. 10) — expect people facing you on your side of narrow roads.',ja:'歩道のない道路では歩行者は右側通行（第10条）。狭い道では自分の車線側に向かってくる歩行者に注意。'},
+  {en:'Look right first when pulling out: the nearest lane carries traffic from your right.',ja:'発進時はまず右を確認。手前の車線は右から車が来る。'}],
+ law:{en:'Road Traffic Act Art. 17(4) — vehicles use the left side of the road.',ja:'道路交通法 第17条第4項（左側通行）'},
+ chips:[{l:{en:'Wrong-side driving',ja:'通行区分違反'},v:{en:'2 pts · ¥9,000',ja:'2点・9,000円'},c:'red'}],
+ tip:{en:'Test examiners watch how far you keep from the left edge on narrow roads — about 1 m from parked cars and cyclists.',ja:'技能試験では左側端との間隔（駐車車両・自転車から約1m）を見られます。'}},
+speed:{num:2,ja:'法定速度',en:'Speed limits',tag:{en:'60, 30 since September 2026, and 100 on expressways',ja:'一般道60・生活道路30（2026年9月〜）・高速道路100'},
+ caps:[[0,'With no sign posted, an ordinary road that has a centre line defaults to 60 km/h.','標識がなければ、中央線のある一般道路の法定速度は60km/hです。'],
+  [5,'Since 1 September 2026, a road with no centre line or lane markings defaults to 30 km/h — even with no sign at all.','2026年9月1日から、中央線も車両通行帯もない道路（生活道路）は、標識がなくても法定速度30km/hになりました。'],
+  [10,'A posted sign always overrides the default. A blue circle shows the maximum for that road.','標識があればそちらが優先。青い丸の標識がその道路の最高速度です。'],
+  [14.5,'Expressways: 100 km/h by default, 120 on some sections — and never slower than 50 km/h.','高速道路は原則100km/h（一部区間は120km/h）。最低速度は50km/hです。']],
+ pts:[{en:'Defaults with no sign: 60 km/h on a road with a centre line; 30 km/h on a road without a centre line, lanes or median (from 1 Sep 2026); 100 km/h on expressways.',ja:'標識なしの法定速度：中央線のある道路60km/h、中央線・車両通行帯・中央分離帯のない道路30km/h（2026年9月1日〜）、高速道路100km/h。'},
+  {en:'The 30 km/h rule covers roughly 70% of Japan\u2019s road length — residential streets, school routes, most roads narrower than 5.5 m.',ja:'30km/hの対象は全国の道路延長の約7割。住宅街、通学路、幅5.5m未満の道路など。'},
+  {en:'Speed cameras (オービス) and unmarked cars are common; tolerance is small and 30 km/h over on an ordinary road (40 on expressways) is a criminal “red ticket”.',ja:'オービスや覆面パトカーが多い。一般道30km/h超（高速40km/h超）は赤切符で刑事処分。'},
+  {en:'Heavy trucks: 80 km/h on expressways. Variable electronic signs lower limits in rain, wind and fog.',ja:'大型トラックは高速80km/h。雨・風・霧のときは可変標識で速度が下がる。'}],
+ law:{en:'Road Traffic Act Art. 22; Enforcement Order Art. 11 & 27 (statutory speeds).',ja:'道路交通法 第22条／施行令 第11条・第27条（法定速度）'},
+ chips:[{l:{en:'Under 20 km/h over',ja:'20km/h未満超過'},v:{en:'1 pt · ¥9,000–12,000',ja:'1点・9,000〜12,000円'}},{l:{en:'25–30 km/h over',ja:'25〜30km/h超過'},v:{en:'3 pts · ¥18,000',ja:'3点・18,000円'}},{l:{en:'30+ over (ordinary road)',ja:'一般道30km/h以上超過'},v:{en:'6 pts · court',ja:'6点・赤切符'},c:'red'}],
+ tip:{en:'No centre line and houses on both sides? Assume 30 km/h. Enforcement started with the new rule in September 2026.',ja:'中央線がなく住宅が並ぶ道は30km/hと考える。2026年9月の施行と同時に取り締まりも始まっています。'}},
+stop:{num:3,ja:'一時停止',en:'Stop means stop',tag:{en:'The red inverted triangle 止まれ',ja:'赤い逆三角形の「止まれ」'},
+ caps:[[0,'止まれ (tomare) is Japan\u2019s stop sign: a red inverted triangle, often with STOP added.','「止まれ」は日本の一時停止標識。赤い逆三角形で、STOPが併記されたものも増えています。'],
+  [3,'Stop completely just before the stop line — wheels not turning. Slowing down does not count.','停止線の直前で完全に停止します。タイヤが止まった状態が「停止」。徐行や減速では違反です。'],
+  [6.5,'Look right, left, then right again. Traffic on the crossing road has priority.','右・左・右と安全確認。交差道路の車が優先です。'],
+  [9.5,'If the view is blocked, creep forward and stop again before entering (a multi-stage stop).','見通しが悪ければ、少し進んでもう一度止まって確認します（多段階停止）。'],
+  [13,'Failing to stop: 2 points and a ¥7,000 fine — and full fault if there is a crash.','一時不停止は2点・反則金7,000円。事故になれば過失は大きく問われます。']],
+ pts:[{en:'Where there is a stop line, stop just before it; with no line, stop just before the intersection (Art. 43).',ja:'停止線があればその直前、なければ交差点の直前で停止（第43条）。'},
+  {en:'A full stop means zero speed. Police and examiners look for the car settling on its springs — many drivers count to three.',ja:'完全停止は速度ゼロ。車体が沈むまで、3秒数える人も多い。'},
+  {en:'The sign is placed on the minor road. Traffic on the road without the sign is fast and has right of way.',ja:'標識は非優先側に設置。標識のない側の道路は速く、優先される。'},
+  {en:'A painted 止まれ on the road (reading top to bottom) has the same legal force as the sign.',ja:'路面に縦書きされた「止まれ」の道路標示も標識と同じ効力。'}],
+ law:{en:'Road Traffic Act Art. 43 (stop at designated places).',ja:'道路交通法 第43条（指定場所における一時停止）'},
+ chips:[{l:{en:'Not stopping at 止まれ',ja:'指定場所一時不停止等'},v:{en:'2 pts · ¥7,000',ja:'2点・7,000円'},c:'red'}],
+ tip:{en:'A rolling stop is the number one reason foreign licence holders fail the driving test.',ja:'外免切替の技能試験で最も多い不合格理由が「止まりきらない一時停止」です。'}},
+cross:{num:4,ja:'横断歩道',en:'Pedestrians first',tag:{en:'Someone waiting at a crosswalk means you stop',ja:'渡ろうとする人がいれば必ず停止'},
+ caps:[[0,'A white diamond on the road means a crosswalk is ahead. Slow down so you can stop.','路面の白いひし形は「この先に横断歩道」の予告。止まれる速度に落とします。'],
+  [4,'If a pedestrian is waiting or crossing, stop before the crosswalk — not slow down, stop.','横断歩道を渡ろうとする人・渡っている人がいれば、その手前で停止します。徐行ではなく停止です。'],
+  [8,'Wait until they are clear of your path. Never overtake a car stopped at a crosswalk.','歩行者が通り過ぎるまで待ちます。横断歩道の手前で止まっている車を追い越してはいけません。'],
+  [12.5,'Obstructing a pedestrian: 2 points and ¥9,000. Pedestrians always have priority.','横断歩行者等妨害は2点・9,000円。歩行者は常に優先です。']],
+ pts:[{en:'Approach every crosswalk at a speed that lets you stop, unless it is clearly empty (Art. 38).',ja:'横断歩道の手前では、明らかに人がいない場合を除き、止まれる速度で接近（第38条）。'},
+  {en:'Someone standing at the kerb intending to cross counts. Do not wait for them to step out.',ja:'渡ろうとして立っている人も対象。踏み出すのを待ってはいけない。'},
+  {en:'Within 30 m before a crosswalk: no overtaking. If a vehicle ahead has stopped at one, you must stop too.',ja:'横断歩道の手前30m以内は追い越し禁止。前の車が停止していたら自分も停止。'},
+  {en:'This also applies when turning at a green light: pedestrians on the crosswalk you are turning into go first.',ja:'青信号で右左折するときも、曲がった先の横断歩道の歩行者が優先。'}],
+ law:{en:'Road Traffic Act Art. 38 & 38-2 (protection of crossing pedestrians).',ja:'道路交通法 第38条・第38条の2（横断歩行者の保護）'},
+ chips:[{l:{en:'Obstructing a pedestrian',ja:'横断歩行者等妨害等'},v:{en:'2 pts · ¥9,000',ja:'2点・9,000円'},c:'red'},{l:{en:'Criminal maximum',ja:'罰則'},v:{en:'3 months or ¥50,000',ja:'3月以下の懲役／5万円以下'}}],
+ tip:{en:'On the driving test, passing a crosswalk while someone waits is an automatic fail.',ja:'技能試験では、横断待ちの歩行者の前を通過した時点で不合格です。'}},
+signal:{num:5,ja:'信号と右左折',en:'Signals and turns',tag:{en:'Horizontal lights, no turn on red, right turns wait',ja:'横型信号・赤で曲がれない・右折は待つ'},
+ caps:[[0,'Japanese signals are horizontal: green (called 青 “blue”), yellow, red — red on the right.','日本の信号は横型。左から青・黄・赤で、赤は右端です。'],
+  [3.5,'Turning right: move to the centre of the intersection and wait with your signal on. Oncoming traffic going straight or turning left goes first.','右折は交差点の中心付近まで進んで待ちます。直進車と左折車が優先です。'],
+  [7.5,'Pedestrians on the crosswalk you are turning into have priority, even on green.','曲がる先の横断歩道の歩行者が優先。青信号でも同じです。'],
+  [12.5,'Yellow means stop at the stop line — unless you cannot stop safely.','黄色は「停止線で止まれ」。安全に止まれない場合だけ進めます。'],
+  [15.5,'Red is red: no turning on red, even left, unless a green arrow or a 左折可 sign allows it.','赤は赤。矢印信号や「左折可」の標示板がない限り、左折もできません。'],
+  [19,'Running a red light: 2 points and ¥9,000.','信号無視（赤色等）は2点・9,000円。']],
+ pts:[{en:'Green arrows let you go in that direction while the main light is red. A right-arrow phase is very common.',ja:'矢印信号は本信号が赤でも矢印の方向に進める。右折矢印がとくに多い。'},
+  {en:'Order of priority when turning: pedestrians → left-turning traffic → oncoming straight traffic → right-turning traffic.',ja:'右左折の優先順：歩行者 → 左折車 → 対向直進車 → 右折車。'},
+  {en:'Signal 30 m before a turn, 3 seconds before a lane change. Keep left when turning left so bikes cannot slip inside.',ja:'合図は右左折の30m手前、進路変更の3秒前。左折時は左に寄せ、二輪車の巻き込みを防ぐ。'},
+  {en:'A flashing yellow light means proceed with caution; flashing red means stop first, then go if safe.',ja:'黄色の点滅は注意して進行、赤の点滅は一時停止して安全確認。'}],
+ law:{en:'Road Traffic Act Art. 7 (obey signals), Art. 34 (turning), Art. 37 (yield when turning right).',ja:'道路交通法 第7条（信号の遵守）・第34条（右左折）・第37条（右折時の進行妨害禁止）'},
+ chips:[{l:{en:'Red light',ja:'信号無視（赤色等）'},v:{en:'2 pts · ¥9,000',ja:'2点・9,000円'},c:'red'},{l:{en:'Turn without yielding',ja:'交差点右左折方法違反'},v:{en:'1 pt · ¥4,000',ja:'1点・4,000円'}}],
+ tip:{en:'Coming from a “right on red” country? Say “red means wait” out loud at your first few red lights.',ja:'赤信号で右折できる国から来た人は、最初のうちは「赤は待つ」と声に出すと慣れます。'}},
+prio:{num:6,ja:'優先関係',en:'Who goes first',tag:{en:'Priority road, wider road, then the car on your left',ja:'優先道路 → 広い道路 → 左方の車'},
+ caps:[[0,'No signals and no stop sign? First: a priority road or a clearly wider road goes first.','信号も一時停止もない交差点では、優先道路や明らかに広い道路の車が優先です。'],
+  [4.5,'Roads equally wide: yield to the vehicle coming from your left (左方優先) — the opposite of the right-hand rule used in many countries.','同じ幅なら左方優先。左から来る車に道を譲ります。多くの国の「右優先」とは逆です。'],
+  [9.5,'Slow down (徐行) at any intersection with poor visibility, and be ready to stop.','見通しの悪い交差点では徐行し、いつでも止まれるように。'],
+  [13.5,'Trams always have priority. A stop sign or a flashing red puts you at the bottom of the list.','路面電車は常に優先。「止まれ」や赤点滅の側は最も優先度が低くなります。']],
+ pts:[{en:'A road is a “priority road” when signed 優先道路 or when its centre line runs unbroken through the intersection (Art. 36).',ja:'「優先道路」の標識がある道路、または中央線が交差点内まで続く道路が優先道路（第36条）。'},
+  {en:'Never rely on priority: in Japan fault is shared in most crashes, and the priority driver still gets 20–30% of the blame.',ja:'優先でも過信しない。事故では優先側にも2〜3割の過失が問われることが多い。'},
+  {en:'Blind intersections in residential areas often have convex mirrors on a pole — use them, but they cannot replace slowing down.',ja:'住宅街の見通しの悪い交差点にはカーブミラー。役立つが徐行の代わりにはならない。'},
+  {en:'Entering an intersection you cannot clear (jamming the crossing traffic) is prohibited, even on green.',ja:'交差点内で止まりそうなときは、青でも進入禁止（交差点への進入禁止）。'}],
+ law:{en:'Road Traffic Act Art. 36 (priority at intersections), Art. 42 (slow down where visibility is poor).',ja:'道路交通法 第36条（交差点の優先関係）・第42条（徐行すべき場所）'},
+ chips:[{l:{en:'Failing to yield',ja:'優先道路通行車妨害等'},v:{en:'2 pts · ¥7,000',ja:'2点・7,000円'}},{l:{en:'Not slowing down',ja:'徐行場所違反'},v:{en:'2 pts · ¥7,000',ja:'2点・7,000円'}}],
+ tip:{en:'Memory aid: in Japan you drive on the left and you yield to the left.',ja:'覚え方：日本は左側通行、譲るのも左。'}},
+rail:{num:7,ja:'踏切',en:'Railway crossings',tag:{en:'Stop, look and listen — every time',ja:'必ず止まって、見て、聞く'},
+ caps:[[0,'Every railway crossing requires a full stop before the stop line — even when the gates are up (Art. 33).','踏切では、遮断機が上がっていても必ず停止線の直前で一時停止します（第33条）。'],
+  [3,'Stop, look both ways and listen. Driving schools teach opening the window a little.','止まって左右を見て、音を聞きます。教習所では窓を少し開けて確認するよう教えます。'],
+  [6,'Flashing lights or a lowering gate: never enter. Wait well back from the barrier.','警報機が鳴り始めたり遮断機が下り始めたら進入禁止。遮断機から離れて待ちます。'],
+  [12,'Cross only when the gates are up and there is room to clear the tracks on the far side.','遮断機が上がり、向こう側に自車が入るスペースがあるときだけ渡ります。'],
+  [16,'Not stopping at a crossing, or entering a closed one: 2 points and ¥9,000.','踏切不停止・遮断踏切立入りは2点・9,000円。']],
+ pts:[{en:'Stop before the line, confirm left and right, then cross in low gear without changing gear — stalling on the tracks is the classic accident.',ja:'停止線で止まり左右を確認。渡るときは低いギアのままシフトチェンジせずに（踏切内エンストが典型事故）。'},
+  {en:'The only exception is a crossing controlled by its own traffic light (踏切信号): on green you may proceed without stopping.',ja:'例外は信号機のある踏切。青なら停止せずに通過できる。'},
+  {en:'If the gate closes behind you, drive through it — the arm is designed to break. Stuck? Press the yellow emergency button (非常ボタン) and get out.',ja:'閉じ込められたら遮断桿を押して脱出（折れる設計）。動けなければ非常ボタンを押して車外へ。'},
+  {en:'Do not stop or park within 10 m of a crossing.',ja:'踏切の前後10m以内は駐停車禁止。'}],
+ law:{en:'Road Traffic Act Art. 33 (passing through railway crossings).',ja:'道路交通法 第33条（踏切の通過）'},
+ chips:[{l:{en:'Not stopping / entering closed crossing',ja:'踏切不停止等・遮断踏切立入り'},v:{en:'2 pts · ¥9,000',ja:'2点・9,000円'},c:'red'}],
+ tip:{en:'Examiners check the window: crack it open at the crossing and turn your head both ways.',ja:'技能試験では窓を少し開け、首を振って左右を確認するかを見ています。'}},
+emer:{num:8,ja:'緊急自動車',en:'Emergency vehicles',tag:{en:'Move left; stop if you are near an intersection',ja:'左に寄せる・交差点付近なら停止'},
+ caps:[[0,'Sirens and red lights behind you: signal left, move to the left edge and let it pass.','後方からサイレンと赤色灯。左の合図を出し、道路の左端に寄せて道を空けます。'],
+  [4,'At or near an intersection you must also stop. Do not enter the intersection.','交差点やその付近では、停止することも義務。交差点内には進入しません。'],
+  [8,'Oncoming vehicles pull left on their side too. On a one-way street, use the right side only if the left would block the way.','対向車も左に寄せます。一方通行で左に寄せると妨げになる場合だけ右に寄せます。'],
+  [12,'Obstructing an emergency vehicle: 1 point and ¥6,000.','緊急車妨害は1点・6,000円。']],
+ pts:[{en:'Ambulances, fire engines and police cars with siren and red light on are “emergency vehicles” (Art. 40).',ja:'サイレンと赤色灯をつけた救急車・消防車・パトカーなどが緊急自動車（第40条）。'},
+  {en:'Ambulances often announce turns by loudspeaker in Japanese; the safest response is always: left, slow, stop if near a junction.',ja:'救急車はスピーカーで進路を案内する。基本は左・減速・交差点付近なら停止。'},
+  {en:'Never stop on a crosswalk or inside an intersection to yield — pass through first, then pull over.',ja:'横断歩道上や交差点内で止まらない。通過してから左に寄せる。'},
+  {en:'Do not follow behind an emergency vehicle to get through traffic.',ja:'緊急車両の後ろについて走らない。'}],
+ law:{en:'Road Traffic Act Art. 40 (giving way to emergency vehicles).',ja:'道路交通法 第40条（緊急自動車の優先）'},
+ chips:[{l:{en:'Obstructing an emergency vehicle',ja:'緊急車妨害等'},v:{en:'1 pt · ¥6,000',ja:'1点・6,000円'}}],
+ tip:{en:'On the test: mirror, left signal for 3 seconds, shoulder check, then pull over. Slamming the brakes is a fail.',ja:'試験では、ミラー→左合図3秒→目視→左に寄せて停止の順。急ブレーキは減点です。'}},
+night:{num:9,ja:'夜間走行',en:'Night driving',tag:{en:'Lights on early, high beam by default, dip for others',ja:'早めの点灯・基本はハイビーム・対向車には切り替え'},
+ caps:[[0,'Turn your headlights on before dark. New models sold since 2020 switch them on automatically and cannot be turned off while moving.','暗くなる前にライトを点灯。2020年以降の新型車はオートライトで、走行中は消せません。'],
+  [3.5,'High beam is the default on unlit roads — it roughly doubles how far you can see.','街灯のない道ではハイビームが基本。見える距離が約2倍になります。'],
+  [7,'Dip to low beam for oncoming traffic, when following another vehicle, and for pedestrians.','対向車、前の車、歩行者がいるときはロービームに切り替えます。'],
+  [10.5,'Pedestrians crossing from your right are the hardest to see: headlights point slightly left.','右から横断する歩行者は見えにくい。ヘッドライトはやや左向きに照らします。'],
+  [14,'Keep your lights on at red lights. Switching off “politely” is an old habit, not a rule.','信号待ちでもライトは消さない。「マナー」で消すのは古い習慣です。']],
+ pts:[{en:'Lights are compulsory from sunset to sunrise, in tunnels, fog, and heavy rain (Art. 52).',ja:'日没から日の出まで、トンネル内、霧や大雨のときはライトを点灯（第52条）。'},
+  {en:'The law calls high beam “the main light”; low beam is the exception used to avoid dazzling others.',ja:'法律上ハイビーム（走行用前照灯）が基本、ロービーム（すれ違い用）は幻惑を防ぐための例外。'},
+  {en:'Rear-seat passengers and cyclists without lights are hard to see: slow down in residential areas after dark.',ja:'夜の住宅街は無灯火の自転車や歩行者に注意し、速度を落とす。'},
+  {en:'Fog lights only in fog; they dazzle others on clear nights.',ja:'フォグランプは霧のときだけ。晴れた夜は眩しいだけ。'}],
+ law:{en:'Road Traffic Act Art. 52 (lighting), Art. 76 (unnecessary high beams as obstructive driving).',ja:'道路交通法 第52条（灯火）・第76条（不必要なハイビームは妨害運転）'},
+ chips:[{l:{en:'No lights at night',ja:'無灯火'},v:{en:'1 pt · ¥6,000',ja:'1点・6,000円'}},{l:{en:'Failing to dip',ja:'減光等義務違反'},v:{en:'1 pt · ¥6,000',ja:'1点・6,000円'}}],
+ tip:{en:'Most modern Japanese cars have an auto high-beam mode. Turn it on and let the car dip for you.',ja:'最近の車にはオートハイビーム機能があります。有効にしておくと自動で切り替わります。'}},
+alc:{num:10,ja:'飲酒運転',en:'Alcohol',tag:{en:'Zero tolerance — one beer can cost your licence',ja:'ビール1本でも免許がなくなる'},
+ caps:[[0,'Japan has effectively zero tolerance. A single drink can put you over the line.','日本の飲酒運転は実質ゼロトレランス。1杯でも基準を超えることがあります。'],
+  [3.5,'0.15 mg/L of breath (about one beer): 13 points, 90-day suspension, up to 3 years in prison or ¥500,000.','呼気0.15mg/L以上（ビール1本程度）：13点・免停90日、3年以下の懲役または50万円以下の罰金。'],
+  [7.5,'0.25 mg/L or more: 25 points and revocation. Visibly drunk: 35 points, up to 5 years or ¥1,000,000.','0.25mg/L以上：25点・免許取消。酒酔い運転：35点、5年以下の懲役または100万円以下の罰金。'],
+  [11.5,'Passengers, the car\u2019s owner and whoever served the drinks can be punished too.','同乗者、車の提供者、酒の提供者も処罰されます。'],
+  [15,'Drank? Take a taxi or call a 運転代行 (chauffeur service). Bicycles count too since November 2024.','飲んだらタクシーか運転代行。2024年11月からは自転車も同じです。']],
+ pts:[{en:'Two offences: 酒気帯び (alcohol on breath, ≥0.15 mg/L) and 酒酔い (unable to drive normally, no number needed).',ja:'酒気帯び運転（呼気0.15mg/L以上）と酒酔い運転（正常な運転ができない状態。数値不要）の2種類。'},
+  {en:'Suspension for 13 points is 90 days; 25 points means the licence is revoked with a 2-year ban; 35 points a 3-year ban.',ja:'13点で免停90日、25点で取消（欠格2年）、35点で取消（欠格3年）。'},
+  {en:'Serving alcohol to someone who will drive, or lending them a car: up to 3–5 years in prison. Riding with them: the same.',ja:'酒類提供・車両提供・同乗はいずれも懲役刑の対象。'},
+  {en:'Morning after: alcohol from a late night can still be in your breath. Roadside checks are routine near expressway interchanges.',ja:'翌朝も注意。前夜の酒が残っていることがある。IC付近の検問は日常的。'}],
+ law:{en:'Road Traffic Act Art. 65 (prohibition), Art. 117-2 & 117-2-2 (penalties).',ja:'道路交通法 第65条（酒気帯び運転等の禁止）・第117条の2、第117条の2の2（罰則）'},
+ chips:[{l:{en:'0.15–0.25 mg/L',ja:'酒気帯び 0.15〜0.25'},v:{en:'13 pts · 90-day suspension',ja:'13点・免停90日'},c:'red'},{l:{en:'≥0.25 mg/L',ja:'酒気帯び 0.25以上'},v:{en:'25 pts · revoked 2 yrs',ja:'25点・取消（欠格2年）'},c:'red'},{l:{en:'Drunk (酒酔い)',ja:'酒酔い運転'},v:{en:'35 pts · revoked 3 yrs',ja:'35点・取消（欠格3年）'},c:'red'}],
+ tip:{en:'Non-alcoholic beer (0.00%) is everywhere in Japan for exactly this reason. Order it.',ja:'ノンアルコールビールが普及しているのはこのため。運転する日は迷わずノンアルで。'}},
+phone:{num:11,ja:'ながら運転とシートベルト',en:'Phones and seatbelts',tag:{en:'Hands off the phone, belts in every seat, child seats under six',ja:'スマホは持たない・全席ベルト・6歳未満はチャイルドシート'},
+ caps:[[0,'Holding a phone while driving — even glancing at the screen — is 3 points and ¥18,000.','運転中にスマホを手に持つ、画面を注視する：3点・18,000円。'],
+  [3.5,'If it causes danger: 6 points, immediate suspension, up to 1 year in prison. Pull over to use it.','危険を生じさせれば6点・即免停、1年以下の懲役。使うなら停車してから。'],
+  [7.5,'Seatbelts are required in every seat, front and back. The driver is responsible: 1 point.','シートベルトは前席も後席も全員着用。責任は運転者にあり、1点。'],
+  [11.5,'Children under 6 must ride in a child seat (1 point if not). Taxis and buses are exempt.','6歳未満はチャイルドシートが義務（違反は1点）。タクシー・バスは例外。']],
+ pts:[{en:'Talking, texting, watching the screen, even holding the phone in your hand while moving is the offence. Stopped at a red light is excluded, but put it away before the light changes.',ja:'通話・操作・画面注視・手に持つだけでも違反。停止中は除外だが、青になる前にしまう。'},
+  {en:'Dash-mounted navigation is legal, but staring at it for more than a glance is still 注視 (watching).',ja:'固定したナビは合法。ただし2秒以上見続けると「注視」で違反。'},
+  {en:'Rear-seat belts: 1 point on expressways; on ordinary roads a warning — but the belt still saves your life.',ja:'後席ベルト：高速道路では1点、一般道は口頭指導。命を守るのは同じ。'},
+  {en:'Child seats: rear-facing for babies, then forward-facing, then a booster. Renting one with a rental car is easy.',ja:'チャイルドシートは乳児用→幼児用→ジュニアシート。レンタカーでも借りられる。'}],
+ law:{en:'Road Traffic Act Art. 71(5-5) (phones), Art. 71-3 (seatbelts and child seats).',ja:'道路交通法 第71条第5号の5（携帯電話等）・第71条の3（座席ベルト・幼児用補助装置）'},
+ chips:[{l:{en:'Holding a phone',ja:'携帯電話使用等（保持）'},v:{en:'3 pts · ¥18,000',ja:'3点・18,000円'},c:'red'},{l:{en:'Phone, causing danger',ja:'携帯電話使用等（交通の危険）'},v:{en:'6 pts · court',ja:'6点・赤切符'},c:'red'},{l:{en:'No seatbelt / child seat',ja:'座席ベルト・幼児用補助装置'},v:{en:'1 pt · no fine',ja:'1点・反則金なし'}}],
+ tip:{en:'Police watch for glowing screens at night. A phone in a cradle, used by voice, is the safe way.',ja:'夜は光る画面が目立ちます。ホルダーに固定して音声操作が安全です。'}},
+hwy:{num:12,ja:'高速道路',en:'Expressways',tag:{en:'Keep left, pass right, 100 km/h, never below 50',ja:'左側走行・追い越しは右・100km/h・最低50km/h'},
+ caps:[[0,'Use the acceleration lane to reach the flow speed, then merge into the left lane.','加速車線で本線の流れに合わせて加速し、左側の走行車線に合流します。'],
+  [4,'Default 100 km/h (120 on some sections, 80 for heavy trucks). Minimum 50 km/h.','法定速度は100km/h（一部120km/h、大型トラックは80km/h）。最低速度は50km/h。'],
+  [8,'Keep left. The right lane is only for passing — cruising in it is a violation (1 point, ¥6,000).','走行車線は左。右側の追越車線を走り続けると通行帯違反（1点・6,000円）。'],
+  [13,'Pass on the right, then return to the left lane. Never drive on the shoulder.','右から追い越したら左に戻ります。路肩走行は禁止。'],
+  [17.5,'Toll gates: ETC lanes at 20 km/h or less. Following distance: your speed in metres.','料金所のETCレーンは20km/h以下。車間距離は速度と同じメートル数が目安です。']],
+ pts:[{en:'Vehicles that cannot do 50 km/h (mopeds, tractors) are banned. Motorcycles need 126 cc or more.',ja:'50km/h出せない車両（原付など）は通行禁止。二輪は126cc以上。'},
+  {en:'Tolls are high. An ETC card and on-board unit (rentable with the car) saves time; keep to the purple ETC lanes.',ja:'通行料金は高め。ETCカードと車載器（レンタカーでも可）で時短。紫色のETCレーンへ。'},
+  {en:'Broken down? Hazard lights, warning triangle 50 m behind, everyone out and over the guardrail. Call #9910 for road emergencies.',ja:'故障時はハザード、停止表示器材を後方に、全員ガードレールの外へ。道路緊急ダイヤル#9910。'},
+  {en:'Reversing, U-turns and stopping on the carriageway are prohibited. Missed your exit? Go to the next one.',ja:'本線上の後退・転回・停車は禁止。出口を過ぎたら次の出口まで。'}],
+ law:{en:'Road Traffic Act Art. 75-4 (minimum speed), 75-8 (no stopping), Art. 20 (lane use).',ja:'道路交通法 第75条の4（最低速度）・第75条の8（停車の禁止）・第20条（通行帯）'},
+ chips:[{l:{en:'Cruising in the passing lane',ja:'通行帯違反'},v:{en:'1 pt · ¥6,000',ja:'1点・6,000円'}},{l:{en:'Below minimum speed',ja:'最低速度違反'},v:{en:'1 pt · ¥6,000',ja:'1点・6,000円'}},{l:{en:'40+ km/h over',ja:'40km/h以上超過'},v:{en:'6 pts · court',ja:'6点・赤切符'},c:'red'}],
+ tip:{en:'The Shuto (Tokyo) expressway is mostly 60 km/h despite looking like a motorway. Read the overhead signs.',ja:'首都高は高速に見えても大半が60km/h規制。標識を必ず確認。'}},
+round:{num:13,ja:'環状交差点',en:'Roundabouts',tag:{en:'Clockwise, yield to the circle, signal on exit',ja:'右回り・環道内が優先・出るときに合図'},
+ caps:[[0,'Roundabouts (環状交差点) are rare but growing. Traffic circulates clockwise.','環状交差点はまだ少ないですが増えています。環道は右回り（時計回り）です。'],
+  [3.5,'Slow down and yield to vehicles already in the circle — they have priority.','徐行して、環道内の車に道を譲ります。環道内が優先です。'],
+  [7.5,'No signal on entry. Signal left as you pass the exit before yours, then leave.','進入時は合図不要。出たい出口の一つ手前を過ぎたら左の合図を出して出ます。'],
+  [11.5,'Drive slowly all the way round and never stop inside the circle.','環道内は徐行。環道内で停止しないこと。']],
+ pts:[{en:'Introduced in September 2014 (Art. 35-2, 37-2). The blue sign shows three arrows going clockwise.',ja:'2014年9月に導入（第35条の2・第37条の2）。青い標識に右回りの矢印。'},
+  {en:'Priority inside the circle is absolute: even the vehicle coming from your left waits for you once you are in.',ja:'環道内が絶対優先。左方優先の原則もここでは環道優先に置き換わる。'},
+  {en:'Pedestrians crossing an entry or exit still have priority over you.',ja:'出入口の横断歩道の歩行者は優先。'},
+  {en:'Emergency vehicles inside the roundabout: exit if you can, otherwise stop on the left edge.',ja:'環道内で緊急車両が来たら、出られるなら出る。無理なら左端で停止。'}],
+ law:{en:'Road Traffic Act Art. 35-2, 37-2 (roundabouts).',ja:'道路交通法 第35条の2・第37条の2（環状交差点）'},
+ chips:[{l:{en:'Failing to yield in roundabout',ja:'環状交差点通行車妨害等'},v:{en:'1 pt · ¥6,000',ja:'1点・6,000円'}}],
+ tip:{en:'Most are in rural Nagano, Shizuoka and Miyagi. Treat any unfamiliar circle as: slow, look right, wait.',ja:'長野・静岡・宮城などに多い。初めての環状交差点は「徐行・右を見る・待つ」。'}},
+bike:{num:14,ja:'自転車',en:'Sharing with bicycles',tag:{en:'Cyclists keep left too — and get fined since April 2026',ja:'自転車も左側通行。2026年4月から青切符'},
+ caps:[[0,'Bicycles are vehicles: they ride on the left edge of the road, in the same direction as cars.','自転車は車両。車道の左端を、車と同じ方向に走ります。'],
+  [3.5,'When passing a cyclist, leave a safe gap (about 1.5 m) — or slow right down if you cannot.','自転車を追い越すときは安全な間隔（目安1.5m）。取れなければ徐行します。'],
+  [7.5,'Check your left mirror and blind spot before turning left — “巻き込み” is the classic city crash.','左折前に左ミラーと死角を確認。「巻き込み事故」は都市部の典型事故です。'],
+  [11.5,'Since April 2026 cyclists aged 16+ get on-the-spot fines: phone ¥12,000, red light ¥6,000, umbrella or no lights ¥5,000.','2026年4月から16歳以上の自転車に青切符。スマホ12,000円、信号無視6,000円、傘さし・無灯火5,000円。'],
+  [15.5,'Drunk cycling has been a crime since November 2024. Helmets are an “effort obligation” for all ages.','自転車の酒気帯び運転は2024年11月から刑事罰。ヘルメットは全年齢で努力義務です。']],
+ pts:[{en:'Cyclists may use the sidewalk only where a sign allows it, or if they are under 13, over 70 or disabled — and must give way to pedestrians there.',ja:'自転車の歩道通行は標識がある場合、13歳未満・70歳以上・身体障害者のみ。歩行者が優先。'},
+  {en:'Blue arrows and bicycle pictograms painted on the road are “bicycle navigation marks” showing where cyclists should ride. Expect them there.',ja:'路面の青い矢印（自転車ナビマーク）は自転車の走行位置。車はそこに自転車がいる前提で。'},
+  {en:'Since April 2026 a vehicle overtaking a bicycle must keep a safe distance or slow down — it is a duty for drivers, not just a courtesy.',ja:'2026年4月から、自転車を追い越す車には安全な間隔の保持または徐行が義務。'},
+  {en:'113 bicycle violations carry fines of ¥3,000–12,000. Serious ones (drunk, causing an accident) go to court.',ja:'自転車の反則行為は113種類、反則金3,000〜12,000円。酒気帯びや事故は赤切符。'}],
+ law:{en:'Road Traffic Act Art. 17, 18 (keep left, distance from bicycles), Art. 63-4 (sidewalks), 2024 amendment (bicycle blue tickets from 1 Apr 2026).',ja:'道路交通法 第17条・第18条（左側端・自転車との間隔）・第63条の4（歩道通行）、2024年改正（自転車の反則金制度 2026年4月1日〜）'},
+ chips:[{l:{en:'Left-turn collision with cyclist',ja:'左折方法違反（巻き込み）'},v:{en:'1 pt · ¥4,000',ja:'1点・4,000円'}},{l:{en:'Cyclist on phone (16+)',ja:'自転車の携帯電話使用'},v:{en:'¥12,000',ja:'12,000円'},c:'blue'},{l:{en:'Cyclist with umbrella',ja:'自転車の傘さし運転'},v:{en:'¥5,000',ja:'5,000円'},c:'blue'}],
+ tip:{en:'Schoolchildren cycle on the left in single file at 8 a.m. — slow down on any road near a school.',ja:'朝8時ごろは通学の自転車が多い。学校近くの道は速度を落とす。'}},
+aori:{num:15,ja:'車間距離とあおり運転',en:'Following distance and road rage',tag:{en:'Keep your distance — tailgating is a crime since 2020',ja:'車間を取る。あおり運転は2020年から犯罪'},
+ caps:[[0,'Keep enough distance to stop safely — on the expressway, about your speed in metres.','安全に止まれる車間距離を。高速道路では速度と同じメートル数が目安です。'],
+  [4,'Tailgating, cutting in, braking hard in front of others, needless horn or high beams — all count as 妨害運転 (obstructive driving).','車間距離不保持、割り込み、急ブレーキ、不必要なクラクションやハイビーム。すべて「妨害運転」です。'],
+  [9,'Penalty: up to 3 years or ¥500,000, 25 points and immediate licence revocation. Causing serious danger: up to 5 years, 35 points.','3年以下の懲役または50万円以下の罰金、25点で即取消。著しい危険を生じさせれば5年以下・35点。'],
+  [14,'If you are targeted: do not engage, pull into a safe place, stay inside, lock the doors and call 110.','あおられたら相手にしない。安全な場所に停めて車内に留まり、ドアをロックして110番。']],
+ pts:[{en:'The 2-second rule works everywhere: pick a fixed object, count “one-thousand-one, one-thousand-two” after the car ahead passes it.',ja:'2秒ルール：前の車が目印を通過してから「ゼロイチ、ゼロニ」と数える。'},
+  {en:'Ten behaviours are listed as obstructive driving, including blocking the road, passing on the left, and zig-zagging.',ja:'妨害運転は10類型：通行区分違反、急ブレーキ、車間距離不保持、進路変更、左からの追い越し、減光等義務違反、警音器、安全運転義務、高速道路での最低速度、駐停車。'},
+  {en:'A dashcam (ドラレコ) is in most Japanese cars now, and its footage is routinely used for these charges.',ja:'ドライブレコーダーの映像は妨害運転の立証に日常的に使われている。'},
+  {en:'Driving slowly in the right lane to “teach a lesson” is itself obstructive driving.',ja:'追越車線をわざと遅く走るのも妨害運転。'}],
+ law:{en:'Road Traffic Act Art. 26 (following distance), Art. 117-2-2 (obstructive driving, added June 2020).',ja:'道路交通法 第26条（車間距離の保持）・第117条の2の2（妨害運転罪、2020年6月施行）'},
+ chips:[{l:{en:'Tailgating (expressway)',ja:'車間距離不保持（高速）'},v:{en:'2 pts · ¥9,000',ja:'2点・9,000円'}},{l:{en:'Obstructive driving',ja:'妨害運転'},v:{en:'25 pts · revoked',ja:'25点・取消'},c:'red'},{l:{en:'…with serious danger',ja:'妨害運転（著しい危険）'},v:{en:'35 pts · 5 yrs prison',ja:'35点・5年以下の懲役'},c:'red'}],
+ tip:{en:'A “dashcam recording” sticker (ドラレコ録画中) on the rear window measurably reduces tailgating.',ja:'「ドラレコ録画中」ステッカーはあおり抑止に効果があります。'}},
+marks:{num:16,ja:'マークとマナー',en:'Marks and manners',tag:{en:'Wakaba, kōreisha, the thank-you hazard flash',ja:'若葉マーク・高齢者マーク・サンキューハザード'},
+ caps:[[0,'The green-and-yellow 若葉 (wakaba) mark is required for one year after getting a licence (1 point, ¥4,000 if missing).','若葉（初心者）マークは免許取得後1年間表示義務。表示しないと1点・4,000円。'],
+  [4,'The four-leaf 高齢者 mark is encouraged for drivers 70+. Squeezing or cutting in on any marked car: 1 point, ¥6,000.','四つ葉の高齢者マークは70歳以上に努力義務。マークの車への幅寄せ・割り込みは1点・6,000円。'],
+  [9,'Two hazard flashes mean “thank you”. A quick headlight flash usually means “go ahead” — customs, not law.','ハザード2回は「ありがとう」、パッシングは「お先にどうぞ」。法律ではなく慣習です。'],
+  [13,'Use the horn only where a sign requires it or to avoid danger. A friendly toot is a ¥3,000 violation.','クラクションは標識のある場所と危険回避のときだけ。挨拶代わりの一鳴らしは3,000円の違反。']],
+ pts:[{en:'Other marks: a butterfly for hearing-impaired drivers, a four-leaf clover with a wheelchair for physical disability. Same protection applies.',ja:'ほかに聴覚障害者標識（蝶）、身体障害者標識（四つ葉にクローバー）。同じ保護規定。'},
+  {en:'Hazard lights are officially for breakdowns and stopping; the “thank-you flash” is universal but unofficial.',ja:'ハザードは本来、故障や停車の合図。「サンキューハザード」は非公式だが全国共通。'},
+  {en:'A short bow from the driver\u2019s seat when someone lets you in is normal — and expected.',ja:'譲ってもらったら運転席から軽く会釈するのが普通。'},
+  {en:'Parking: none within 5 m of a crosswalk or intersection, 10 m of a bus stop, on the road for more than 12 hours (8 at night).',ja:'駐車禁止：横断歩道・交差点から5m以内、バス停から10m以内、路上12時間（夜間8時間）超。'}],
+ law:{en:'Road Traffic Act Art. 71(5) & 71-5 (driver marks), Art. 54 (horn), Art. 44–45 (no stopping/parking).',ja:'道路交通法 第71条第5号・第71条の5（標識）・第54条（警音器）・第44条〜第45条（駐停車禁止）'},
+ chips:[{l:{en:'No wakaba mark',ja:'初心運転者標識表示義務違反'},v:{en:'1 pt · ¥4,000',ja:'1点・4,000円'}},{l:{en:'Cutting in on a marked car',ja:'初心運転者等保護義務違反'},v:{en:'1 pt · ¥6,000',ja:'1点・6,000円'}},{l:{en:'Horn without reason',ja:'警音器使用制限違反'},v:{en:'0 pts · ¥3,000',ja:'0点・3,000円'}}],
+ tip:{en:'A wakaba magnet costs ¥300 at any convenience store. Since 2025 newly converted licence holders are treated as new drivers too.',ja:'若葉マークはコンビニで300円ほど。外免切替直後の運転者も初心者扱いになります。'}}
+};
+const ORDER=['left','speed','stop','cross','signal','prio','rail','emer','night','alc','phone','hwy','round','bike','aori','marks'];
+
+/* ===================== QUIZ ===================== */
+const QUIZ=[
+ {q:{en:'A residential street has no centre line and no speed sign. The limit is 60 km/h.',ja:'中央線も速度標識もない住宅街の道路。法定速度は60km/hである。'},a:false,x:{en:'Since 1 September 2026 a road with no centre line, lanes or median defaults to 30 km/h.',ja:'2026年9月1日から、中央線・車両通行帯・中央分離帯のない道路の法定速度は30km/hです。'}},
+ {q:{en:'The railway crossing gates are up and no train is in sight, so you may cross without stopping.',ja:'踏切の遮断機が上がっていて列車も見えないので、停止せずに通過してよい。'},a:false,x:{en:'Article 33: stop before every crossing, confirm safety, then cross. Only a crossing with its own green traffic light exempts you.',ja:'第33条：踏切の直前で必ず停止し、安全確認をしてから通過。例外は信号機が青の踏切だけです。'}},
+ {q:{en:'The light is red but the way is clear, so you may turn left.',ja:'赤信号だが安全なので左折してよい。'},a:false,x:{en:'No turn on red in Japan unless a green arrow or a 左折可 sign allows it.',ja:'矢印信号や「左折可」の標示板がない限り、赤信号では左折できません。'}},
+ {q:{en:'A pedestrian is waiting at a crosswalk with no signal. You may pass slowly as long as they have not stepped onto the road.',ja:'信号のない横断歩道で歩行者が待っている。まだ道路に出ていないので徐行で通過してよい。'},a:false,x:{en:'Someone waiting to cross means you must stop before the crosswalk (Art. 38). 2 points, ¥9,000.',ja:'渡ろうとしている歩行者がいれば横断歩道の手前で停止（第38条）。2点・9,000円。'}},
+ {q:{en:'At an intersection of two equally wide roads with no signs, you yield to the vehicle on your right.',ja:'標識のない同じ幅の道路の交差点では、右から来る車に道を譲る。'},a:false,x:{en:'Japan uses left-hand priority (左方優先): yield to the vehicle coming from your left.',ja:'日本は左方優先。左から来る車に道を譲ります。'}},
+ {q:{en:'Rear-seat passengers must wear seatbelts on ordinary roads as well as on expressways.',ja:'後部座席の同乗者は、高速道路だけでなく一般道でもシートベルトを着用しなければならない。'},a:true,x:{en:'All seats, all roads (Art. 71-3). Points are only given on expressways for rear seats, but the duty applies everywhere.',ja:'全席・全道路で着用義務（第71条の3）。後席は高速道路のみ点数がつきますが、義務はどこでも同じです。'}},
+ {q:{en:'One glass of beer with dinner is fine as long as you feel normal.',ja:'食事中にビールを1杯飲んでも、普通に感じていれば運転してよい。'},a:false,x:{en:'One beer can already exceed 0.15 mg/L: 13 points and a 90-day suspension. Feeling normal is not the test.',ja:'ビール1杯で0.15mg/Lを超えることがあります。13点・免停90日。自覚は関係ありません。'}},
+ {q:{en:'An ambulance with its siren on approaches from behind while you are near an intersection. You should pull left and stop.',ja:'交差点付近で後方からサイレンを鳴らした救急車が近づいてきた。左に寄せて停止すべきである。'},a:true,x:{en:'Near an intersection: avoid the intersection, pull to the left and stop (Art. 40).',ja:'交差点付近では交差点を避け、左に寄せて停止します（第40条）。'}},
+ {q:{en:'Touching your phone while fully stopped at a red light is the same “holding a phone” violation as while moving.',ja:'赤信号で完全に停止しているときにスマホを操作するのも、走行中と同じ「保持」違反である。'},a:false,x:{en:'The holding offence excludes a vehicle that is stopped — but you must put the phone away before moving, and watching a screen while creeping forward is a violation.',ja:'「保持」の違反は停止中を除きます。ただし動き出す前にしまうこと。徐行中の画面注視は違反です。'}},
+ {q:{en:'On an expressway you may keep driving in the right lane if you are at the speed limit.',ja:'高速道路で制限速度で走っていれば、右側の車線を走り続けてもよい。'},a:false,x:{en:'The right lane is for passing only. Cruising in it is 通行帯違反: 1 point, ¥6,000.',ja:'右側は追越車線。走り続けると通行帯違反で1点・6,000円。'}},
+ {q:{en:'Since April 2026, cyclists aged 16 or over can receive on-the-spot fines for using a phone or ignoring a stop sign.',ja:'2026年4月から、16歳以上の自転車利用者はスマホ使用や一時不停止で反則金の対象になる。'},a:true,x:{en:'The bicycle blue-ticket system covers 113 violations with fines from ¥3,000 to ¥12,000.',ja:'自転車の青切符制度：113種類の違反、反則金3,000〜12,000円。'}},
+ {q:{en:'On an unlit road at night with no other traffic, you should drive on high beam.',ja:'夜間、街灯も対向車もない道路ではハイビームで走行すべきである。'},a:true,x:{en:'High beam is the default; switch to low beam for oncoming or leading vehicles and pedestrians.',ja:'ハイビームが基本。対向車・先行車・歩行者がいればロービームに。'}},
+ {q:{en:'A 止まれ sign requires you to slow to walking pace and continue if the road is clear.',ja:'「止まれ」の標識では、歩く速さまで減速し、安全なら止まらずに進んでよい。'},a:false,x:{en:'It requires a complete stop with the wheels stopped, just before the stop line. 2 points, ¥7,000.',ja:'停止線の直前で完全停止（車輪が止まる）が必要。2点・7,000円。'}},
+ {q:{en:'Flashing your hazard lights twice after someone lets you merge is a legal requirement.',ja:'合流を譲ってもらった後にハザードを2回点滅させるのは法律上の義務である。'},a:false,x:{en:'The “thank-you hazard” is a custom, not a rule. Hazards are legally for stopping and breakdowns.',ja:'サンキューハザードは慣習で義務ではありません。本来は停車・故障の合図。'}},
+ {q:{en:'Children under six must use a child seat, except in taxis and buses.',ja:'6歳未満の子どもはチャイルドシートを使用しなければならないが、タクシーやバスは例外である。'},a:true,x:{en:'Art. 71-3(3): child seats for under-sixes; taxis, buses and medical emergencies are exempt. 1 point if you skip it.',ja:'第71条の3第3項。6歳未満はチャイルドシート。タクシー・バス・急病時は例外。違反は1点。'}}
+];
+
+/* ===================== PENALTIES ===================== */
+const PEN={
+ rows:[
+  ['Speeding under 15 km/h over','速度超過15km/h未満','1','¥9,000'],['Speeding 15–20','速度超過15〜20km/h未満','1','¥12,000'],['Speeding 20–25','速度超過20〜25km/h未満','2','¥15,000'],['Speeding 25–30','速度超過25〜30km/h未満','3','¥18,000'],
+  ['Speeding 30–35 (expressway only)','速度超過30〜35km/h未満（高速）','3','¥25,000'],['Speeding 35–40 (expressway only)','速度超過35〜40km/h未満（高速）','3','¥35,000'],
+  ['30+ over on an ordinary road / 40+ on expressway','一般道30km/h以上・高速40km/h以上超過','6','court'],
+  ['Red light','信号無視（赤色等）','2','¥9,000'],['Flashing red / yellow light ignored','信号無視（点滅）','2','¥7,000'],['Not stopping at 止まれ','指定場所一時不停止等','2','¥7,000'],['Obstructing a crossing pedestrian','横断歩行者等妨害等','2','¥9,000'],['Railway crossing: not stopping','踏切不停止等','2','¥9,000'],
+  ['Failing to yield (priority road)','優先道路通行車妨害等','2','¥7,000'],['Not slowing where required','徐行場所違反','2','¥7,000'],['Wrong side of the road','通行区分違反','2','¥9,000'],
+  ['Holding / using a phone','携帯電話使用等（保持）','3','¥18,000'],['Phone use causing danger','携帯電話使用等（交通の危険）','6','court'],
+  ['Seatbelt not worn (driver responsible)','座席ベルト装着義務違反','1','—'],['Child under 6 without child seat','幼児用補助装置使用義務違反','1','—'],
+  ['Cruising in the passing lane','通行帯違反','1','¥6,000'],['Obstructing an emergency vehicle','緊急車妨害等','1','¥6,000'],['No lights at night','無灯火','1','¥6,000'],['Not dipping high beams','減光等義務違反','1','¥6,000'],
+  ['Cutting in on a wakaba / kōreisha car','初心運転者等保護義務違反','1','¥6,000'],['No wakaba mark in first year','初心運転者標識表示義務違反','1','¥4,000'],['Horn without reason','警音器使用制限違反','0','¥3,000'],
+  ['Parking in a no-parking zone','駐車禁止場所等（放置）','2','¥15,000'],['Parking in a no-stopping zone','駐停車禁止場所等（放置）','3','¥18,000'],
+  ['Alcohol 0.15–0.25 mg/L','酒気帯び運転（0.15〜0.25）','13','court'],['Alcohol 0.25 mg/L or more','酒気帯び運転（0.25以上）','25','court'],['Drunk driving (酒酔い)','酒酔い運転','35','court'],
+  ['Obstructive driving (あおり)','妨害運転','25','court'],['Obstructive driving, serious danger','妨害運転（著しい危険）','35','court'],['Driving without a licence','無免許運転','25','court'],['Hit and run','救護義務違反（ひき逃げ）','35','court']
+ ],
+ thresholds:[['6–8','30-day suspension','免許停止30日'],['9–11','60-day suspension','免許停止60日'],['12–14','90-day suspension','免許停止90日'],['15–24','Revoked, 1-year ban','免許取消（欠格1年）'],['25–34','Revoked, 2-year ban','免許取消（欠格2年）'],['35–39','Revoked, 3-year ban','免許取消（欠格3年）'],['40–44','Revoked, 4-year ban','免許取消（欠格4年）'],['45+','Revoked, 5-year ban','免許取消（欠格5年）']],
+ timeline:[
+  ['Dec 2019','2019年12月',{en:'Phone-use penalties tripled: 3 points, ¥18,000; 6 points and prison if it causes danger.',ja:'ながら運転の罰則強化：3点・18,000円、危険を生じさせれば6点・懲役。'}],
+  ['Jun 2020','2020年6月',{en:'“Obstructive driving” (あおり運転) becomes a crime: 25–35 points, immediate revocation.',ja:'妨害運転罪の創設：25〜35点、即時免許取消。'}],
+  ['Oct 2021','2021年10月',{en:'Automatic headlights mandatory on all new cars sold.',ja:'新車のオートライト義務化完了。'}],
+  ['Apr 2023','2023年4月',{en:'Bicycle helmets become an effort obligation for all ages.',ja:'自転車ヘルメットが全年齢で努力義務に。'}],
+  ['Nov 2024','2024年11月',{en:'Phone use and drink-riding on bicycles become criminal offences.',ja:'自転車のながら運転・酒気帯び運転に罰則。'}],
+  ['Oct 2025','2025年10月',{en:'Foreign licence conversion tightened: residence certificate required, 50-question test at 90%.',ja:'外免切替の厳格化：住民票が必要、知識確認は50問・正答率90%。'}],
+  ['Apr 2026','2026年4月',{en:'Bicycle blue tickets (16+, 113 violations, ¥3,000–12,000). Drivers must keep a safe gap when passing cyclists.',ja:'自転車に青切符（16歳以上、113種類、3,000〜12,000円）。自転車追い越し時の安全間隔が義務に。'}],
+  ['Sep 2026','2026年9月',{en:'Roads without a centre line default to 30 km/h nationwide.',ja:'中央線のない生活道路の法定速度が全国で30km/hに。'}]
+ ]
+};
+
+/* ===================== 3D ENGINE ===================== */
+const CFONT='"Overpass","Zen Kaku Gothic New","Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",sans-serif';
+const JFONT='"Zen Kaku Gothic New","Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic","Meiryo",sans-serif';
+const Y_AXIS=new THREE.Vector3(0,1,0);
+let renderer,scene,camera,stage,sun,hemi,threeOK=false;
+const stageEl=$('#stage'),canvas=$('#c');
+
+function initThree(){
+  try{
+    renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
+  }catch(e){ return false; }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  renderer.outputEncoding=THREE.sRGBEncoding;
+  scene=new THREE.Scene();
+  camera=new THREE.PerspectiveCamera(48,1,0.5,700);
+  hemi=new THREE.HemisphereLight(0xdfe9f3,0x6f7f5f,0.95); scene.add(hemi);
+  sun=new THREE.DirectionalLight(0xfff1d8,1.15); sun.castShadow=true;
+  sun.shadow.mapSize.set(2048,2048);
+  const sc=sun.shadow.camera; sc.left=-48; sc.right=48; sc.top=48; sc.bottom=-48; sc.near=1; sc.far=220;
+  sun.shadow.bias=-0.0006; sun.shadow.normalBias=0.03;
+  scene.add(sun); scene.add(sun.target);
+  stage=new THREE.Group(); scene.add(stage);
+  resize(); new ResizeObserver(resize).observe(stageEl);
+  return true;
+}
+function resize(){
+  if(!renderer) return;
+  const w=stageEl.clientWidth||1,h=stageEl.clientHeight||1;
+  renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix();
+}
+function clearStage(){
+  stage.traverse(o=>{
+    if(o.geometry) o.geometry.dispose();
+    if(o.material){ (Array.isArray(o.material)?o.material:[o.material]).forEach(m=>{ if(m.map) m.map.dispose(); m.dispose(); }); }
+  });
+  while(stage.children.length) stage.remove(stage.children[0]);
+}
+const SKY={day:0xbfd8ea,night:0x0d1524,dusk:0x415580};
+function setEnv(mode){
+  const night=mode==='night';
+  scene.background=new THREE.Color(SKY[mode]||SKY.day);
+  scene.fog=new THREE.Fog(SKY[mode]||SKY.day,night?40:70,night?170:260);
+  hemi.color.set(night?0x2a3c66:0xdfe9f3); hemi.groundColor.set(night?0x0f1412:0x6f7f5f); hemi.intensity=night?0.45:0.95;
+  sun.color.set(night?0x8fa3d8:0xfff1d8); sun.intensity=night?0.22:1.15;
+}
+
+/* ---------- helpers ---------- */
+function mat(color,o){ return new THREE.MeshStandardMaterial(Object.assign({color,roughness:0.92,metalness:0},o||{})); }
+function box(w,h,d,m,x,y,z,shadow){ const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m); o.position.set(x||0,y||0,z||0); if(shadow!==false){o.castShadow=true;o.receiveShadow=true;} return o; }
+function cyl(rt,rb,h,m,x,y,z,seg){ const o=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,seg||14),m); o.position.set(x||0,y||0,z||0); o.castShadow=true; o.receiveShadow=true; return o; }
+function flat(w,d,m,x,z,y,rot){ const o=new THREE.Mesh(new THREE.PlaneGeometry(w,d),m); o.rotation.x=-Math.PI/2; if(rot) o.rotation.z=rot; o.position.set(x||0,y===undefined?0.115:y,z||0); o.receiveShadow=true; return o; }
+function smooth(u){ return u*u*(3-2*u); }
+function kf(t,keys){
+  if(t<=keys[0][0]) return keys[0][1];
+  for(let i=1;i<keys.length;i++){ const k=keys[i]; if(t<=k[0]){ const p=keys[i-1]; let u=(t-p[0])/(k[0]-p[0]); const e=k[2]||'lin';
+    if(e==='smooth') u=smooth(u); else if(e==='out') u=1-(1-u)*(1-u); else if(e==='in') u=u*u; return p[1]+(k[1]-p[1])*u; } }
+  return keys[keys.length-1][1];
+}
+function step(t,keys){ let v=keys[0][1]; for(const k of keys){ if(t>=k[0]) v=k[1]; } return v; }
+function within(t,a,b){ return t>=a&&t<b; }
+function heading(obj,dx,dz){ obj.rotation.y=Math.atan2(-dz,dx); }
+const DIR={E:0,W:Math.PI,N:Math.PI/2,S:-Math.PI/2};
+function camPath(keys){ // [t,[px,py,pz],[lx,ly,lz],ease]
+  return function(t){
+    if(t<=keys[0][0]) return {pos:keys[0][1],look:keys[0][2]};
+    for(let i=1;i<keys.length;i++){ const k=keys[i]; if(t<=k[0]){ const p=keys[i-1]; let u=(t-p[0])/(k[0]-p[0]); const e=k[3]||'smooth'; if(e==='smooth') u=smooth(u); else if(e==='out') u=1-(1-u)*(1-u);
+      return {pos:[0,1,2].map(j=>p[1][j]+(k[1][j]-p[1][j])*u),look:[0,1,2].map(j=>p[2][j]+(k[2][j]-p[2][j])*u)}; } }
+    const l=keys[keys.length-1]; return {pos:l[1],look:l[2]};
+  };
+}
+
+/* ---------- canvas textures ---------- */
+function ctex(w,h,draw){ const c=document.createElement('canvas'); c.width=w; c.height=h; const x=c.getContext('2d'); draw(x,w,h); const t=new THREE.CanvasTexture(c); t.encoding=THREE.sRGBEncoding; t.anisotropy=4; return t; }
+function rr(x,X,Y,w,h,r){ x.beginPath(); x.moveTo(X+r,Y); x.arcTo(X+w,Y,X+w,Y+h,r); x.arcTo(X+w,Y+h,X,Y+h,r); x.arcTo(X,Y+h,X,Y,r); x.arcTo(X,Y,X+w,Y,r); x.closePath(); }
+function texStop(){ return ctex(256,256,(x,w,h)=>{ x.clearRect(0,0,w,h); x.fillStyle='#C8242C'; x.beginPath(); x.moveTo(6,18); x.lineTo(250,18); x.lineTo(128,238); x.closePath(); x.fill(); x.strokeStyle='#fff'; x.lineWidth=10; x.beginPath(); x.moveTo(30,34); x.lineTo(226,34); x.lineTo(128,208); x.closePath(); x.stroke(); x.fillStyle='#fff'; x.textAlign='center'; x.textBaseline='middle'; x.font='700 60px '+JFONT; x.fillText('止まれ',128,88); x.font='800 30px '+CFONT; x.fillText('STOP',128,140); }); }
+function texSlow(){ return ctex(256,256,(x,w,h)=>{ x.clearRect(0,0,w,h); x.fillStyle='#C8242C'; x.beginPath(); x.moveTo(6,18); x.lineTo(250,18); x.lineTo(128,238); x.closePath(); x.fill(); x.strokeStyle='#fff'; x.lineWidth=10; x.beginPath(); x.moveTo(30,34); x.lineTo(226,34); x.lineTo(128,208); x.closePath(); x.stroke(); x.fillStyle='#fff'; x.textAlign='center'; x.textBaseline='middle'; x.font='700 62px '+JFONT; x.fillText('徐行',128,86); x.font='800 26px '+CFONT; x.fillText('SLOW',128,138); }); }
+function texSpeed(n,min){ return ctex(256,256,(x,w,h)=>{ x.clearRect(0,0,w,h); x.fillStyle='#fff'; x.beginPath(); x.arc(128,128,124,0,Math.PI*2); x.fill(); x.fillStyle='#1B57AE'; x.beginPath(); x.arc(128,128,112,0,Math.PI*2); x.fill(); x.fillStyle='#fff'; x.textAlign='center'; x.textBaseline='middle'; x.font='800 128px '+CFONT; x.fillText(String(n),128,min?116:134); if(min){ x.fillRect(58,196,140,12);} }); }
+function texRound(){ return ctex(256,256,(x,w,h)=>{ x.clearRect(0,0,w,h); x.fillStyle='#fff'; x.beginPath(); x.arc(128,128,124,0,Math.PI*2); x.fill(); x.fillStyle='#1B57AE'; x.beginPath(); x.arc(128,128,112,0,Math.PI*2); x.fill(); x.strokeStyle='#fff'; x.lineWidth=16; x.lineCap='round'; for(let i=0;i<3;i++){ const a0=i*2.094+0.35,a1=a0+1.5; x.beginPath(); x.arc(128,128,62,a0,a1); x.stroke(); const ex=128+62*Math.cos(a1),ey=128+62*Math.sin(a1); x.save(); x.translate(ex,ey); x.rotate(a1+Math.PI/2); x.fillStyle='#fff'; x.beginPath(); x.moveTo(0,-22); x.lineTo(16,6); x.lineTo(-16,6); x.closePath(); x.fill(); x.restore(); } }); }
+function texRailWarn(){ return ctex(256,256,(x,w,h)=>{ x.clearRect(0,0,w,h); x.fillStyle='#F2C230'; x.beginPath(); x.moveTo(128,4); x.lineTo(252,128); x.lineTo(128,252); x.lineTo(4,128); x.closePath(); x.fill(); x.strokeStyle='#111'; x.lineWidth=8; x.beginPath(); x.moveTo(128,22); x.lineTo(234,128); x.lineTo(128,234); x.lineTo(22,128); x.closePath(); x.stroke(); x.fillStyle='#111'; rr(x,70,88,116,62,8); x.fill(); x.fillStyle='#F2C230'; x.fillRect(84,100,20,20); x.fillRect(118,100,20,20); x.fillRect(152,100,20,20); x.fillStyle='#111'; x.beginPath(); x.arc(92,162,13,0,7); x.fill(); x.beginPath(); x.arc(164,162,13,0,7); x.fill(); x.fillRect(60,146,136,8); }); }
+function texCrosswalkSign(){ return ctex(256,256,(x,w,h)=>{ x.clearRect(0,0,w,h); x.fillStyle='#1B57AE'; x.beginPath(); x.moveTo(128,6); x.lineTo(250,96); x.lineTo(250,250); x.lineTo(6,250); x.lineTo(6,96); x.closePath(); x.fill(); x.fillStyle='#fff'; x.fillRect(24,204,208,14); x.fillRect(24,228,208,14); x.beginPath(); x.arc(150,86,18,0,7); x.fill(); x.fillRect(120,106,26,60); x.fillRect(146,110,44,12); x.fillRect(122,166,14,42); x.fillRect(146,160,26,12); x.fillRect(160,166,14,40); }); }
+function texPriority(){ return ctex(256,256,(x,w,h)=>{ x.clearRect(0,0,w,h); x.fillStyle='#C8242C'; x.beginPath(); x.moveTo(6,18); x.lineTo(250,18); x.lineTo(128,238); x.closePath(); x.fill(); x.fillStyle='#fff'; x.beginPath(); x.moveTo(30,34); x.lineTo(226,34); x.lineTo(128,204); x.closePath(); x.fill(); x.fillStyle='#111'; x.fillRect(56,84,144,26); x.fillRect(116,64,24,90); }); }
+function texWakaba(){ return ctex(128,128,(x,w,h)=>{ x.clearRect(0,0,w,h); x.beginPath(); x.moveTo(64,10); x.quadraticCurveTo(122,10,116,120); x.lineTo(64,102); x.lineTo(12,120); x.quadraticCurveTo(6,10,64,10); x.closePath(); x.fillStyle='#F4D03F'; x.fill(); x.beginPath(); x.moveTo(64,10); x.quadraticCurveTo(6,10,12,120); x.lineTo(64,102); x.closePath(); x.fillStyle='#1E9E62'; x.fill(); }); }
+function texKoreisha(){ return ctex(128,128,(x,w,h)=>{ x.clearRect(0,0,w,h); const cols=['#F59A23','#F4D03F','#5FBF7A','#3E8FE0']; for(let i=0;i<4;i++){ x.fillStyle=cols[i]; x.beginPath(); const a=i*Math.PI/2-Math.PI/4; x.ellipse(64+30*Math.cos(a),64+30*Math.sin(a),30,22,a,0,Math.PI*2); x.fill(); } }); }
+function css(c){ return typeof c==='number'?'#'+c.toString(16).padStart(6,'0'):c; }
+function texWindows(cols,rows,base,lit){ return ctex(256,256,(x,w,h)=>{ x.fillStyle=css(base); x.fillRect(0,0,w,h); const cw=w/cols,ch=h/rows; for(let i=0;i<cols;i++)for(let j=0;j<rows;j++){ x.fillStyle=lit?(Math.random()<0.6?'#FFE6A6':'#3b3f48'):'#8fb3cc'; x.fillRect(i*cw+cw*0.22,j*ch+ch*0.2,cw*0.56,ch*0.55);} }); }
+function texStripes(){ return ctex(256,64,(x,w,h)=>{ for(let i=0;i<8;i++){ x.fillStyle=i%2?'#111':'#F2C230'; x.fillRect(i*32,0,32,64);} }); }
+function texRoadText(txt){ return ctex(128,384,(x,w,h)=>{ x.clearRect(0,0,w,h); x.fillStyle='#f4f4f4'; x.textAlign='center'; x.textBaseline='middle'; x.font='700 96px '+JFONT; const ch=txt.split('').reverse(); ch.forEach((c,i)=>x.fillText(c,64,70+i*120)); }); }
+function texDiamond(){ return ctex(128,256,(x,w,h)=>{ x.clearRect(0,0,w,h); x.strokeStyle='#f4f4f4'; x.lineWidth=14; x.beginPath(); x.moveTo(64,10); x.lineTo(118,128); x.lineTo(64,246); x.lineTo(10,128); x.closePath(); x.stroke(); }); }
+function texBoard(lines,bg,fg,W,H,size){ return ctex(W||512,H||256,(x,w,h)=>{ x.fillStyle=bg; rr(x,0,0,w,h,18); x.fill(); x.fillStyle=fg; x.textAlign='center'; x.textBaseline='middle'; x.font='700 '+(size||64)+'px '+CFONT; lines.forEach((l,i)=>x.fillText(l,w/2,h/2+(i-(lines.length-1)/2)*(size||64)*1.25)); }); }
+function makeLabel(text,o){ o=o||{}; const bg=o.bg||'rgba(27,31,36,0.92)',fg=o.fg||'#fff',fs=o.size||56; const c=document.createElement('canvas'); c.width=512; c.height=144; const x=c.getContext('2d'); x.fillStyle=bg; rr(x,6,6,500,132,30); x.fill(); x.fillStyle=fg; x.textAlign='center'; x.textBaseline='middle'; let f=fs; x.font='700 '+f+'px '+CFONT; while(f>26&&x.measureText(text).width>468){ f-=2; x.font='700 '+f+'px '+CFONT; } x.fillText(text,256,74); const t=new THREE.CanvasTexture(c); t.encoding=THREE.sRGBEncoding; const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthTest:false})); s.scale.set(o.w||3.4,(o.w||3.4)*144/512,1); s.renderOrder=20; return s; }
+
+/* ---------- world pieces ---------- */
+const ASPH=0x3d4147, WHITE=0xf1f1ec, YEL=0xf0c23b, GRASS=0x7d9c5e, WALK=0xb7bab2, KERB=0x9a9d96;
+function ground(g,night){ const m=mat(night?0x2a3226:GRASS); const p=new THREE.Mesh(new THREE.PlaneGeometry(1100,1100),m); p.rotation.x=-Math.PI/2; p.receiveShadow=true; g.add(p); return p; }
+function roadX(g,x0,x1,z,w,o){ o=o||{}; const len=x1-x0,cx=(x0+x1)/2; g.add(box(len,0.1,w,mat(ASPH),cx,0.05,z,false));
+  const lm=mat(WHITE,{roughness:1}),ym=mat(YEL,{roughness:1});
+  if(o.edges!==false){ g.add(flat(len,0.14,lm,cx,z-w/2+0.2,0.105)); g.add(flat(len,0.14,lm,cx,z+w/2-0.2,0.105)); }
+  if(o.center==='dashed'){ for(let x=x0+1;x<x1-2;x+=6){ if(o.gap&&x+3>o.gap[0]&&x<o.gap[1]) continue; g.add(flat(3,0.14,lm,x+1.5,z,0.105)); } }
+  else if(o.center==='yellow'){ g.add(flat(len,0.16,ym,cx,z,0.105)); }
+  else if(o.center==='white'){ g.add(flat(len,0.16,lm,cx,z,0.105)); }
+  return g; }
+function roadZ(g,z0,z1,x,w,o){ o=o||{}; const len=z1-z0,cz=(z0+z1)/2; g.add(box(w,0.1,len,mat(ASPH),x,0.05,cz,false));
+  const lm=mat(WHITE,{roughness:1}),ym=mat(YEL,{roughness:1});
+  if(o.edges!==false){ g.add(flat(0.14,len,lm,x-w/2+0.2,cz,0.105)); g.add(flat(0.14,len,lm,x+w/2-0.2,cz,0.105)); }
+  if(o.center==='dashed'){ for(let z=z0+1;z<z1-2;z+=6){ if(o.gap&&z+3>o.gap[0]&&z<o.gap[1]) continue; g.add(flat(0.14,3,lm,x,z+1.5,0.105)); } }
+  else if(o.center==='yellow'){ g.add(flat(0.16,len,ym,x,cz,0.105)); }
+  return g; }
+function crosswalkX(g,x,z,w){ const m=mat(WHITE,{roughness:1}); for(let zz=-w/2+0.7;zz<w/2-0.3;zz+=0.9) g.add(flat(3,0.45,m,x,z+zz,0.108)); }
+function crosswalkZ(g,x,z,w){ const m=mat(WHITE,{roughness:1}); for(let xx=-w/2+0.7;xx<w/2-0.3;xx+=0.9) g.add(flat(0.45,3,m,x+xx,z,0.108)); }
+function stopLineX(g,x,z){ g.add(flat(0.35,3.3,mat(WHITE,{roughness:1}),x,z,0.108)); }
+function stopLineZ(g,x,z){ g.add(flat(3.3,0.35,mat(WHITE,{roughness:1}),x,z,0.108)); }
+function roadTextX(g,x,z,dir){ const p=new THREE.Mesh(new THREE.PlaneGeometry(1.3,3.9),new THREE.MeshStandardMaterial({map:texRoadText('止まれ'),transparent:true,roughness:1})); p.rotation.x=-Math.PI/2; p.rotation.z=dir===DIR.E?-Math.PI/2:Math.PI/2; p.position.set(x,0.109,z); g.add(p); }
+function roadTextZ(g,x,z,dir){ const p=new THREE.Mesh(new THREE.PlaneGeometry(1.3,3.9),new THREE.MeshStandardMaterial({map:texRoadText('止まれ'),transparent:true,roughness:1})); p.rotation.x=-Math.PI/2; p.rotation.z=dir===DIR.N?0:Math.PI; p.position.set(x,0.109,z); g.add(p); }
+function diamondX(g,x,z){ const p=new THREE.Mesh(new THREE.PlaneGeometry(1.4,2.8),new THREE.MeshStandardMaterial({map:texDiamond(),transparent:true,roughness:1})); p.rotation.x=-Math.PI/2; p.rotation.z=Math.PI/2; p.position.set(x,0.109,z); g.add(p); }
+function sidewalkBox(g,x0,x1,z0,z1,night){ const w=x1-x0,d=z1-z0; g.add(box(w,0.16,d,mat(night?0x6f7370:WALK),(x0+x1)/2,0.08,(z0+z1)/2,false)); }
+function signPost(tex,o){ o=o||{}; const g=new THREE.Group(); const h=o.height||2.9,s=o.size||1.05; g.add(cyl(0.05,0.05,h,mat(0x8d9299),0,h/2,0,8)); const f=new THREE.Mesh(new THREE.PlaneGeometry(s,s),new THREE.MeshStandardMaterial({map:tex,transparent:true,roughness:0.55,side:THREE.DoubleSide})); f.position.y=h-s/2-0.05; f.castShadow=true; g.add(f); if(o.sub){ const b=new THREE.Mesh(new THREE.PlaneGeometry(s,s*0.32),new THREE.MeshStandardMaterial({map:o.sub,roughness:0.55,side:THREE.DoubleSide})); b.position.y=h-s-0.25; g.add(b);} return g; }
+function faceTo(obj,dir){ obj.rotation.y=dir; } // for sign posts: dir is the direction the FRONT faces
+const FACE={toE:Math.PI/2,toW:-Math.PI/2,toN:Math.PI,toS:0}; // direction the sign FRONT faces (plane normal is +Z at rotation 0)
+function tree(g,x,z,s,night){ s=s||1; const t=cyl(0.12*s,0.16*s,1.2*s,mat(0x6b4a2f),x,0.6*s,z,7); g.add(t); const c=night?0x2f4a33:0x4f8a4a; const a=new THREE.Mesh(new THREE.SphereGeometry(1.1*s,10,8),mat(c)); a.position.set(x,1.9*s,z); a.castShadow=true; g.add(a); const b=new THREE.Mesh(new THREE.SphereGeometry(0.8*s,10,8),mat(c)); b.position.set(x+0.5*s,2.5*s,z-0.3*s); b.castShadow=true; g.add(b); }
+function pole(g,x,z,night){ g.add(cyl(0.12,0.16,8.5,mat(0x8a8f96),x,4.25,z,8)); g.add(box(1.8,0.12,0.12,mat(0x8a8f96),x,7.9,z)); g.add(box(1.4,0.1,0.1,mat(0x8a8f96),x,7.2,z)); const c=cyl(0.09,0.09,0.32,mat(0xdedad0),x+0.7,8.05,z,6); g.add(c); const c2=cyl(0.09,0.09,0.32,mat(0xdedad0),x-0.7,8.05,z,6); g.add(c2); if(night){ const lamp=box(0.5,0.14,0.28,mat(0xdddddd,{emissive:0xffe3b0,emissiveIntensity:1.2}),x+0.9,6.6,z); g.add(lamp); const l=new THREE.PointLight(0xffd9a0,1.1,22,1.6); l.position.set(x+0.9,6.4,z); g.add(l);} }
+function wires(g,pts){ const m=new THREE.LineBasicMaterial({color:0x2b2e33}); for(let i=0;i<pts.length-1;i++){ const a=pts[i],b=pts[i+1]; const geo=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(a[0]+0.7,8.05,a[1]),new THREE.Vector3((a[0]+b[0])/2+0.7,7.7,(a[1]+b[1])/2),new THREE.Vector3(b[0]+0.7,8.05,b[1])]); g.add(new THREE.Line(geo,m)); } }
+function building(g,x,z,w,d,h,color,night,cols,rows){ const t=texWindows(cols||Math.max(2,Math.round(w/2.2)),rows||Math.max(1,Math.round(h/2.6)),color,night); const m=new THREE.MeshStandardMaterial({map:t,roughness:0.9}); const b=box(w,h,d,[m,m,mat(color),mat(color),m,m],x,h/2,z); g.add(b); return b; }
+function house(g,x,z,w,d,h,color,roof,night){ g.add(box(w,h,d,mat(color),x,h/2,z)); const r=new THREE.Mesh(new THREE.ConeGeometry(Math.max(w,d)*0.78,h*0.55,4),mat(roof||0x5a6675)); r.position.set(x,h+h*0.27,z); r.rotation.y=Math.PI/4; r.castShadow=true; g.add(r); if(night){ g.add(box(0.7,0.7,0.05,mat(0xffe6a6,{emissive:0xffe0a0,emissiveIntensity:1.1}),x-w*0.25,h*0.55,z+d/2+0.03,false)); } }
+function konbini(g,x,z,night){ const w=9,d=7,h=3.4; g.add(box(w,h,d,mat(0xf4f4f0),x,h/2,z)); const strip=box(w+0.4,0.8,0.25,mat(0x1a56a6),x,h-0.5,z+d/2+0.1); g.add(strip); const t=texBoard(['STORE  24h'],'#ffffff','#1a56a6',512,128,60); const s=new THREE.Mesh(new THREE.PlaneGeometry(6,1.4),new THREE.MeshStandardMaterial({map:t,emissive:night?0xffffff:0x000000,emissiveMap:t,emissiveIntensity:night?0.9:0})); s.position.set(x,h+0.9,z+d/2+0.02); g.add(s); g.add(box(w-1,h-1,0.05,mat(0x9fc3d8,{emissive:night?0xfff3d0:0x000000,emissiveIntensity:night?0.9:0}),x,(h-1)/2,z+d/2+0.03,false)); if(night){ const l=new THREE.PointLight(0xfff0c8,1.4,18,1.5); l.position.set(x,2.8,z+d/2+2); g.add(l);} }
+function fuji(g){ const m=new THREE.Mesh(new THREE.ConeGeometry(120,70,24),mat(0x6d7fa5,{fog:true})); m.position.set(-40,35,-330); g.add(m); const cap=new THREE.Mesh(new THREE.ConeGeometry(34,20,24),mat(0xf2f4f6)); cap.position.set(-40,60,-330); g.add(cap); for(const [x,z,r,h] of [[-180,-260,80,26],[120,-290,90,30],[220,-240,60,18],[-260,-200,70,22]]){ const hh=new THREE.Mesh(new THREE.SphereGeometry(r,12,8),mat(0x7d9078)); hh.position.set(x,-r+h,z); hh.scale.y=0.6; g.add(hh);} }
+
+/* ---------- town (intersection) ---------- */
+function buildTown(g,o){
+  o=o||{}; const night=!!o.night; const W=7;
+  ground(g,night); fuji(g);
+  roadX(g,-70,70,0,W,{center:o.mainCenter||'dashed',gap:[-4,4]});
+  roadZ(g,-70,70,0,W,{center:o.sideCenter||'dashed',gap:[-4,4]});
+  g.add(box(W,0.1,W,mat(ASPH),0,0.05,0,false));
+  // corner sidewalks
+  for(const sx of [-1,1]) for(const sz of [-1,1]){ sidewalkBox(g,sx>0?3.5:-60,sx>0?60:-3.5,sz>0?3.5:-5.5,sz>0?5.5:-3.5,night); sidewalkBox(g,sx>0?3.5:-5.5,sx>0?5.5:-3.5,sz>0?5.5:-60,sz>0?60:-5.5,night); }
+  // crosswalks on each arm
+  crosswalkX(g,-7,0,W); crosswalkX(g,7,0,W); crosswalkZ(g,0,-7,W); crosswalkZ(g,0,7,W);
+  if(o.stops){ // stop signs for the side road (N and S approaches)
+    stopLineZ(g,-1.75,9); stopLineZ(g,1.75,-9); roadTextZ(g,-1.75,12.5,DIR.N); roadTextZ(g,1.75,-12.5,DIR.S);
+    const s1=signPost(texStop()); s1.position.set(-4.4,0.16,9.6); s1.rotation.y=FACE.toS; g.add(s1);
+    const s2=signPost(texStop()); s2.position.set(4.4,0.16,-9.6); s2.rotation.y=FACE.toN; g.add(s2);
+  }
+  if(o.diamonds){ diamondX(g,-20,-1.75); diamondX(g,-28,-1.75); }
+  const sig={};
+  if(o.signals){ sig.ew=[]; sig.ns=[];
+    const mk=(px,pz,armAxis,armSign,hx,hz,yaw,arr)=>{ const u=makeSignalUnit(px,pz,armAxis,armSign,hx,hz,yaw); g.add(u.g); arr.push(u); };
+    mk(7,-6.5,'z',1,7,-1.9,Math.PI,sig.ew);  // for eastbound (front faces -X)
+    mk(-7,6.5,'z',-1,-7,1.9,0,sig.ew);       // for westbound (front faces +X)
+    mk(6.5,-7,'x',-1,1.9,-7,-Math.PI/2,sig.ns); // for northbound (front faces +Z)
+    mk(-6.5,7,'x',1,-1.9,7,Math.PI/2,sig.ns);   // for southbound (front faces -Z)
+  }
+  // buildings
+  if(o.buildings!==false){
+    konbini(g,14,-13,night);
+    building(g,-16,-16,10,8,9,night?0x5a5f66:0xd9d6cf,night);
+    building(g,-30,-14,8,8,12,night?0x565a61:0xc9ccd2,night);
+    house(g,-14,15,7,6,3.2,night?0x7c7466:0xe8e0d0,0x4c5866,night);
+    house(g,-25,17,6,6,3,night?0x6f6b62:0xd8d0c4,0x6e4c46,night);
+    house(g,16,16,7,6,3.4,night?0x77716a:0xf0e9dc,0x53606e,night);
+    house(g,27,15,6,7,3,night?0x6e6a64:0xd4cdc1,0x445064,night);
+    building(g,30,-15,9,9,7,night?0x585c63:0xd0cdc6,night);
+    house(g,-36,16,6,6,3,night?0x736f68:0xe2dacd,0x5b5a63,night);
+    tree(g,-9,-9,1.1,night); tree(g,9,10,1,night); tree(g,-11,11,0.9,night); tree(g,22,10,1.2,night); tree(g,-40,-9,1.3,night); tree(g,40,10,1.1,night);
+    const P=[[-45,-6.4],[-27,-6.4],[-9,-6.4],[9,-6.4],[27,-6.4],[45,-6.4]]; P.forEach(p=>pole(g,p[0],p[1],night)); wires(g,P);
+    const Q=[[6.4,12],[6.4,30],[6.4,48]]; Q.forEach(p=>pole(g,p[0],p[1],night));
+  }
+  const api={g,sig, set(dir,state,arrow){ (sig[dir]||[]).forEach(u=>u.set(state,arrow)); }};
+  if(o.signals){ api.set('ew','g'); api.set('ns','r'); }
+  return api;
+}
+function makeSignalUnit(px,pz,armAxis,armSign,hx,hz,yaw){
+  const g=new THREE.Group(); const pm=mat(0x8a8f96);
+  g.add(cyl(0.12,0.14,6,pm,px,3,pz,8));
+  const len=Math.abs(armAxis==='z'?hz-pz:hx-px);
+  const arm=box(armAxis==='x'?len:0.12,0.12,armAxis==='z'?len:0.12,pm,armAxis==='x'?(px+hx)/2:px,5.6,armAxis==='z'?(pz+hz)/2:pz); g.add(arm);
+  const head=new THREE.Group(); head.position.set(hx,5.15,hz); head.rotation.y=yaw;
+  head.add(box(1.5,0.5,0.34,mat(0x2c3136),0,0,0));
+  head.add(box(1.55,0.12,0.5,mat(0x2c3136),0,0.3,0.05));
+  const lamps={}; const mkLamp=(z,col,key)=>{ const m=new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.16,0.08,16),mat(col,{emissive:col,emissiveIntensity:0.08})); m.rotation.z=Math.PI/2; m.position.set(0.2,0,z); head.add(m); lamps[key]=m; };
+  mkLamp(0.46,0x1fb56b,'g'); mkLamp(0,0xf0c23b,'y'); mkLamp(-0.46,0xe02b2b,'r');
+  const ar=new THREE.Mesh(new THREE.PlaneGeometry(0.34,0.3),new THREE.MeshStandardMaterial({map:texBoard(['→'],'#111','#1fb56b',128,128,96),transparent:true,emissive:0xffffff,emissiveIntensity:0,side:THREE.DoubleSide})); ar.rotation.y=Math.PI/2; ar.position.set(0.22,-0.42,0); ar.visible=false; head.add(ar);
+  g.add(head);
+  return {g,set(state,arrow){ for(const k in lamps) lamps[k].material.emissiveIntensity=(k===state)?1.6:0.06; ar.visible=!!arrow; ar.material.emissiveIntensity=arrow?0.9:0; }};
+}
+
+/* ---------- vehicles & people ---------- */
+function makeCar(color,o){
+  o=o||{}; const g=new THREE.Group(); const bm=o.seeThrough?mat(color,{roughness:0.55,transparent:true,opacity:0.32,depthWrite:false}):mat(color,{roughness:0.55,metalness:0.1});
+  g.add(box(4.2,0.62,1.82,bm,0,0.6,0));
+  const cm=o.seeThrough?mat(color,{roughness:0.55,transparent:true,opacity:0.3,depthWrite:false}):bm;
+  g.add(box(2.3,0.58,1.66,cm,-0.25,1.18,0));
+  const glass=mat(0x27323f,{roughness:0.25,metalness:0.3,transparent:!!o.seeThrough,opacity:o.seeThrough?0.18:1,depthWrite:!o.seeThrough});
+  g.add(box(2.34,0.4,1.7,glass,-0.25,1.2,0));
+  g.add(box(0.5,0.1,1.4,cm,-0.25,1.48,0));
+  const wg=new THREE.CylinderGeometry(0.36,0.36,0.3,16); wg.rotateX(Math.PI/2); const wm=mat(0x1e2124);
+  const wheels=[]; [[1.35,0.9],[1.35,-0.9],[-1.35,0.9],[-1.35,-0.9]].forEach(([x,z])=>{ const w=new THREE.Mesh(wg,wm); w.position.set(x,0.36,z); w.castShadow=true; g.add(w); wheels.push(w); });
+  const hl=mat(0xfff8e6,{emissive:0xfff2cc,emissiveIntensity:0.5}); g.add(box(0.1,0.2,0.4,hl,2.1,0.66,0.6,false)); g.add(box(0.1,0.2,0.4,hl,2.1,0.66,-0.6,false));
+  const tl=mat(0x9a1010,{emissive:0xff2a2a,emissiveIntensity:0.35}); g.add(box(0.1,0.18,0.4,tl,-2.1,0.66,0.6,false)); g.add(box(0.1,0.18,0.4,tl,-2.1,0.66,-0.6,false));
+  const mkB=(x,z)=>{ const b=box(0.1,0.13,0.22,mat(0xd88a1a,{emissive:0xffa726,emissiveIntensity:0}),x,0.8,z,false); g.add(b); return b; };
+  const blink={left:[mkB(2.08,-0.88),mkB(-2.08,-0.88)],right:[mkB(2.08,0.88),mkB(-2.08,0.88)]};
+  g.userData={wheels,tail:tl,head:hl,blink,prev:null,speed:0,brake:false,blinkMode:null,beam:null,beamCone:null};
+  if(o.mark){ const t=o.mark==='wakaba'?texWakaba():texKoreisha(); const pm=new THREE.MeshStandardMaterial({map:t,transparent:true,roughness:0.6,side:THREE.DoubleSide}); const p1=new THREE.Mesh(new THREE.PlaneGeometry(0.38,0.38),pm); p1.rotation.y=-Math.PI/2; p1.position.set(-2.12,0.95,0.55); g.add(p1); const p2=new THREE.Mesh(new THREE.PlaneGeometry(0.38,0.38),pm); p2.rotation.y=Math.PI/2; p2.position.set(2.12,0.95,-0.55); g.add(p2); }
+  if(o.taxi){ const s=new THREE.Mesh(new THREE.BoxGeometry(0.8,0.28,0.3),mat(0xffffff,{emissive:0xfff2cc,emissiveIntensity:0.4})); s.position.set(-0.2,1.7,0); g.add(s); }
+  if(o.headlights){ addBeam(g,o.headlights==='high'); }
+  return g;
+}
+function addBeam(car,high){
+  const s=new THREE.SpotLight(0xfff0cc,high?7:4.5,high?80:38,high?0.38:0.48,0.6,1); s.position.set(2,0.8,0); const tg=new THREE.Object3D(); tg.position.set(30,-1.2,0); car.add(tg); s.target=tg; car.add(s);
+  const cg=new THREE.ConeGeometry(high?4.2:2.8,high?30:14,18,1,true); cg.rotateZ(Math.PI/2); cg.translate(high?17:9,0,0);
+  const cm=new THREE.MeshBasicMaterial({color:0xfff1c8,transparent:true,opacity:0.045,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending});
+  const cone=new THREE.Mesh(cg,cm); cone.position.set(2,0.7,0); car.add(cone);
+  car.userData.beam=s; car.userData.beamCone=cone; car.userData.high=high;
+}
+function setBeam(car,high){ const u=car.userData; if(!u.beam||u.high===high) return; u.high=high; u.beam.intensity=high?7:4.5; u.beam.distance=high?80:38; u.beam.angle=high?0.38:0.48; car.remove(u.beamCone); u.beamCone.geometry.dispose(); const cg=new THREE.ConeGeometry(high?4.2:2.8,high?30:14,18,1,true); cg.rotateZ(Math.PI/2); cg.translate(high?17:9,0,0); u.beamCone=new THREE.Mesh(cg,u.beamCone.material); u.beamCone.position.set(2,0.7,0); car.add(u.beamCone); }
+function makeTruck(color){ const g=new THREE.Group(); const bm=mat(color||0xf2f2ee,{roughness:0.6}); g.add(box(2.6,2.2,2.4,bm,2.6,1.5,0)); g.add(box(2.64,0.9,2.44,mat(0x27323f,{roughness:0.3}),2.62,2.0,0)); g.add(box(6.6,2.9,2.4,mat(0xdedbd3),-2.2,1.95,0)); g.add(box(9.8,0.5,2.2,mat(0x33363b),0,0.5,0)); const wg=new THREE.CylinderGeometry(0.5,0.5,0.4,16); wg.rotateX(Math.PI/2); const wm=mat(0x1e2124); const wheels=[]; [[3.2,1.05],[3.2,-1.05],[-1.4,1.05],[-1.4,-1.05],[-3.2,1.05],[-3.2,-1.05]].forEach(([x,z])=>{ const w=new THREE.Mesh(wg,wm); w.position.set(x,0.5,z); w.castShadow=true; g.add(w); wheels.push(w); }); g.userData={wheels,prev:null,speed:0,blink:{left:[],right:[]},tail:mat(0x9a1010),blinkMode:null}; g.add(box(0.1,0.3,0.5,mat(0xfff8e6,{emissive:0xfff2cc,emissiveIntensity:0.5}),3.9,1.0,0.8,false)); g.add(box(0.1,0.3,0.5,mat(0xfff8e6,{emissive:0xfff2cc,emissiveIntensity:0.5}),3.9,1.0,-0.8,false)); return g; }
+function makeAmbulance(){ const g=makeCar(0xf6f6f2); g.add(box(2.6,1.05,1.86,mat(0xf6f6f2,{roughness:0.55}),-0.6,1.75,0)); g.add(box(4.2,0.18,1.9,mat(0xd2202a),0,0.75,0)); g.add(box(2.6,0.16,1.9,mat(0xd2202a),-0.6,1.7,0)); const light=new THREE.Mesh(new THREE.BoxGeometry(1.1,0.22,0.5),mat(0xd2202a,{emissive:0xff2020,emissiveIntensity:1.5})); light.position.set(-0.2,2.4,0); g.add(light); const pl=new THREE.PointLight(0xff2020,1.6,18,1.4); pl.position.set(-0.2,2.6,0); g.add(pl); g.userData.siren={light,pl}; return g; }
+function makePerson(color,o){ o=o||{}; const g=new THREE.Group(); const s=o.scale||1; const body=cyl(0.2*s,0.26*s,0.72*s,mat(color),0,0.98*s,0,10); g.add(body); const head=new THREE.Mesh(new THREE.SphereGeometry(0.19*s,12,10),mat(0xf0c9a3)); head.position.y=1.52*s; head.castShadow=true; g.add(head); const lm=mat(0x33363d); const l1=cyl(0.09*s,0.09*s,0.62*s,lm,0,0.31*s,0.11*s,8),l2=cyl(0.09*s,0.09*s,0.62*s,lm,0,0.31*s,-0.11*s,8); g.add(l1,l2); g.userData={legs:[l1,l2],phase:Math.random()*6,s}; return g; }
+function walk(p,moving,dt){ const u=p.userData; if(moving){ u.phase+=dt*7; u.legs[0].rotation.z=Math.sin(u.phase)*0.55; u.legs[1].rotation.z=-Math.sin(u.phase)*0.55; p.position.y=Math.abs(Math.sin(u.phase))*0.04; } else { u.legs[0].rotation.z=0; u.legs[1].rotation.z=0; p.position.y=0; } }
+function makeBike(color){ const g=new THREE.Group(); const wg=new THREE.TorusGeometry(0.34,0.035,8,24); const wm=mat(0x22262b); const w1=new THREE.Mesh(wg,wm); w1.position.set(0.55,0.36,0); const w2=new THREE.Mesh(wg,wm); w2.position.set(-0.55,0.36,0); w1.castShadow=w2.castShadow=true; g.add(w1,w2); const fm=mat(color||0x2f6db3); const f=box(1.0,0.06,0.06,fm,0,0.62,0); f.rotation.z=0.35; g.add(f); g.add(box(0.06,0.5,0.06,fm,-0.15,0.7,0)); g.add(box(0.06,0.55,0.06,fm,0.45,0.72,0)); g.add(box(0.06,0.06,0.5,fm,0.5,1.02,0)); const r=makePerson(0xd95a2b,{scale:0.9}); r.position.set(-0.1,0.5,0); r.userData.legs.forEach(l=>{l.rotation.z=0.9;}); g.add(r); g.userData={wheels:[w1,w2],rider:r,prev:null,speed:0,blink:{left:[],right:[]},blinkMode:null}; return g; }
+function makeTrain(){ const g=new THREE.Group(); for(let i=0;i<3;i++){ const z=i*19; g.add(box(2.9,3.3,18.6,mat(0xe9ecef,{roughness:0.5}),0,1.95,z)); g.add(box(2.94,0.55,18.6,mat(0x1e9e62),0,1.45,z)); g.add(box(2.96,0.9,17.6,mat(0x27323f,{roughness:0.3}),0,2.55,z)); g.add(box(2.4,0.25,18.6,mat(0xb8bcc2),0,3.7,z)); } g.add(box(2.9,3.3,0.3,mat(0x1e9e62),0,1.95,-9.45)); const hl=mat(0xfff8e6,{emissive:0xffffff,emissiveIntensity:1}); g.add(box(0.5,0.4,0.1,hl,-0.8,0.9,-9.5,false)); g.add(box(0.5,0.4,0.1,hl,0.8,0.9,-9.5,false)); return g; }
+function makeCrossing(g,x,night){ // tracks along Z crossing road at x
+  const rm=mat(0x5a5e63,{metalness:0.4,roughness:0.5}); g.add(box(0.14,0.12,140,rm,x-0.75,0.13,0,false)); g.add(box(0.14,0.12,140,rm,x+0.75,0.13,0,false));
+  const sm=mat(0x6b5541); for(let z=-70;z<70;z+=0.9){ if(Math.abs(z)<4.2) continue; g.add(box(2.3,0.1,0.26,sm,x,0.06,z,false)); }
+  g.add(box(2.6,0.11,8.4,mat(0x4a4e54),x,0.055,0,false));
+  const st=texStripes();
+  const units=[]; const mk=(ux,uz,dirZ)=>{ const u=new THREE.Group(); u.position.set(ux,0,uz); const pm=mat(0x8a8f96); u.add(cyl(0.07,0.07,3.6,pm,0,1.8,0,8));
+    const xm=new THREE.MeshStandardMaterial({map:st,roughness:0.6}); const b1=box(1.5,0.24,0.06,xm,0,3.4,0); b1.rotation.z=0.6; const b2=box(1.5,0.24,0.06,xm,0,3.4,0); b2.rotation.z=-0.6; u.add(b1,b2);
+    const lm=mat(0xa01010,{emissive:0xff2020,emissiveIntensity:0.05}); const L1=new THREE.Mesh(new THREE.SphereGeometry(0.14,10,8),lm),L2=new THREE.Mesh(new THREE.SphereGeometry(0.14,10,8),lm.clone()); L1.position.set(-0.4,2.55,0.1); L2.position.set(0.4,2.55,0.1); u.add(L1,L2); u.add(box(1.2,0.5,0.1,mat(0x2c3136),0,2.55,0));
+    const pivot=new THREE.Group(); pivot.position.set(0.18,1.15,0); const arm=box(0.09,0.09,4.6,new THREE.MeshStandardMaterial({map:st,roughness:0.6}),0,0,dirZ*2.3); pivot.add(arm); pivot.rotation.x=-dirZ*Math.PI/2; u.add(pivot);
+    g.add(u); units.push({u,L1,L2,pivot,dirZ}); };
+  mk(x-3.4,-4.6,1); mk(x+3.4,4.6,-1);
+  stopLineX(g,x-6.2,-1.75); stopLineX(g,x+6.2,1.75);
+  const w1=signPost(texRailWarn(),{size:1.0}); w1.position.set(x-26,0.16,-4.6); w1.rotation.y=FACE.toW; g.add(w1);
+  const w2=signPost(texRailWarn(),{size:1.0}); w2.position.set(x+26,0.16,4.6); w2.rotation.y=FACE.toE; g.add(w2);
+  return {units, set(down,flash,time){ units.forEach(u=>{ u.pivot.rotation.x=-u.dirZ*Math.PI/2*(1-down); const on=flash&&(Math.floor(time*2)%2===0); u.L1.material.emissiveIntensity=flash?(on?1.8:0.05):0.05; u.L2.material.emissiveIntensity=flash?(on?0.05:1.8):0.05; }); }};
+}
+function makeHighway(g,o){ o=o||{}; const night=!!o.night; if(!o.noGround){ ground(g,night); fuji(g); }
+  const L0=o.L0!==undefined?o.L0:-110,L1=o.L1!==undefined?o.L1:110,CX=(L0+L1)/2; g.add(box(L1-L0,0.1,10.5,mat(ASPH),CX,0.05,-5.75,false)); g.add(box(L1-L0,0.1,10.5,mat(ASPH),CX,0.05,5.75,false));
+  g.add(box(L1-L0,0.1,3,mat(0x4a4e54),CX,0.05,-12.5,false)); g.add(box(L1-L0,0.1,3,mat(0x4a4e54),CX,0.05,12.5,false));
+  const lm=mat(WHITE,{roughness:1}); for(const z of [-11,-0.5,0.5,11]) g.add(flat(L1-L0,0.16,lm,CX,z,0.105));
+  for(const z of [-4,-7.5,4,7.5]) for(let x=L0+2;x<L1-4;x+=8) g.add(flat(4,0.15,lm,x+2,z,0.105));
+  g.add(box(L1-L0,0.9,0.5,mat(0xc9cbcf),CX,0.45,0)); // median barrier
+  const gm=mat(0xdcdedf,{metalness:0.4,roughness:0.5}); g.add(box(L1-L0,0.28,0.08,gm,CX,0.75,-14.2)); g.add(box(L1-L0,0.28,0.08,gm,CX,0.75,14.2)); for(let x=L0;x<L1;x+=6){ g.add(box(0.1,0.7,0.1,gm,x,0.35,-14.2,false)); g.add(box(0.1,0.7,0.1,gm,x,0.35,14.2,false)); }
+  if(o.ramp!==false){ // acceleration lane merging from the left for eastbound (z=-14.5 side)
+    g.add(box(60,0.1,3.5,mat(ASPH),-40,0.05,-12.75,false)); const rg=new THREE.Shape(); rg.moveTo(-70,-14.5); rg.lineTo(-78,-14.5); rg.lineTo(-92,-22); rg.lineTo(-88,-24); rg.lineTo(-70,-15.5); const rm=new THREE.Mesh(new THREE.ShapeGeometry(rg),mat(ASPH)); rm.rotation.x=-Math.PI/2; rm.position.y=0.1; rm.scale.z=-1; g.add(rm);
+    g.add(box(24,0.1,3.5,mat(ASPH),-90,0.05,-24,false)); for(let x=-70;x<-12;x+=4) g.add(flat(2,0.15,lm,x,-11,0.106));
+    g.add(flat(60,0.14,lm,-40,-14.4,0.106));
+    const tri=new THREE.Shape(); tri.moveTo(-14,-11); tri.lineTo(-2,-11); tri.lineTo(-14,-14.5); const tm=new THREE.Mesh(new THREE.ShapeGeometry(tri),mat(ASPH)); tm.rotation.x=-Math.PI/2; tm.position.y=0.1; tm.scale.z=-1; g.add(tm);
+  }
+  // gantry sign
+  const gt=texBoard(['出口 EXIT  1km','↑ 東京 Tokyo'],'#0f7a4d','#fff',768,256,58); const sg=new THREE.Group(); sg.position.set(o.signX!==undefined?o.signX:30,0,0); sg.add(cyl(0.18,0.2,7.5,mat(0x8a8f96),0,3.75,-13.5,8)); sg.add(cyl(0.18,0.2,7.5,mat(0x8a8f96),0,3.75,0.6,8)); sg.add(box(0.3,0.3,14.4,mat(0x8a8f96),0,7.4,-6.5)); const bd=new THREE.Mesh(new THREE.PlaneGeometry(7.5,2.5),new THREE.MeshStandardMaterial({map:gt,roughness:0.5,side:THREE.DoubleSide})); bd.rotation.y=-Math.PI/2; bd.position.set(-0.2,6.2,-6.5); sg.add(bd); g.add(sg);
+  for(let x=L0+10;x<L1-10;x+=26){ tree(g,x,-24-((x/26|0)%3)*3,1.3+((x/26|0)%2)*0.4,night); tree(g,x+12,26+((x/26|0)%2)*4,1.5,night); }
+  house(g,60,30,8,7,3.4,0xe8e0d0,0x4c5866,night); house(g,-40,34,7,6,3,0xd8d0c4,0x6e4c46,night); building(g,90,-30,12,10,9,0xd9d6cf,night);
+}
+function makeRoundabout(g,o){ o=o||{}; const night=!!o.night; ground(g,night); fuji(g);
+  const ring=new THREE.Mesh(new THREE.RingGeometry(6.5,13,64),mat(ASPH)); ring.rotation.x=-Math.PI/2; ring.position.y=0.1; ring.receiveShadow=true; g.add(ring);
+  const isl=cyl(6.5,6.5,0.4,mat(0x9fb37e),0,0.2,0,48); g.add(isl); g.add(cyl(6.9,6.9,0.25,mat(KERB),0,0.12,0,48)); tree(g,0,0,1.6,night);
+  const lm=mat(WHITE,{roughness:1}); const edge=new THREE.Mesh(new THREE.RingGeometry(12.7,12.9,64),lm); edge.rotation.x=-Math.PI/2; edge.position.y=0.106; g.add(edge);
+  roadX(g,-70,-12,0,7,{center:'dashed',gap:[-16,-12]}); roadX(g,12,70,0,7,{center:'dashed',gap:[12,16]}); roadZ(g,-70,-12,0,7,{center:'dashed',gap:[-16,-12]}); roadZ(g,12,70,0,7,{center:'dashed',gap:[12,16]});
+  // yield markings at entries (small triangles)
+  const tm=mat(WHITE,{roughness:1}); const tri=(x,z,rot)=>{ const s=new THREE.Shape(); s.moveTo(-0.35,0); s.lineTo(0.35,0); s.lineTo(0,0.8); const m=new THREE.Mesh(new THREE.ShapeGeometry(s),tm); m.rotation.x=-Math.PI/2; m.rotation.z=rot; m.position.set(x,0.108,z); g.add(m); };
+  for(let i=0;i<3;i++){ tri(-1.75-0.9+i*0.9,13.2,0); tri(1.75-0.9+i*0.9,-13.2,Math.PI); tri(13.2,-1.75-0.9+i*0.9,Math.PI/2); tri(-13.2,1.75-0.9+i*0.9,-Math.PI/2); }
+  const sp=[[-4.5,14.5,FACE.toS],[4.5,-14.5,FACE.toN],[14.5,4.5,FACE.toE],[-14.5,-4.5,FACE.toW]]; sp.forEach(([x,z,r])=>{ const s=signPost(texRound(),{size:0.95}); s.position.set(x,0.16,z); s.rotation.y=r; g.add(s); });
+  house(g,22,22,7,6,3.2,0xe8e0d0,0x4c5866,night); house(g,-24,-22,6,6,3,0xd8d0c4,0x6e4c46,night); house(g,-22,24,7,6,3.4,0xf0e9dc,0x53606e,night); building(g,26,-24,10,8,8,0xd9d6cf,night);
+  tree(g,-18,18,1.2,night); tree(g,18,-18,1.1,night); tree(g,20,10,1,night); tree(g,-16,-16,1.3,night);
+}
+function izakaya(g,x,z,night){ const w=10,d=8,h=4; g.add(box(w,h,d,mat(0x5b4636),x,h/2,z)); const r=box(w+1,0.5,d+1,mat(0x2e2a30),x,h+0.2,z); g.add(r); const t=texBoard(['居酒屋'],'#2b1d17','#ffd27a',512,192,110); const s=new THREE.Mesh(new THREE.PlaneGeometry(4.5,1.7),new THREE.MeshStandardMaterial({map:t,emissive:0xffffff,emissiveMap:t,emissiveIntensity:night?0.8:0})); s.position.set(x,h-1.1,z+d/2+0.03); g.add(s); for(const dx of [-3.5,3.5]){ const l=new THREE.Mesh(new THREE.SphereGeometry(0.4,12,10),mat(0xd2202a,{emissive:0xff4a2a,emissiveIntensity:night?1.4:0.2})); l.position.set(x+dx,2.2,z+d/2+0.5); l.scale.y=1.3; g.add(l);} const door=box(1.6,2.4,0.06,mat(0xf3d9a4,{emissive:night?0xffe2a8:0x000000,emissiveIntensity:night?0.8:0}),x,1.2,z+d/2+0.03,false); g.add(door); if(night){ const pl=new THREE.PointLight(0xffb070,1.6,16,1.5); pl.position.set(x,2.5,z+d/2+2); g.add(pl);} }
+
+/* ---------- per-frame vehicle dynamics ---------- */
+function tickVehicle(v,dt,time){
+  const u=v.userData; if(!u) return;
+  const p=v.position; if(u.prev){ const dist=p.distanceTo(u.prev); if(dist>8||dt<=0){ u.prev.copy(p); u.speed=0; return; } const sp=dist/dt; if(u.wheels){ const r=u.wheels[0].geometry.parameters?u.wheels[0].geometry.parameters.radiusTop||0.36:0.36; u.wheels.forEach(w=>{ w.rotation.z-=dist/r; }); }
+    const decel=(u.speed-sp)/Math.max(dt,0.001); u.brake=(sp>0.3&&decel>0.8)||(u.forceBrake&&sp>0.05); if(u.tail) u.tail.emissiveIntensity=u.brake?2.4:0.35; u.speed=sp; } else u.prev=new THREE.Vector3();
+  u.prev.copy(p);
+  if(u.blink){ const on=(time%0.8)<0.4; const m=u.blinkMode; u.blink.left.forEach(b=>b.material.emissiveIntensity=(m==='left'||m==='hazard')&&on?2.2:0); u.blink.right.forEach(b=>b.material.emissiveIntensity=(m==='right'||m==='hazard')&&on?2.2:0); }
+  if(u.siren){ const on=(time%0.5)<0.25; u.siren.light.material.emissiveIntensity=on?2.2:0.4; u.siren.pl.intensity=on?2.2:0.4; }
+}
+
+/* ===================== CHAPTER SCENES ===================== */
+let VEH=[],PEOPLE=[];
+const BUILD={};
+function hudSet(n,unit,warn){ const h=$('#hud'); h.classList.add('on'); h.classList.toggle('warn',!!warn); $('#hudNum').textContent=n; $('#hudUnit').textContent=unit||'km/h'; }
+function hudHide(){ $('#hud').classList.remove('on'); }
+function bez(p0,p1,p2,u){ const a=(1-u)*(1-u),b=2*(1-u)*u,c=u*u; return [a*p0[0]+b*p1[0]+c*p2[0],a*p0[1]+b*p1[1]+c*p2[1]]; }
+function bezDir(p0,p1,p2,u){ return [2*(1-u)*(p1[0]-p0[0])+2*u*(p2[0]-p1[0]),2*(1-u)*(p1[1]-p0[1])+2*u*(p2[1]-p1[1])]; }
+function placeBez(obj,p0,p1,p2,u){ const p=bez(p0,p1,p2,u),d=bezDir(p0,p1,p2,u); obj.position.x=p[0]; obj.position.z=p[1]; if(Math.abs(d[0])+Math.abs(d[1])>1e-4) heading(obj,d[0],d[1]); }
+function steer(obj,x,z){ const u=obj.userData; if(u.lx!==undefined){ const dx=x-u.lx,dz=z-u.lz; if(Math.abs(dx)+Math.abs(dz)>1e-4) heading(obj,dx,dz); } u.lx=x; u.lz=z; obj.position.x=x; obj.position.z=z; }
+function lerpCam(a,b,u){ return {pos:[0,1,2].map(i=>a.pos[i]+(b.pos[i]-a.pos[i])*u),look:[0,1,2].map(i=>a.look[i]+(b.look[i]-a.look[i])*u)}; }
+const _wp=new THREE.Vector3();
+function follow(obj,off,lo){ obj.getWorldPosition(_wp); return {pos:[_wp.x+off[0],_wp.y+off[1],_wp.z+off[2]],look:[_wp.x+lo[0],_wp.y+lo[1],_wp.z+lo[2]]}; }
+function blendWin(t,t0,t1,a,b){ if(t<=t0) return a; if(t>=t1) return b; return lerpCam(a,b,smooth((t-t0)/(t1-t0))); }
+const RED='rgba(200,36,44,0.95)', YELB='rgba(240,194,59,0.96)';
+
+/* 1 — keep left */
+BUILD.left=function(){
+  setEnv('day'); const g=stage; buildTown(g,{});
+  const a=makeCar(0x2f6db3),b=makeCar(0xf2f2ee); g.add(a,b); VEH.push(a,b);
+  const ped=makePerson(0xd95a2b); g.add(ped); PEOPLE.push(ped);
+  const lab=makeLabel('運転席 · driver seat',{w:3.6}),lab2=makeLabel('右側を歩く · walk on the right',{w:5}); g.add(lab,lab2);
+  return {dur:15,chip:{en:'Suburban street · day',ja:'住宅街の道路・昼'},
+    update(t,dt){
+      const ax=kf(t,[[0,-50],[15,44]]); a.position.set(ax,0,-1.75); a.rotation.y=DIR.E;
+      const bx=kf(t,[[0,48],[15,-46]]); b.position.set(bx,0,1.75); b.rotation.y=DIR.W;
+      lab.visible=within(t,2.5,8.5); lab.position.set(ax-0.2,2.6,-0.7);
+      const px=kf(t,[[0,40],[15,16]]); ped.position.x=px; ped.position.z=-4.6; ped.rotation.y=DIR.W; walk(ped,true,dt); ped.position.y+=0.16;
+      lab2.visible=t>10.5; lab2.position.set(px,2.7,-4.6);
+    },
+    cam(t){
+      const est={pos:[-34,20,30],look:[-6,0,-2]}, f=follow(a,[-10,4.6,5.5],[9,0.9,-1.5]), side={pos:[27,7,-17],look:[17,0.8,-2]};
+      if(t<3) return est; if(t<5) return lerpCam(est,f,smooth((t-3)/2)); if(t<10) return f; if(t<12) return lerpCam(f,side,smooth((t-10)/2)); return side;
+    }};
+};
+
+/* 2 — speed limits */
+BUILD.speed=function(){
+  setEnv('day'); const g=stage; ground(g,false); fuji(g);
+  roadX(g,-110,0,0,7,{center:'dashed'}); sidewalkBox(g,-110,0,-5.5,-3.5); sidewalkBox(g,-110,0,3.5,5.5);
+  roadX(g,0,110,0,4.6,{center:'none'});
+  for(let x=4;x<106;x+=9){ house(g,x,-6.4,6,5,3.1,[0xe8e0d0,0xd8d0c4,0xf0e9dc][(x/9|0)%3],0x4c5866,false); house(g,x+4,6.6,6,5,3,[0xd4cdc1,0xe2dacd][(x/9|0)%2],0x6e4c46,false); }
+  for(let x=-104;x<-8;x+=16){ building(g,x,-12,8,7,7+((x/16|0)%2)*3,0xd9d6cf,false); house(g,x+7,12,7,6,3.2,0xe8e0d0,0x4c5866,false); }
+  const P=[]; for(let x=-96;x<100;x+=18){ const z=x<0?-6.4:-3.4; pole(g,x,z,false); P.push([x,z]); } wires(g,P);
+  for(let x=-90;x<100;x+=23){ tree(g,x,x<0?9:8.6,1.1,false); }
+  const s40=signPost(texSpeed(40)); s40.position.set(44,0.12,-3.4); s40.rotation.y=FACE.toW; g.add(s40);
+  const hg=new THREE.Group(); hg.position.z=300; makeHighway(hg,{noGround:true,ramp:false,L0:-120,L1:130,signX:60}); g.add(hg);
+  const a=makeCar(0x2f6db3); g.add(a); VEH.push(a);
+  const h=makeCar(0xc8242c),tr=makeTruck(); hg.add(h,tr); VEH.push(h,tr);
+  const lab=makeLabel('中央線なし = 30 · no centre line = 30',{w:6.4,bg:YELB,fg:'#1b1f24'}),lab2=makeLabel('標識が優先 · the sign wins',{w:4.6}); g.add(lab,lab2);
+  return {dur:19,chip:{en:'Ordinary road → residential street → expressway',ja:'一般道 → 生活道路 → 高速道路'},
+    update(t){
+      const ax=kf(t,[[0,-95],[5,-10],[5.8,0],[10,36],[11.5,50],[14.5,84]]); a.position.set(ax,0,-1.75); a.rotation.y=DIR.E;
+      const hx=kf(t,[[14,-70],[19,65]]); h.position.set(hx,0,-9.25); h.rotation.y=DIR.E;
+      const tx=kf(t,[[14,-25],[19,85]]); tr.position.set(tx,0,-9.25); tr.rotation.y=DIR.E;
+      const spd=kf(t,[[0,60],[4.6,60],[5.8,30],[10.2,30],[11.6,40],[14.4,40],[14.5,100],[19,100]]);
+      hudSet(Math.round(spd),'km/h',t>=5.3&&t<10.3);
+      lab.visible=within(t,5.4,10); lab.position.set(ax+6,2.9,-3.2);
+      lab2.visible=within(t,10.2,14.2); lab2.position.set(44,3.6,-3.4);
+    },
+    cam(t){ if(t<14.5) return follow(a,[-12,5,6.5],[9,0.6,-1]); return follow(h,[-16,6,8],[12,0.5,-2]); }};
+};
+
+/* 3 — stop sign */
+BUILD.stop=function(){
+  setEnv('day'); const g=stage; buildTown(g,{stops:true});
+  const r=makeCar(0xc8242c),w=makeCar(0xf2f2ee),b=makeCar(0x8c9aa8); g.add(r,w,b); VEH.push(r,w,b);
+  const l1=makeLabel('完全停止 · full stop, 3 s',{w:4.2,bg:RED}),l2=makeLabel('右 → 左 → 右 · look',{w:3.8}),l3=makeLabel('もう一度止まる · stop again',{w:4.8}); g.add(l1,l2,l3);
+  return {dur:16,chip:{en:'Side road meets main road · 止まれ',ja:'非優先道路から優先道路へ・止まれ'},
+    update(t){
+      const rz=kf(t,[[0,50],[3.2,11.4,'out'],[6.4,11.4],[8.6,7.6,'smooth'],[10.2,7.6],[16,-42,'in']]);
+      r.position.set(-1.75,0,rz); r.rotation.y=DIR.N; r.userData.forceBrake=within(t,3.2,6.4)||within(t,8.6,10.2);
+      const wx=kf(t,[[0,42],[9,-46]]); w.position.set(wx,0,1.75); w.rotation.y=DIR.W;
+      const bx=kf(t,[[0,-95],[11,-60],[16,20]]); b.position.set(bx,0,-1.75); b.rotation.y=DIR.E;
+      l1.visible=within(t,3.4,6.2); l1.position.set(-1.75,2.7,rz);
+      l2.visible=within(t,6.4,8.4); l2.position.set(-1.75,2.7,rz);
+      l3.visible=within(t,8.8,10.2); l3.position.set(-1.75,2.7,rz);
+    },
+    cam:camPath([[0,[-8,6,34],[-1.75,1,14]],[3.2,[-10,4.5,22],[-1.75,1,9]],[6.2,[12,5,15],[-1.75,0.8,9]],[9.5,[-7,5,20],[-1.75,1,2]],[13,[-7,5,20],[-1.75,1,-2]],[16,[-7,8,10],[-1.75,1,-22]]])};
+};
+
+/* 4 — crosswalk */
+BUILD.cross=function(){
+  setEnv('day'); const g=stage; buildTown(g,{diamonds:true});
+  const a=makeCar(0x2f6db3),b=makeCar(0xf2f2ee); g.add(a,b); VEH.push(a,b);
+  const ped=makePerson(0x7b4fa3); g.add(ped); PEOPLE.push(ped);
+  const l1=makeLabel('◇ 横断歩道あり · crosswalk ahead',{w:5.6}),l2=makeLabel('渡りたい人 · wants to cross',{w:4.6}),l3=makeLabel('追い越し禁止 · no overtaking',{w:4.8,bg:RED}); g.add(l1,l2,l3);
+  return {dur:16.5,chip:{en:'Crosswalk with no signal',ja:'信号のない横断歩道'},
+    update(t,dt){
+      const ax=kf(t,[[0,-62],[5.5,-11.6,'out'],[10.6,-11.6],[16.5,44,'in']]); a.position.set(ax,0,-1.75); a.rotation.y=DIR.E; a.userData.forceBrake=within(t,5.5,10.6);
+      const bx=kf(t,[[0,-74],[5.9,-19.5,'out'],[11,-19.5],[16.5,36,'in']]); b.position.set(bx,0,-1.75); b.rotation.y=DIR.E; b.userData.forceBrake=within(t,5.9,11);
+      const pz=kf(t,[[0,4.7],[5.8,4.7],[10,-4.7]]); const moving=within(t,5.8,10)||t>10.3;
+      const px=kf(t,[[10.3,-7],[16.5,-24]]); ped.position.set(px,0,pz); ped.rotation.y=t<10.15?DIR.N:DIR.W; walk(ped,moving,dt); ped.position.y+=(t<5.8||t>10)?0.16:0.1;
+      l1.visible=t<4; l1.position.set(-20,2.4,-1.75);
+      l2.visible=within(t,2,6); l2.position.set(-7,2.7,4.7);
+      l3.visible=within(t,7.5,10.6); l3.position.set(bx,2.6,-1.75);
+    },
+    cam:camPath([[0,[-70,7,12],[-40,0.5,-2]],[3.5,[-30,6,12],[-12,0.5,-1]],[6.5,[-3,5,13],[-9,1,1]],[10.5,[-6,7,12],[-8,1,-1]],[13,[-16,8,15],[0,1,-1]],[16.5,[-12,10,18],[14,0,-2]]])};
+};
+
+/* 5 — signals and turns */
+BUILD.signal=function(){
+  setEnv('day'); const g=stage; const town=buildTown(g,{signals:true});
+  const a=makeCar(0x2f6db3),b=makeCar(0xf2f2ee),c=makeCar(0x8c9aa8),d=makeCar(0x2f9e63); g.add(a,b,c,d); VEH.push(a,b,c,d);
+  const ped=makePerson(0xd95a2b); g.add(ped); PEOPLE.push(ped);
+  const l1=makeLabel('右折待ち · waiting to turn right',{w:5.2}),l2=makeLabel('左折車が先 · left turn goes first',{w:5.4}),l3=makeLabel('歩行者が先 · pedestrians first',{w:5}),l4=makeLabel('黄 = 止まれ · yellow means stop',{w:5.2,bg:YELB,fg:'#1b1f24'}); g.add(l1,l2,l3,l4);
+  return {dur:22,chip:{en:'Signalised intersection',ja:'信号交差点'},
+    update(t,dt){
+      town.set('ew',step(t,[[0,'g'],[13,'y'],[15,'r']])); town.set('ns',step(t,[[0,'r'],[16,'g']]));
+      if(t<11.5){ const ax=kf(t,[[0,-44],[4.5,-1.8,'out']]); a.position.set(ax,0,-1.75); a.rotation.y=DIR.E; }
+      else if(t<14.5) placeBez(a,[-1.8,-1.75],[2.4,-1.75],[1.75,3.2],smooth((t-11.5)/3));
+      else { const az=kf(t,[[14.5,3.2],[19,46]]); a.position.set(1.75,0,az); a.rotation.y=DIR.S; }
+      a.userData.blinkMode=within(t,1,14.5)?'right':null; a.userData.forceBrake=within(t,4.5,11.5);
+      const bx=kf(t,[[0,52],[7,-46]]); b.position.set(bx,0,1.75); b.rotation.y=DIR.W;
+      if(t<5.2){ const cx=kf(t,[[0,64],[5.2,3.2,'out']]); c.position.set(cx,0,1.75); c.rotation.y=DIR.W; }
+      else if(t<7) placeBez(c,[3.2,1.75],[1.75,1.75],[1.75,4.2],smooth((t-5.2)/1.8));
+      else { const cz=kf(t,[[7,4.2],[11,46]]); c.position.set(1.75,0,cz); c.rotation.y=DIR.S; }
+      c.userData.blinkMode=within(t,2.5,7)?'left':null;
+      const px=kf(t,[[0,-4.7],[7.5,-4.7],[11.5,4.7]]); const pz=kf(t,[[11.5,7],[18,32]]);
+      ped.position.set(px,0,pz); ped.rotation.y=t<11.5?DIR.E:DIR.S; walk(ped,t>7.5,dt); ped.position.y+=(t<7.5||t>11.5)?0.16:0.1;
+      const dz=kf(t,[[10,52],[15,11.4,'out'],[16.8,11.4],[22,-40,'in']]); d.position.set(-1.75,0,dz); d.rotation.y=DIR.N; d.userData.forceBrake=within(t,15,16.8);
+      l1.visible=within(t,5,11.4); l1.position.set(-1.8,2.7,-1.75);
+      l2.visible=within(t,5.2,7.2); l2.position.set(c.position.x,2.7,c.position.z);
+      l3.visible=within(t,7.6,11.4); l3.position.set(px,2.7,7);
+      l4.visible=within(t,13,15); l4.position.set(-1.75,2.7,16);
+    },
+    cam:camPath([[0,[-36,14,26],[-10,0,0]],[4.5,[-16,8,18],[0,1,1]],[9,[8,7,16],[-1,1,2]],[12.5,[-15,6,-11],[5,3,-1]],[16,[-8,8,28],[-1.75,1,6]],[22,[-8,9,24],[-2,1,-8]]])};
+};
+
+/* 6 — priority */
+BUILD.prio=function(){
+  setEnv('day'); const g=stage; buildTown(g,{});
+  const a=makeCar(0x2f6db3),b=makeCar(0xf2f2ee); g.add(a,b); VEH.push(a,b);
+  const s=signPost(texSlow()); s.position.set(-4.4,0.16,14); s.rotation.y=FACE.toS; g.add(s);
+  const mp=new THREE.Group(); mp.position.set(5.2,0.16,5.2); mp.add(cyl(0.05,0.05,3.2,mat(0x8d9299),0,1.6,0,8)); const mr=new THREE.Mesh(new THREE.TorusGeometry(0.42,0.05,8,24),mat(0xe8731a)); mr.position.y=3.1; mp.add(mr); const md=new THREE.Mesh(new THREE.CircleGeometry(0.4,24),mat(0xdfe6ee,{metalness:0.8,roughness:0.15})); md.position.y=3.1; mp.add(md); mp.rotation.y=Math.PI*0.75; g.add(mp);
+  const l1=makeLabel('左から来る車 · car from the LEFT',{w:5.6}),l2=makeLabel('譲る · yields',{w:2.8}),l3=makeLabel('徐行 · slow, ready to stop',{w:4.6,bg:YELB,fg:'#1b1f24'}); g.add(l1,l2,l3);
+  return {dur:16,chip:{en:'Equal roads, no signs',ja:'同じ幅の道路・標識なし'},
+    update(t){
+      const ax=kf(t,[[0,-50],[11,22],[16,60]]); a.position.set(ax,0,-1.75); a.rotation.y=DIR.E;
+      const bz=kf(t,[[0,46],[5.2,11.6,'out'],[8.4,11.6],[13,-30,'in']]); b.position.set(-1.75,0,bz); b.rotation.y=DIR.N; b.userData.forceBrake=within(t,5.2,8.4);
+      l1.visible=within(t,3.5,8); l1.position.set(ax,2.6,-1.75);
+      l2.visible=within(t,5.4,8.4); l2.position.set(-1.75,2.6,bz);
+      l3.visible=within(t,9.8,13); l3.position.set(-1.75,2.6,bz);
+    },
+    cam:camPath([[0,[-10,16,34],[-3,0,6]],[4,[-10,9,24],[-3,1,6]],[8.5,[10,8,10],[-2,1,2]],[12,[6,10,-16],[-4,1,-4]],[16,[0,22,26],[0,0,0]]])};
+};
+
+/* 7 — railway crossing */
+BUILD.rail=function(){
+  setEnv('day'); const g=stage; ground(g,false); fuji(g);
+  roadX(g,-100,100,0,7,{center:'dashed',gap:[-4,4]});
+  const cr=makeCrossing(g,0,false);
+  for(let x=-90;x<90;x+=17){ if(Math.abs(x)<9) continue; house(g,x,-11,6,5,3.1,[0xe8e0d0,0xd8d0c4,0xf0e9dc][((x+90)/17|0)%3],0x4c5866,false); house(g,x+6,11.5,6,5,3,[0xd4cdc1,0xe2dacd][((x+90)/17|0)%2],0x6e4c46,false); }
+  for(let x=-80;x<90;x+=24){ tree(g,x,-16,1.2,false); tree(g,x+9,17,1.1,false); }
+  const a=makeCar(0x2f6db3); g.add(a); VEH.push(a);
+  const tr=makeTrain(); g.add(tr);
+  const l1=makeLabel('窓を開けて音を聞く · listen',{w:5}),l2=makeLabel('向こうに入れる？ · room beyond?',{w:5.4}); g.add(l1,l2);
+  return {dur:19,chip:{en:'Level crossing on a local line',ja:'ローカル線の踏切'},
+    update(t,dt,time){
+      const ax=kf(t,[[0,-46],[2.6,-8.6,'out'],[13.8,-8.6],[19,40,'in']]); a.position.set(ax,0,-1.75); a.rotation.y=DIR.E; a.userData.forceBrake=within(t,2.6,13.8);
+      const flash=within(t,4,13.6); const down=kf(t,[[4,0],[6.2,1,'smooth'],[12.2,1],[13.8,0,'smooth']]); cr.set(down,flash,time);
+      const tz=kf(t,[[6.6,85],[12.2,-75]]); tr.position.set(0,0.13,tz); tr.visible=within(t,6.6,12.2);
+      l1.visible=within(t,3,6.5); l1.position.set(ax,2.6,-1.75);
+      l2.visible=within(t,12.4,15); l2.position.set(6,2.6,-1.75);
+    },
+    cam:camPath([[0,[-52,7,14],[-22,0,-2]],[2.6,[-20,5,11],[-6,1,-1]],[6,[-16,6,-15],[-1,1.5,-1]],[9,[-18,7,-16],[0,2,0]],[12.5,[-18,6,-14],[0,1,-1]],[19,[-6,8,-14],[22,1,-2]]])};
+};
+
+/* 8 — emergency vehicles */
+BUILD.emer=function(){
+  setEnv('day'); const g=stage; buildTown(g,{});
+  const a=makeCar(0x2f6db3),b=makeCar(0xf2f2ee),amb=makeAmbulance(); g.add(a,b,amb); VEH.push(a,b,amb);
+  const l1=makeLabel('左に寄せて停止 · pull left, stop',{w:5.2}),l2=makeLabel('対向車も左へ · other side too',{w:5}); g.add(l1,l2);
+  return {dur:15.5,chip:{en:'Ambulance approaching from behind',ja:'後方から救急車'},
+    update(t){
+      const ax=kf(t,[[0,-40],[2.5,-27],[5.5,-15,'out'],[10.8,-15],[15.5,34,'in']]); const az=kf(t,[[2.5,-1.75],[5,-2.85,'smooth'],[10.8,-2.85],[13,-1.75,'smooth']]);
+      a.position.set(ax,0,az); a.rotation.y=DIR.E; a.userData.blinkMode=within(t,2.2,10.8)?'left':null; a.userData.forceBrake=within(t,5.5,10.8);
+      const mx=kf(t,[[0,-120],[10,50]]); const mz=kf(t,[[4,-1.75],[5.6,-0.3,'smooth'],[8.4,-0.3],[9.8,-1.75,'smooth']]); amb.position.set(mx,0,mz); amb.rotation.y=DIR.E;
+      const bx=kf(t,[[0,60],[4.5,32,'out'],[10.5,32],[15.5,-30,'in']]); const bz=kf(t,[[2.5,1.75],[4.5,2.85,'smooth'],[10.5,2.85],[12.5,1.75,'smooth']]);
+      b.position.set(bx,0,bz); b.rotation.y=DIR.W; b.userData.blinkMode=within(t,2,10.5)?'left':null; b.userData.forceBrake=within(t,4.5,10.5);
+      l1.visible=within(t,3,6.5); l1.position.set(ax,2.6,az);
+      l2.visible=within(t,8,11); l2.position.set(bx,2.6,bz);
+    },
+    cam:camPath([[0,[-64,9,14],[-32,1,0]],[3.5,[-6,7,-14],[-26,1.5,-1]],[7.5,[-2,7,12],[-6,1,-2]],[11.5,[-26,8,10],[-8,1,-2]],[15.5,[-10,10,20],[10,0,-2]]])};
+};
+
+/* 9 — night */
+BUILD.night=function(){
+  setEnv('night'); const g=stage; ground(g,true); fuji(g);
+  roadX(g,-120,120,0,7,{center:'dashed'});
+  for(let x=-110;x<110;x+=22){ tree(g,x,-9,1.3,true); tree(g,x+11,10,1.2,true); }
+  house(g,-30,-14,7,6,3.2,0x7c7466,0x4c5866,true); house(g,44,14,7,6,3.2,0x77716a,0x53606e,true); house(g,80,-13,6,6,3,0x6f6b62,0x6e4c46,true);
+  const a=makeCar(0x2f6db3,{headlights:'high'}),b=makeCar(0xf2f2ee,{headlights:'low'}); g.add(a,b); VEH.push(a,b);
+  const ped=makePerson(0x8b8f9a); g.add(ped); PEOPLE.push(ped);
+  const lab=makeLabel('ハイビーム · high beam',{w:4.2,bg:YELB,fg:'#1b1f24'}),lab2=makeLabel('ロービーム · low beam',{w:4.2}),lab3=makeLabel('右からの歩行者 · from the right',{w:5.2}); g.add(lab,lab2,lab3);
+  return {dur:17,chip:{en:'Unlit country road · night',ja:'街灯のない道路・夜'},
+    update(t,dt){
+      const ax=kf(t,[[0,-75],[17,95]]); a.position.set(ax,0,-1.75); a.rotation.y=DIR.E;
+      const bx=kf(t,[[0,95],[17,-75]]); b.position.set(bx,0,1.75); b.rotation.y=DIR.W;
+      const gap=bx-ax; const high=!(gap>-6&&gap<50);
+      setBeam(a,high); setBeam(b,gap<-6); a.userData.head.emissiveIntensity=high?1.2:0.6;
+      lab.visible=high; lab2.visible=!high; lab.position.set(ax,2.6,-1.75); lab2.position.set(ax,2.6,-1.75);
+      const pz=kf(t,[[0,4.6],[9,4.6],[11.5,-4.6]]); ped.position.set(46,0,pz); ped.rotation.y=DIR.N; walk(ped,within(t,9,11.5),dt); ped.position.y+=0.1;
+      lab3.visible=within(t,9.5,12); lab3.position.set(46,2.6,pz);
+    },
+    cam(t){ return follow(a,[-13,5.5,5.5],[12,0.6,-0.5]); }};
+};
+
+/* 10 — alcohol */
+BUILD.alc=function(){
+  setEnv('night'); const g=stage; ground(g,true); fuji(g);
+  roadX(g,-70,70,0,7,{center:'dashed'}); sidewalkBox(g,-70,70,-5.5,-3.5,true); sidewalkBox(g,-70,70,3.5,5.5,true);
+  izakaya(g,0,-11.5,true); g.add(box(12,0.12,7,mat(0x4a4e54),-14,0.06,-9.5,false));
+  building(g,14,-12,9,7,8,0x5a5f66,true); house(g,-30,-12,7,6,3.2,0x7c7466,0x4c5866,true); house(g,-14,14,7,6,3,0x6f6b62,0x6e4c46,true); house(g,16,15,7,6,3.4,0x77716a,0x53606e,true);
+  pole(g,-22,-6.4,true); pole(g,-4,-6.4,true); pole(g,14,-6.4,true); wires(g,[[-22,-6.4],[-4,-6.4],[14,-6.4]]);
+  tree(g,-32,10,1.2,true); tree(g,30,-9,1.3,true);
+  const own=makeCar(0x8c9aa8); own.position.set(-14,0,-9.5); own.rotation.y=DIR.S; g.add(own);
+  const taxi=makeCar(0x1e1e22,{taxi:true,headlights:'low'}); g.add(taxi); VEH.push(taxi);
+  const p=makePerson(0x2f6db3); g.add(p); PEOPLE.push(p);
+  const lx=makeLabel('✕ 今夜は運転しない · not tonight',{w:5.6,bg:RED}),lt=makeLabel('タクシー · taxi',{w:3}),ld=makeLabel('または運転代行 · or a driver service',{w:6}); g.add(lx,lt,ld);
+  return {dur:16,chip:{en:'Izakaya, 11 p.m.',ja:'居酒屋・夜11時'},
+    update(t,dt){
+      const px=kf(t,[[0,0],[3,-10.5,'smooth'],[5,-10.5],[8.2,2,'smooth'],[9.6,2],[10.6,2.6]]);
+      const pz=kf(t,[[0,-7.2],[3,-6.6,'smooth'],[5,-6.6],[8.2,-3.9,'smooth'],[9.6,-3.9],[10.6,-2.9]]);
+      const mv=within(t,0.2,3)||within(t,5,8.2)||within(t,9.6,10.6);
+      p.position.set(px,0,pz); heading(p,t<3?-1:1,t<3?0.05:-0.15); walk(p,mv,dt); p.position.y+=0.16; p.visible=t<10.6;
+      lx.visible=within(t,3.2,6); lx.position.set(-14,2.8,-9.5);
+      const tx=kf(t,[[0,-60],[5,-60],[8.8,3.4,'out'],[11.2,3.4],[15.5,70,'in']]); taxi.position.set(tx,0,-2.6); taxi.rotation.y=DIR.E; taxi.userData.forceBrake=within(t,8.8,11.2); taxi.userData.blinkMode=within(t,7,11.2)?'left':null;
+      lt.visible=within(t,8,11); lt.position.set(tx,2.8,-2.6);
+      ld.visible=within(t,12,16); ld.position.set(-14,2.8,-9.5);
+    },
+    cam:camPath([[0,[9,4.5,2],[-2,1.4,-7]],[3.5,[-4,4,3],[-12,1,-7]],[6,[-6,5,4],[-8,1,-6]],[9,[13,5,8],[2,1,-3]],[12.5,[-14,7,12],[6,1,-2]],[16,[-16,8,14],[20,0,-2]]])};
+};
+
+/* 11 — phones and seatbelts */
+BUILD.phone=function(){
+  setEnv('day'); const g=stage; ground(g,false); fuji(g);
+  roadX(g,-60,60,0,7,{center:'dashed'}); sidewalkBox(g,-60,60,-5.5,-3.5); sidewalkBox(g,-60,60,3.5,5.5);
+  tree(g,-12,-9,1.2); tree(g,10,10,1.1); house(g,-8,-13,7,6,3.2,0xe8e0d0,0x4c5866); house(g,12,-13,7,6,3,0xd8d0c4,0x6e4c46); house(g,-10,14,7,6,3.1,0xf0e9dc,0x53606e);
+  const car=makeCar(0x2f6db3,{seeThrough:true}); car.position.set(0,0,-2.7); g.add(car);
+  const seat=(x,z,color,s,child)=>{ const p=makePerson(color,{scale:s}); p.userData.legs.forEach(l=>l.visible=false); p.position.set(x,child?0.62:0.33,z); car.add(p); return p; };
+  const drv=seat(0.35,0.45,0x2b3a4a,0.62), pas=seat(0.35,-0.45,0xd95a2b,0.6), rr=seat(-0.85,0.45,0x7b4fa3,0.6);
+  const cs=box(0.55,0.5,0.5,mat(0xf28a1a,{roughness:0.7}),-0.85,0.58,-0.45); car.add(cs); const kid=seat(-0.85,-0.45,0x2f9e63,0.4,true);
+  const beltOf=(p,side)=>{ const s=p.userData.s; const b=box(0.05,0.66*s,0.06,mat(0x1b1f24),0.16*s,1.0*s,0); b.rotation.x=side*0.72; b.visible=false; p.add(b); return b; };
+  const belts=[beltOf(drv,1),beltOf(pas,-1),beltOf(rr,1),beltOf(kid,-1)];
+  const phone=box(0.09,0.16,0.02,mat(0x111418,{emissive:0x9fd0ff,emissiveIntensity:0.6})); car.add(phone);
+  const mount=box(0.06,0.2,0.12,mat(0x33363b),1.02,0.9,0.15); car.add(mount);
+  const lx=makeLabel('✕ 保持 · holding = violation',{w:5.4,bg:RED}),lm=makeLabel('ホルダーへ · into the cradle',{w:5}),lb=makeLabel('全席シートベルト · belts in every seat',{w:6.2}),lc=makeLabel('6歳未満 · child seat',{w:4.4,bg:YELB,fg:'#1b1f24'}); g.add(lx,lm,lb,lc);
+  return {dur:15,chip:{en:'Inside the car',ja:'車内'},
+    update(t){
+      const u=kf(t,[[4,0],[6,1,'smooth']]); phone.position.set(0.52+(1.0-0.52)*u,1.1-(1.1-0.95)*u,0.62-(0.62-0.15)*u); phone.rotation.z=0.5*(1-u); phone.rotation.y=-0.4*(1-u);
+      phone.material.emissiveIntensity=t<4?(0.5+0.4*Math.sin(t*6)):0.3;
+      belts.forEach((b,i)=>b.visible=t>=[7.2,8.2,9.2,11.6][i]);
+      lx.visible=t<4; lx.position.set(0.5,2.4,-2.1); lm.visible=within(t,4.4,7); lm.position.set(1.0,2.3,-2.5);
+      lb.visible=within(t,7.4,11.4); lb.position.set(-0.2,2.5,-2.7); lc.visible=t>=11.6; lc.position.set(-0.85,2.3,-3.15);
+    },
+    cam(t){ const an=1.0+0.17*t; return {pos:[7.2*Math.cos(an),4.3,-2.7+7.2*Math.sin(an)],look:[0,1.1,-2.7]}; }};
+};
+
+/* 12 — expressway */
+BUILD.hwy=function(){
+  setEnv('day'); const g=stage; makeHighway(g,{L0:-140,L1:440,signX:210,ramp:true});
+  const a=makeCar(0x2f6db3),x=makeCar(0xc8242c),t1=makeTruck(); g.add(a,x,t1); VEH.push(a,x,t1);
+  const l1=makeLabel('加速車線でしっかり加速 · accelerate',{w:6}),l2=makeLabel('✕ 追越車線を走り続ける · cruising',{w:6.4,bg:RED}),l3=makeLabel('追い越したら左へ · back to the left',{w:5.8}); g.add(l1,l2,l3);
+  const lanes=[-12.75,-9.25,-5.75];
+  return {dur:20,chip:{en:'Expressway · merging and passing',ja:'高速道路・合流と追い越し'},
+    update(t){
+      const ax=kf(t,[[0,-125],[3,-75,'in'],[6,-16],[7.5,20],[20,357]]);
+      let z; if(ax<-90) z=-24; else if(ax<-72) z=-24+11.25*smooth((ax+90)/18); else { const m=kf(t,[[6,0],[7.6,1,'smooth'],[9.5,1],[11,2,'smooth'],[14,2],[15.6,1,'smooth']]); const li=Math.min(1,Math.floor(m)),lf=m-li; z=lanes[li]+(lanes[li+1]-lanes[li])*lf; }
+      steer(a,ax,z);
+      a.userData.blinkMode=within(t,5.6,7.6)||within(t,9.3,11)?'right':(within(t,14,15.6)?'left':null);
+      const tx=-112+21*t; t1.position.set(tx,0,-9.25); t1.rotation.y=DIR.E;
+      const xx=kf(t,[[0,-183],[10,87],[20,420]]); x.position.set(xx,0,-2.25); x.rotation.y=DIR.E;
+      hudSet(Math.round(kf(t,[[0,40],[3,60],[6,85],[7.5,97],[20,97]])),'km/h');
+      l1.visible=t<4; l1.position.set(ax,2.6,z); l2.visible=within(t,7.6,10.2); l2.position.set(xx,2.6,-2.25); l3.visible=within(t,14,16); l3.position.set(ax,2.6,z);
+    },
+    cam(t){ const chase=follow(a,[-17,6.5,7],[14,0.6,-1]),high=follow(a,[-10,10,-20],[10,0.5,-2]); if(t<7) return chase; if(t<9) return lerpCam(chase,high,smooth((t-7)/2)); if(t<12.5) return high; if(t<14) return lerpCam(high,chase,smooth((t-12.5)/1.5)); return chase; }};
+};
+
+/* 13 — roundabout */
+BUILD.round=function(){
+  setEnv('day'); const g=stage; makeRoundabout(g,{});
+  const a=makeCar(0x2f6db3),b=makeCar(0xf2f2ee); g.add(a,b); VEH.push(a,b);
+  const l1=makeLabel('環道内が優先 · circle has priority',{w:5.6}),l2=makeLabel('出る前に左合図 · signal left, then exit',{w:6}); g.add(l1,l2);
+  const R=9.75, ring=(o,an)=>{ o.position.x=R*Math.cos(an); o.position.z=R*Math.sin(an); heading(o,-Math.sin(an),Math.cos(an)); };
+  const A0=0.6*Math.PI;
+  return {dur:20,chip:{en:'Roundabout · clockwise',ja:'環状交差点・右回り'},
+    update(t){
+      if(t<6.2){ const z=kf(t,[[0,46],[4.2,15.4,'out']]); a.position.set(-1.75,0,z); a.rotation.y=DIR.N; }
+      else if(t<8){ const u=smooth((t-6.2)/1.8); const ex=R*Math.cos(A0),ez=R*Math.sin(A0); steer(a,-1.75+(ex+1.75)*u,15.4+(ez-15.4)*u); }
+      else if(t<14){ ring(a,A0+(t-8)*0.48); }
+      else if(t<15.6){ const u=smooth((t-14)/1.6); steer(a,0+(-1.75-0)*u,-9.75+(-16.5+9.75)*u); }
+      else { const z=kf(t,[[15.6,-16.5],[20,-54]]); a.position.set(-1.75,0,z); a.rotation.y=DIR.N; }
+      a.userData.forceBrake=within(t,4.2,6.2); a.userData.blinkMode=within(t,11.4,15.6)?'left':null;
+      const bA=1.6*Math.PI+0.48*t;
+      if(t<9.2) ring(b,bA);
+      else if(t<10.8){ const u=smooth((t-9.2)/1.6); steer(b,-9.75+(-16.5+9.75)*u,0+(1.75-0)*u); }
+      else { const x=kf(t,[[10.8,-16.5],[15,-54]]); b.position.set(x,0,1.75); b.rotation.y=DIR.W; }
+      b.userData.blinkMode=within(t,7.4,10.8)?'left':null; b.visible=t<15;
+      l1.visible=within(t,3.5,7.5); l1.position.set(b.position.x,2.6,b.position.z);
+      l2.visible=within(t,11.4,15); l2.position.set(a.position.x,2.6,a.position.z);
+    },
+    cam:camPath([[0,[-14,12,42],[-2,0,16]],[5,[-18,8,28],[-2,1,12]],[9,[-26,15,10],[-4,0,2]],[14,[-20,13,-16],[-2,0,-6]],[20,[-16,10,-34],[-2,0,-34]]])};
+};
+
+/* 14 — bicycles */
+BUILD.bike=function(){
+  setEnv('day'); const g=stage; buildTown(g,{});
+  const a=makeCar(0x2f6db3),bk=makeBike(0x2f6db3); g.add(a,bk); VEH.push(a,bk);
+  const gap=box(1.2,0.04,1.45,new THREE.MeshStandardMaterial({color:0x2fbf7a,transparent:true,opacity:0.55,roughness:1}),0,0.14,0,false); g.add(gap);
+  const lg=makeLabel('1.5 m',{w:2.2,bg:'rgba(11,107,69,0.95)'}),lb=makeLabel('自転車を先に · let the bike go',{w:5.4}),lm=makeLabel('左ミラー・死角確認 · mirror and blind spot',{w:6.4,bg:YELB,fg:'#1b1f24'}); g.add(lg,lb,lm);
+  return {dur:20,chip:{en:'Passing a cyclist, then turning left',ja:'自転車の追い越しと左折'},
+    update(t){
+      const bx=-60+5*t; bk.position.set(bx,0,-2.85); bk.rotation.y=DIR.E;
+      if(t<14.5){ const ax=kf(t,[[0,-80],[2,-62],[6,-26],[8.3,-11.4,'out'],[13,-11.4],[14.5,-6.4]]); const az=kf(t,[[2,-1.75],[3,-0.25,'smooth'],[4.6,-0.25],[6,-1.75,'smooth']]); a.position.set(ax,0,az); a.rotation.y=DIR.E; }
+      else if(t<17) placeBez(a,[-6.4,-1.75],[-1.75,-1.75],[-1.75,-7.2],smooth((t-14.5)/2.5));
+      else { const z=kf(t,[[17,-7.2],[20,-42,'in']]); a.position.set(-1.75,0,z); a.rotation.y=DIR.N; }
+      a.userData.forceBrake=within(t,8.3,13); a.userData.blinkMode=within(t,7,17)?'left':null;
+      gap.visible=within(t,3.6,5.6); gap.position.set(a.position.x,0.14,-1.9); lg.visible=gap.visible; lg.position.set(a.position.x,1.6,-1.9);
+      lb.visible=within(t,9.5,12.8); lb.position.set(bx,2.4,-2.85);
+      lm.visible=within(t,7.2,9.4); lm.position.set(a.position.x,2.6,a.position.z);
+    },
+    cam:camPath([[0,[-92,7,10],[-62,0,-2]],[2.5,[-68,5,8],[-52,1,-2]],[4.5,[-55,4.2,4],[-47,0.5,-2.5]],[7.5,[-32,7,12],[-14,1,-2]],[11.5,[-4,6,10],[-8,1,-2]],[14.5,[-4,9,-18],[-4,1,-3]],[20,[-8,10,-30],[-2,0,-24]]])};
+};
+
+/* 15 — following distance / aori */
+BUILD.aori=function(){
+  setEnv('day'); const g=stage; makeHighway(g,{L0:-140,L1:440,signX:210,ramp:false});
+  const a=makeCar(0xf2f2ee),b=makeCar(0x2f6db3); g.add(a,b); VEH.push(a,b);
+  const gh=makeCar(0xff3030,{seeThrough:true}); g.add(gh);
+  const slab=box(1,0.05,2.2,new THREE.MeshStandardMaterial({color:0x2fbf7a,transparent:true,opacity:0.4,roughness:1}),0,0.13,-9.25,false); g.add(slab);
+  const ls=makeLabel('2秒 · 2 seconds',{w:4,bg:'rgba(11,107,69,0.95)'}),lg=makeLabel('✕ 8 m · 車間距離不保持',{w:5.6,bg:RED}),lb=makeLabel('ブレーキ · braking',{w:3.6,bg:RED}); g.add(ls,lg,lb);
+  const AK=[[-2,-110],[6,90],[7.5,115,'out'],[9,133],[11,164,'in'],[20,389]];
+  return {dur:20,chip:{en:'Expressway · following distance',ja:'高速道路・車間距離'},
+    update(t){
+      const ax=kf(t,AK),bx=kf(t-2,AK); a.position.set(ax,0,-9.25); a.rotation.y=DIR.E; b.position.set(bx,0,-9.25); b.rotation.y=DIR.E;
+      const gap=ax-bx-4.2; slab.scale.x=Math.max(0.1,gap); slab.position.x=(ax+bx)/2; const ghost=within(t,11.5,17);
+      slab.visible=!ghost; ls.visible=!ghost; ls.position.set((ax+bx)/2,1.8,-9.25);
+      gh.visible=ghost; gh.position.set(ax-12,0,-9.25); gh.rotation.y=DIR.E; lg.visible=ghost; lg.position.set(ax-12,2.6,-9.25);
+      lb.visible=within(t,6.2,8.4); lb.position.set(ax,2.6,-9.25);
+    },
+    cam(t){ const ax=kf(t,AK),bx=kf(t-2,AK); const chase=follow(b,[-18,6,8],[14,0.5,-1]); const persp={pos:[bx-13,8.5,-1],look:[(ax+bx)/2+6,0.6,-9.25]}; return blendWin(t,4,6,chase,persp); }};
+};
+
+/* 16 — marks and manners */
+BUILD.marks=function(){
+  setEnv('day'); const g=stage; buildTown(g,{});
+  const a=makeCar(0x2f9e63,{mark:'wakaba'}),b=makeCar(0xf2f2ee),c=makeCar(0xd9c8a0,{mark:'koreisha'}); g.add(a,b,c); VEH.push(a,b,c);
+  const lw=makeLabel('若葉マーク · new driver',{w:4.6}),lk=makeLabel('高齢者マーク · 70+',{w:4.2}),lp=makeLabel('パッシング = どうぞ · go ahead',{w:5.6,bg:YELB,fg:'#1b1f24'}),lh=makeLabel('サンキューハザード · thank you',{w:5.8}); g.add(lw,lk,lp,lh);
+  return {dur:16,chip:{en:'Joining the main road',ja:'本線への合流'},
+    update(t){
+      if(t<6.5){ const z=kf(t,[[0,44],[4,11.4,'out'],[5.5,11.4],[6.5,8.2]]); a.position.set(-1.75,0,z); a.rotation.y=DIR.N; }
+      else if(t<9) placeBez(a,[-1.75,8.2],[-1.75,1.75],[-7,1.75],smooth((t-6.5)/2.5));
+      else { const x=kf(t,[[9,-7],[16,-45]]); a.position.set(x,0,1.75); a.rotation.y=DIR.W; }
+      a.userData.forceBrake=within(t,4,5.5); a.userData.blinkMode=within(t,1,9)?'left':(within(t,9.6,11.4)?'hazard':null);
+      const bx=kf(t,[[0,52],[4,17,'out'],[8,17],[16,-38,'in']]); b.position.set(bx,0,1.75); b.rotation.y=DIR.W; b.userData.forceBrake=within(t,4,8);
+      b.userData.head.emissiveIntensity=within(t,3.6,4.4)&&Math.sin(t*25)>0?3:0.5;
+      const cx=kf(t,[[0,-52],[16,44]]); c.position.set(cx,0,-1.75); c.rotation.y=DIR.E;
+      lw.visible=within(t,0.5,4); lw.position.set(-1.75,2.6,a.position.z);
+      lk.visible=within(t,4.5,8.5); lk.position.set(cx,2.6,-1.75);
+      lp.visible=within(t,3.4,5.2); lp.position.set(bx,2.6,1.75);
+      lh.visible=within(t,9.6,12); lh.position.set(a.position.x,2.6,a.position.z);
+    },
+    cam:camPath([[0,[-14,8,30],[-2,1,10]],[4,[12,6,24],[-2,1,8]],[8,[-14,6,14],[-6,1,2]],[12,[-30,7,12],[-20,1,1]],[16,[-42,9,14],[-42,0,0]]])};
+};
+
+/* ===================== STATIC STRINGS ===================== */
+const STR={
+ tabLearn:{en:'Learn',ja:'学ぶ'},tabSigns:{en:'Signs',ja:'標識'},tabPen:{en:'Penalties',ja:'罰則'},tabQuiz:{en:'Quiz',ja:'クイズ'},
+ chapters:{en:'16 chapters',ja:'全16章'},brandSub:{en:'The rules of the road, animated in 3D',ja:'日本の交通ルールを3Dで'},
+ hint:{en:'Drag to look around · scroll to zoom',ja:'ドラッグで視点を回転・スクロールでズーム'},
+ signsTitle:{en:'Signs and markings you must recognise',ja:'必ず覚えたい標識と標示'},
+ signsLead:{en:'Japanese regulatory signs are round or triangular and mostly wordless, with three famous exceptions: 止まれ (stop), 徐行 (slow down) and 通行止め (road closed). Warning signs are yellow diamonds; instruction signs are blue.',ja:'規制標識は丸か三角で、文字があるのは「止まれ」「徐行」「通行止め」など少数。警戒標識は黄色のひし形、指示標識は青です。'},
+ marksTitle:{en:'Driver marks',ja:'運転者の標識（マーク）'},lineTitle:{en:'Lines on the road',ja:'路面の線と標示'},
+ quizTitle:{en:'Test yourself, licence-conversion style',ja:'外免切替スタイルで腕試し'},
+ quizLead:{en:'Since October 2025 the knowledge test for converting a foreign licence (外免切替) has 50 true/false questions and needs 90% to pass. Here are 15 in the same spirit — each one explains the rule behind it.',ja:'2025年10月から、外国免許の切替（外免切替）の知識確認は○×50問・正答率90%が必要です。同じ形式の15問で、それぞれ根拠となるルールを解説します。'},
+ foot1:{en:'Built from the Road Traffic Act (道路交通法) and public guidance from the National Police Agency, JAF and prefectural police, current to September 2026. Points and fines shown are for a standard passenger car (普通車); larger vehicles pay more.',ja:'道路交通法および警察庁・JAF・各都道府県警察の公開資料に基づき、2026年9月時点の情報で作成。点数・反則金は普通車の場合で、大型車などは異なります。'},
+ foot2:{en:'This is a learning aid, not legal advice. Posted signs and police instructions always override the defaults described here.',ja:'本サイトは学習用であり法的助言ではありません。現地の標識と警察官の指示が常に優先します。'},
+ loading:{en:'Loading 3D scene…',ja:'3Dシーンを読み込み中…'},
+ nofx1:{en:'The 3D engine could not start.',ja:'3Dエンジンを起動できませんでした。'},nofx2:{en:'Your browser may not support WebGL, or the three.js script was blocked. The chapter text on this page still works.',ja:'WebGLに対応していないか、three.jsの読み込みがブロックされた可能性があります。本文は引き続きご利用いただけます。'},
+ penTitle:{en:'Points, fines and what they add up to',ja:'点数・反則金と、その先にあるもの'},
+ penLead:{en:'Japan runs a demerit-point system on top of fines. Minor violations get a blue ticket (fine, no criminal record); serious ones get a red ticket and go to court. Points accumulate over three years.',ja:'日本は反則金に加えて点数制度があります。軽い違反は青切符（反則金・前科なし）、重い違反は赤切符で刑事手続きへ。点数は過去3年分が累積します。'},
+ penTable:{en:'Common violations (standard car)',ja:'主な違反（普通車）'},colV:{en:'Violation',ja:'違反'},colP:{en:'Points',ja:'点数'},colF:{en:'Fine',ja:'反則金'},court:{en:'criminal (red ticket)',ja:'刑事処分（赤切符）'},
+ thrTitle:{en:'When points add up (no prior suspensions)',ja:'点数が累積すると（前歴なしの場合）'},
+ tickets:{en:'Three colours of ticket',ja:'切符の3つの色'},
+ tW:{en:'White ticket — points only, no fine (seatbelts, child seats, some parking).',ja:'白切符：点数のみ、反則金なし（シートベルト、チャイルドシートなど）。'},
+ tB:{en:'Blue ticket — points plus a fine paid within about a week at a bank or post office. No criminal record.',ja:'青切符：点数＋反則金。約1週間以内に銀行・郵便局で納付。前科はつかない。'},
+ tR:{en:'Red ticket — points plus criminal proceedings: a court fine or prison, and a record. Given for 6 points or more per offence.',ja:'赤切符：点数＋刑事手続き（罰金・懲役、前科）。1回の違反が6点以上の場合。'},
+ tlTitle:{en:'What has changed recently',ja:'最近の主な改正'},
+ detailRule:{en:'What the rule says',ja:'ルール'},detailPen:{en:'If you get it wrong',ja:'違反したら'},detailLaw:{en:'Legal basis',ja:'根拠条文'},detailTip:{en:'Test and street tip',ja:'試験・実践のヒント'},
+ prev:{en:'← Previous',ja:'← 前へ'},next:{en:'Next →',ja:'次へ →'},toQuiz:{en:'Take the quiz',ja:'クイズへ'},
+ qOf:{en:'Question',ja:'問'},qTrue:{en:'True ○',ja:'正しい ○'},qFalse:{en:'False ✕',ja:'誤り ✕'},qNext:{en:'Next question',ja:'次の問題'},qResult:{en:'See result',ja:'結果を見る'},qRetry:{en:'Try again',ja:'もう一度'},
+ qCorrect:{en:'Correct.',ja:'正解。'},qWrong:{en:'Not quite.',ja:'残念。'},qPass:{en:'That is a pass at the 90% standard.',ja:'90%基準で合格ラインです。'},qFail:{en:'Below the 90% pass mark — replay the chapters you missed.',ja:'合格ライン（90%）未満。間違えた章をもう一度見てみましょう。'},qScore:{en:'correct',ja:'問正解'},qReview:{en:'Review the ones you missed',ja:'間違えた問題を復習'},
+ catReg:{en:'Regulatory',ja:'規制'},catWarn:{en:'Warning',ja:'警戒'},catIns:{en:'Instruction',ja:'指示'},
+ chapter:{en:'Chapter',ja:'第'},of16:{en:'of 16',ja:'章／全16章'}
+};
+
+/* ===================== SIGNS ===================== */
+const F_JA='font-family="Zen Kaku Gothic New, Hiragino Sans, Noto Sans JP, sans-serif"', F_EN='font-family="Overpass, system-ui, sans-serif"';
+const SV={
+ tri:i=>`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M4 10h92L50 92z" fill="#C8242C"/><path d="M14 17h72L50 79z" fill="none" stroke="#fff" stroke-width="4"/>${i}</svg>`,
+ triW:i=>`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M4 10h92L50 92z" fill="#C8242C"/><path d="M14 17h72L50 79z" fill="#fff"/>${i}</svg>`,
+ ring:(i,blue)=>`<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="45" fill="${blue?'#1B57AE':'#fff'}" stroke="#C8242C" stroke-width="8"/>${i}</svg>`,
+ blue:i=>`<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" fill="#1B57AE" stroke="#fff" stroke-width="3"/>${i}</svg>`,
+ dia:i=>`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 3L97 50 50 97 3 50z" fill="#F2C230"/><path d="M50 10L90 50 50 90 10 50z" fill="none" stroke="#111" stroke-width="3"/>${i}</svg>`,
+ rect:(i,bg)=>`<svg viewBox="0 0 100 100" aria-hidden="true"><rect x="4" y="4" width="92" height="92" rx="6" fill="${bg||'#1B57AE'}"/>${i}</svg>`,
+ pent:i=>`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 3L97 38V97H3V38z" fill="#1B57AE"/>${i}</svg>`,
+ disc:i=>`<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" fill="#C8242C" stroke="#fff" stroke-width="3"/>${i}</svg>`
+};
+const PED=(x,y,c)=>`<g transform="translate(${x} ${y})"><circle cx="0" cy="-22" r="5" fill="${c}"/><path d="M0-16v16M0 0l-7 16M0 0l7 16M-6-9l6-4 8 6" stroke="${c}" stroke-width="4.5" fill="none" stroke-linecap="round"/></g>`;
+const BIKE=(x,y,c)=>`<g transform="translate(${x} ${y})"><circle cx="-11" cy="8" r="8" fill="none" stroke="${c}" stroke-width="3"/><circle cx="11" cy="8" r="8" fill="none" stroke="${c}" stroke-width="3"/><path d="M-11 8l6-11h8l8 11M3-3l-6 11M-2-8h6" stroke="${c}" stroke-width="3" fill="none"/></g>`;
+const SIGNS=[
+ {ja:'止まれ',en:'Stop',cat:'reg',svg:SV.tri(`<text x="50" y="43" text-anchor="middle" font-size="20" font-weight="700" fill="#fff" ${F_JA}>止まれ</text><text x="50" y="60" text-anchor="middle" font-size="11" font-weight="800" fill="#fff" ${F_EN}>STOP</text>`),d:{en:'Complete stop before the line, then go only when safe. 2 pts / ¥7,000.',ja:'停止線の直前で完全停止。2点・7,000円。'}},
+ {ja:'徐行',en:'Slow down',cat:'reg',svg:SV.tri(`<text x="50" y="44" text-anchor="middle" font-size="21" font-weight="700" fill="#fff" ${F_JA}>徐行</text><text x="50" y="60" text-anchor="middle" font-size="10" font-weight="800" fill="#fff" ${F_EN}>SLOW</text>`),d:{en:'Drive at a speed that lets you stop instantly (about 10 km/h).',ja:'すぐに止まれる速度（10km/h程度）で進行。'}},
+ {ja:'通行止め',en:'Road closed',cat:'reg',svg:SV.ring(`<line x1="20" y1="80" x2="80" y2="20" stroke="#C8242C" stroke-width="8"/><text x="50" y="57" text-anchor="middle" font-size="17" font-weight="700" fill="#111" ${F_JA}>通行止</text>`),d:{en:'Closed to everyone — vehicles, bicycles and pedestrians.',ja:'車・自転車・歩行者すべて通行禁止。'}},
+ {ja:'車両進入禁止',en:'No entry',cat:'reg',svg:SV.disc(`<rect x="18" y="43" width="64" height="15" fill="#fff"/>`),d:{en:'You are at the wrong end of a one-way street. Do not enter.',ja:'一方通行の出口側。ここからは進入できない。'}},
+ {ja:'車両通行止め',en:'No vehicles',cat:'reg',svg:SV.ring(`<line x1="20" y1="80" x2="80" y2="20" stroke="#C8242C" stroke-width="8"/>`),d:{en:'No vehicles of any kind, including bicycles.',ja:'自転車を含むすべての車両が通行禁止。'}},
+ {ja:'一方通行',en:'One way',cat:'ins',svg:SV.rect(`<path d="M18 44h44V31l22 19-22 19V56H18z" fill="#fff"/>`),d:{en:'Traffic flows only in the arrow direction. Very common in city centres.',ja:'矢印の方向にしか進めない。都市部に多い。'}},
+ {ja:'指定方向外進行禁止',en:'Only in the direction shown',cat:'reg',svg:SV.blue(`<path d="M50 78V38" stroke="#fff" stroke-width="10"/><path d="M34 42l16-20 16 20z" fill="#fff"/>`),d:{en:'Here: straight ahead only. Variants show left, right or combinations.',ja:'この例は直進のみ。左折・右折などの組み合わせがある。'}},
+ {ja:'転回禁止',en:'No U-turn',cat:'reg',svg:SV.ring(`<path d="M34 72V44a16 16 0 0 1 32 0v22" fill="none" stroke="#111" stroke-width="8"/><path d="M55 64l11 12 11-12z" fill="#111"/><line x1="22" y1="78" x2="78" y2="22" stroke="#C8242C" stroke-width="7"/>`),d:{en:'No turning around here. Look for a 転回可 sign or a signal phase that allows it.',ja:'転回できない。転回可の標示がある場所で。'}},
+ {ja:'追越しのための右側部分はみ出し通行禁止',en:'No crossing the centre line to overtake',cat:'reg',svg:SV.ring(`<line x1="50" y1="12" x2="50" y2="88" stroke="#F2C230" stroke-width="5"/><rect x="27" y="50" width="15" height="28" rx="4" fill="#111"/><rect x="58" y="22" width="15" height="28" rx="4" fill="#C8242C"/>`),d:{en:'The same rule a yellow centre line gives you: stay on your side.',ja:'黄色の中央線と同じ意味。はみ出し禁止。'}},
+ {ja:'駐車禁止',en:'No parking',cat:'reg',svg:SV.ring(`<line x1="20" y1="80" x2="80" y2="20" stroke="#C8242C" stroke-width="8"/>`,true),d:{en:'No parking, but a short stop to load or unload passengers is allowed.',ja:'駐車禁止。人の乗降などの短い停車は可。'}},
+ {ja:'駐停車禁止',en:'No stopping or parking',cat:'reg',svg:SV.ring(`<line x1="22" y1="22" x2="78" y2="78" stroke="#C8242C" stroke-width="8"/><line x1="78" y1="22" x2="22" y2="78" stroke="#C8242C" stroke-width="8"/>`,true),d:{en:'Do not stop here at all — not even for a moment.',ja:'一瞬でも止まってはいけない。'}},
+ {ja:'最高速度',en:'Maximum speed',cat:'reg',svg:SV.blue(`<text x="50" y="66" text-anchor="middle" font-size="46" font-weight="800" fill="#fff" ${F_EN}>50</text>`),d:{en:'The limit for this road, in km/h. It overrides the default.',ja:'この道路の最高速度（km/h）。法定速度より優先。'}},
+ {ja:'最低速度',en:'Minimum speed',cat:'reg',svg:SV.blue(`<text x="50" y="62" text-anchor="middle" font-size="42" font-weight="800" fill="#fff" ${F_EN}>50</text><rect x="26" y="70" width="48" height="6" fill="#fff"/>`),d:{en:'The underline means minimum. Seen on expressways.',ja:'下線は「最低」。高速道路で見かける。'}},
+ {ja:'前方優先道路',en:'Priority road ahead',cat:'ins',svg:SV.triW(`<rect x="26" y="34" width="48" height="10" fill="#111"/><rect x="46" y="27" width="8" height="34" fill="#111"/>`),d:{en:'Slow down and give way to traffic on the road ahead.',ja:'徐行して前方の優先道路の車に道を譲る。'}},
+ {ja:'横断歩道',en:'Crosswalk',cat:'ins',svg:SV.pent(`${PED(52,58,'#fff')}<rect x="14" y="84" width="72" height="4" fill="#fff"/>`),d:{en:'Blue pentagon: a crosswalk. Slow down; stop if anyone wants to cross.',ja:'青い五角形。渡ろうとする人がいれば停止。'}},
+ {ja:'踏切あり',en:'Railway crossing ahead',cat:'warn',svg:SV.dia(`<rect x="30" y="38" width="40" height="22" rx="3" fill="#111"/><rect x="35" y="43" width="7" height="8" fill="#F2C230"/><rect x="46" y="43" width="7" height="8" fill="#F2C230"/><rect x="57" y="43" width="7" height="8" fill="#F2C230"/><circle cx="38" cy="66" r="5" fill="#111"/><circle cx="62" cy="66" r="5" fill="#111"/>`),d:{en:'Be ready to stop at the crossing. A full stop is required there.',ja:'この先踏切。踏切では一時停止。'}},
+ {ja:'学校、幼稚園、保育所等あり',en:'Children ahead',cat:'warn',svg:SV.dia(`${PED(40,54,'#111')}<g transform="scale(.8) translate(72 72)">${PED(0,0,'#111')}</g>`),d:{en:'School or nursery nearby. Expect children on foot and on bicycles.',ja:'学校・園の近く。子どもの飛び出しと自転車に注意。'}},
+ {ja:'環状交差点における右回り通行',en:'Roundabout — clockwise',cat:'reg',svg:SV.blue(`<path d="M50 26a24 24 0 0 1 22 14M72 62a24 24 0 0 1-26 12M28 58a24 24 0 0 1 4-26" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/><path d="M66 32l10 12-14 2z M50 72l-14 4 6-12z M34 30l-10 2 4 12z" fill="#fff"/>`),d:{en:'Circulate clockwise; traffic already in the circle has priority.',ja:'右回りに通行。環道内の車が優先。'}},
+ {ja:'歩行者専用',en:'Pedestrians only',cat:'reg',svg:SV.blue(`${PED(42,54,'#fff')}<g transform="scale(.7) translate(88 84)">${PED(0,0,'#fff')}</g>`),d:{en:'No vehicles, including bicycles (unless a bicycle sign is added).',ja:'車両通行禁止。自転車も原則不可。'}},
+ {ja:'自転車及び歩行者専用',en:'Bicycles and pedestrians only',cat:'reg',svg:SV.blue(`${BIKE(34,52,'#fff')}${PED(70,56,'#fff')}`),d:{en:'The sign that allows cyclists on a sidewalk — pedestrians still have priority.',ja:'自転車が歩道を通行できる標識。歩行者が優先。'}},
+ {ja:'自動車専用',en:'Motor vehicles only',cat:'reg',svg:SV.rect(`<rect x="22" y="46" width="56" height="18" rx="5" fill="#fff"/><rect x="34" y="32" width="32" height="18" rx="5" fill="#fff"/><circle cx="34" cy="66" r="6" fill="#1B57AE" stroke="#fff" stroke-width="3"/><circle cx="66" cy="66" r="6" fill="#1B57AE" stroke="#fff" stroke-width="3"/>`),d:{en:'Expressway or motor-vehicle road: no mopeds under 126 cc, bicycles or pedestrians.',ja:'高速道路・自動車専用道路。原付・自転車・歩行者は不可。'}},
+ {ja:'歩行者横断禁止',en:'No pedestrian crossing',cat:'reg',svg:SV.ring(`${PED(50,56,'#111')}<line x1="22" y1="78" x2="78" y2="22" stroke="#C8242C" stroke-width="7"/>`),d:{en:'Pedestrians may not cross here — use the crosswalk or bridge.',ja:'ここでは横断禁止。横断歩道や歩道橋へ。'}}
+];
+const MARKS=[
+ {ja:'初心運転者標識（若葉マーク）',en:'Beginner mark (wakaba)',svg:`<svg viewBox="0 0 120 70" aria-hidden="true"><path d="M60 8c30 0 40 20 36 56L60 50 24 64C20 28 30 8 60 8z" fill="#F4D03F"/><path d="M60 8c-30 0-40 20-36 56l36-14z" fill="#1E9E62"/></svg>`,d:{en:'Required for one year after your first licence (1 pt / ¥4,000 if missing). Other drivers must not cut in on you.',ja:'免許取得後1年間は表示義務（違反1点・4,000円）。周囲の車は幅寄せ・割り込み禁止。'}},
+ {ja:'高齢運転者標識（高齢者マーク）',en:'Senior driver mark (kōreisha)',svg:`<svg viewBox="0 0 120 70" aria-hidden="true"><ellipse cx="60" cy="24" rx="14" ry="11" fill="#F59A23"/><ellipse cx="74" cy="36" rx="14" ry="11" fill="#F4D03F"/><ellipse cx="60" cy="48" rx="14" ry="11" fill="#5FBF7A"/><ellipse cx="46" cy="36" rx="14" ry="11" fill="#3E8FE0"/></svg>`,d:{en:'Encouraged (not compulsory) for drivers aged 70 and over. Same protection: no squeezing or cutting in.',ja:'70歳以上に努力義務。同じく幅寄せ・割り込み禁止の保護対象。'}},
+ {ja:'聴覚障害者標識',en:'Hearing-impaired driver mark',svg:`<svg viewBox="0 0 120 70" aria-hidden="true"><path d="M60 36c-8-16-26-22-30-10s10 22 30 24c20-2 34-12 30-24s-22-6-30 10z" fill="#5FBF7A"/><path d="M60 36c-8 16-26 22-30 10s10-22 30-24c20 2 34 12 30 24s-22 6-30-10z" fill="#F4D03F" opacity=".9"/></svg>`,d:{en:'A green-and-yellow butterfly. Required for licence holders with a hearing condition.',ja:'緑と黄色の蝶。聴覚障害を理由に免許条件が付いた人に表示義務。'}},
+ {ja:'身体障害者標識',en:'Physically disabled driver mark',svg:`<svg viewBox="0 0 120 70" aria-hidden="true"><circle cx="60" cy="22" r="11" fill="#3E8FE0"/><circle cx="74" cy="36" r="11" fill="#3E8FE0"/><circle cx="60" cy="50" r="11" fill="#3E8FE0"/><circle cx="46" cy="36" r="11" fill="#3E8FE0"/><circle cx="60" cy="36" r="6" fill="#fff"/></svg>`,d:{en:'A blue four-leaf clover. Optional; gives the same protection from cutting in.',ja:'青い四つ葉。表示は任意。同じ保護規定。'}}
+];
+const LINES=[
+ {ja:'黄色の実線',en:'Yellow solid centre line',svg:`<svg viewBox="0 0 100 60" aria-hidden="true"><rect width="100" height="60" fill="#3d4147"/><rect y="28" width="100" height="4" fill="#F0C23B"/></svg>`,d:{en:'Do not cross it to overtake. Crossing to turn right into a driveway is allowed.',ja:'追い越しのためのはみ出し禁止。右折で横切るのは可。'}},
+ {ja:'白の実線',en:'White solid centre line',svg:`<svg viewBox="0 0 100 60" aria-hidden="true"><rect width="100" height="60" fill="#3d4147"/><rect y="28" width="100" height="4" fill="#f1f1ec"/></svg>`,d:{en:'Do not cross it at all (roads 6 m or wider).',ja:'はみ出し禁止（幅6m以上の道路）。'}},
+ {ja:'白の破線',en:'White broken centre line',svg:`<svg viewBox="0 0 100 60" aria-hidden="true"><rect width="100" height="60" fill="#3d4147"/><path d="M4 30h16M32 30h16M60 30h16M88 30h12" stroke="#f1f1ec" stroke-width="4"/></svg>`,d:{en:'You may cross to overtake when it is safe. No line at all: default 30 km/h since September 2026.',ja:'安全なら追い越しではみ出せる。線がなければ2026年9月から法定速度30km/h。'}},
+ {ja:'ひし形（横断歩道あり）',en:'Diamond — crosswalk ahead',svg:`<svg viewBox="0 0 100 60" aria-hidden="true"><rect width="100" height="60" fill="#3d4147"/><path d="M50 8l14 22-14 22-14-22z" fill="none" stroke="#f1f1ec" stroke-width="4"/></svg>`,d:{en:'Painted 30 m and 50 m before a crosswalk. Slow down; be ready to stop.',ja:'横断歩道の30m・50m手前に表示。減速して停止に備える。'}},
+ {ja:'止まれ（路面標示）',en:'Painted stop',svg:`<svg viewBox="0 0 100 60" aria-hidden="true"><rect width="100" height="60" fill="#3d4147"/><rect x="12" y="10" width="76" height="5" fill="#f1f1ec"/><text x="50" y="46" text-anchor="middle" font-size="22" font-weight="700" fill="#f1f1ec" ${F_JA}>止まれ</text></svg>`,d:{en:'Same force as the sign: stop at the line, wheels stopped.',ja:'標識と同じ効力。停止線で完全停止。'}},
+ {ja:'自転車ナビマーク',en:'Bicycle navigation mark',svg:`<svg viewBox="0 0 100 60" aria-hidden="true"><rect width="100" height="60" fill="#3d4147"/><path d="M40 44l10-16 10 16" fill="none" stroke="#3E8FE0" stroke-width="5"/>${BIKE(50,20,'#3E8FE0')}</svg>`,d:{en:'Blue chevrons show where cyclists should ride (on the left, with traffic). Expect bikes there.',ja:'自転車の走行位置を示す青い矢羽根。車はそこに自転車がいる前提で。'}}
+];
+function renderSigns(){
+  $('#signGrid').innerHTML=SIGNS.map(s=>`<div class="sign">${s.svg}<span class="cat ${s.cat}">${T(STR[s.cat==='reg'?'catReg':s.cat==='warn'?'catWarn':'catIns'])}</span><b>${lang==='ja'?s.ja:s.en}<br><span>${lang==='ja'?s.en:s.ja}</span></b><span>${T(s.d)}</span></div>`).join('');
+  $('#markGrid').innerHTML=MARKS.map(m=>`<div class="mark">${m.svg}<div><b>${lang==='ja'?m.ja:m.en}</b><span>${lang==='ja'?m.en:m.ja} — ${T(m.d)}</span></div></div>`).join('');
+  $('#lineGrid').innerHTML=LINES.map(l=>`<div class="sign"><svg viewBox="0 0 100 60" style="width:120px;height:72px;border-radius:6px" aria-hidden="true">${l.svg.replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'')}</svg><b>${lang==='ja'?l.ja:l.en}<br><span>${lang==='ja'?l.en:l.ja}</span></b><span>${T(l.d)}</span></div>`).join('');
+}
+
+/* ===================== PENALTIES ===================== */
+function renderPenalties(){
+  const rows=PEN.rows.map(r=>`<tr><td>${lang==='ja'?r[1]:r[0]}<br><small style="color:var(--muted)">${lang==='ja'?r[0]:r[1]}</small></td><td class="num">${r[2]}</td><td class="${r[3]==='court'?'red-t':''}">${r[3]==='court'?T(STR.court):r[3]}</td></tr>`).join('');
+  const thr=PEN.thresholds.map(x=>`<tr><td class="num">${x[0]}</td><td>${lang==='ja'?x[2]:x[1]}</td></tr>`).join('');
+  const tl=PEN.timeline.map(x=>`<li><b>${lang==='ja'?x[1]:x[0]}</b><span>${T(x[2])}</span></li>`).join('');
+  $('#penPage').innerHTML=`<h1>${T(STR.penTitle)}</h1><p class="lead">${T(STR.penLead)}</p>
+  <div class="cols"><div class="card"><h3>${T(STR.tickets)}</h3><p><span class="ticket" style="background:#fff"></span>${T(STR.tW)}</p><p style="margin-top:8px"><span class="ticket" style="background:#1F4E9C"></span>${T(STR.tB)}</p><p style="margin-top:8px"><span class="ticket" style="background:#C8242C"></span>${T(STR.tR)}</p></div>
+  <div class="card"><h3>${T(STR.thrTitle)}</h3><div class="tw"><table><thead><tr><th>${T(STR.colP)}</th><th></th></tr></thead><tbody>${thr}</tbody></table></div></div></div>
+  <h2>${T(STR.penTable)}</h2><div class="tw"><table><thead><tr><th>${T(STR.colV)}</th><th>${T(STR.colP)}</th><th>${T(STR.colF)}</th></tr></thead><tbody>${rows}</tbody></table></div>
+  <h2>${T(STR.tlTitle)}</h2><ul class="tl">${tl}</ul>`;
+}
+
+/* ===================== QUIZ ===================== */
+const Q={i:0,ans:[],done:false};
+function renderQuiz(){
+  const box=$('#qbox');
+  if(Q.done){ const score=Q.ans.filter((a,i)=>a===QUIZ[i].a).length; const pass=score/QUIZ.length>=0.9;
+    const missed=QUIZ.map((q,i)=>Q.ans[i]!==q.a?`<li style="margin-bottom:10px"><b>${T(q.q)}</b><br><span style="color:var(--muted)">${T(q.x)}</span></li>`:'').join('');
+    box.innerHTML=`<div class="qn">${T(STR.qOf)} ${QUIZ.length}/${QUIZ.length}</div><div class="score">${score} / ${QUIZ.length}</div><p class="qs">${score}${lang==='ja'?'':' '}${T(STR.qScore)} · ${pass?T(STR.qPass):T(STR.qFail)}</p>${missed?`<h3 style="font-size:15px;margin:14px 0 8px">${T(STR.qReview)}</h3><ul style="padding-left:18px;font-size:14.5px">${missed}</ul>`:''}<div class="qnext"><button id="qRetry">${T(STR.qRetry)}</button></div>`;
+    $('#qRetry').addEventListener('click',()=>{ Q.i=0; Q.ans=[]; Q.done=false; renderQuiz(); }); return; }
+  const q=QUIZ[Q.i], answered=Q.ans.length>Q.i;
+  const prog=QUIZ.map((x,i)=>`<i class="${i<Q.ans.length?(Q.ans[i]===QUIZ[i].a?'ok':'ng'):(i===Q.i?'cur':'')}"></i>`).join('');
+  box.innerHTML=`<div class="prog">${prog}</div><div class="qn">${T(STR.qOf)} ${Q.i+1} / ${QUIZ.length}</div><div class="q">${T(q.q)}</div><div class="qs ${lang==='ja'?'':'ja'}">${lang==='ja'?q.q.en:q.q.ja}</div>
+  <div class="qbtns"><button id="qT" ${answered?'disabled':''}>${T(STR.qTrue)}</button><button id="qF" ${answered?'disabled':''}>${T(STR.qFalse)}</button></div>
+  <div class="expl ${answered?'on':''}" id="qX"></div><div class="qnext" id="qN" style="display:${answered?'flex':'none'}"><button id="qNext">${Q.i===QUIZ.length-1?T(STR.qResult):T(STR.qNext)}</button></div>`;
+  const show=()=>{ const a=Q.ans[Q.i]; const ok=a===q.a; $('#qX').innerHTML=`<b style="color:${ok?'var(--green-fg)':'var(--red-fg)'}">${ok?T(STR.qCorrect):T(STR.qWrong)}</b>${T(q.x)}`; $('#qX').classList.add('on'); $('#qN').style.display='flex'; $('#qT').disabled=$('#qF').disabled=true; $(a?'#qT':'#qF').classList.add('pick',ok?'ok':'ng'); $(q.a?'#qT':'#qF').classList.add('reveal'); };
+  $('#qT').addEventListener('click',()=>{ Q.ans[Q.i]=true; show(); }); $('#qF').addEventListener('click',()=>{ Q.ans[Q.i]=false; show(); });
+  $('#qNext').addEventListener('click',()=>{ if(Q.i===QUIZ.length-1) Q.done=true; else Q.i++; renderQuiz(); try{ $('#qbox').scrollIntoView({behavior:REDUCE?'auto':'smooth',block:'nearest'}); }catch(e){} });
+  if(answered) show();
+}
+
+/* ===================== LEARN UI ===================== */
+let cur=-1,chapter=null,t=0,playing=true,lastFrame=0,capIndex=-1,visible3D=true,introUntil=0,hintTimer=null;
+const orbit={az:0,el:0,zoom:1};
+const camPos=new THREE.Vector3(),camLook=new THREE.Vector3(); let camInit=false;
+function renderChapterList(){
+  const el=$('#chapList'); el.innerHTML='';
+  ORDER.forEach((id,i)=>{ const c=TEXT[id]; const b=document.createElement('button'); b.className='chap'; b.type='button'; b.setAttribute('aria-current',i===cur?'true':'false');
+    b.innerHTML=`<span class="n">${c.num}</span><span class="t"><b class="${lang==='ja'?'ja':''}">${lang==='ja'?c.ja:c.en}</b><i class="${lang==='ja'?'':'ja'}">${lang==='ja'?c.en:c.ja}</i></span>`;
+    b.addEventListener('click',()=>loadChapter(i,{scroll:true})); el.appendChild(b); });
+  const act=el.querySelector('[aria-current="true"]'); if(act&&act.scrollIntoView&&window.innerWidth<=1180){ try{ act.scrollIntoView({block:'nearest',inline:'center',behavior:'auto'}); }catch(e){} }
+}
+function renderDetail(){
+  const c=TEXT[ORDER[cur]]; const title=lang==='ja'?c.ja:c.en,sub=lang==='ja'?c.en:c.ja;
+  const chips=c.chips.map(ch=>`<span class="chip ${ch.c||''}"><small>${T(ch.l)}</small><b>${T(ch.v)}</b></span>`).join('');
+  $('#detail').innerHTML=`<div class="kicker"><span class="n">${c.num}</span>${lang==='ja'?'第'+c.num+'章／全16章':'Chapter '+c.num+' of 16'}</div>
+  <h2 class="${lang==='ja'?'ja':''}">${title}<small class="${lang==='ja'?'':'ja'}">${sub}</small></h2><p class="tag">${T(c.tag)}</p>
+  <h3>${T(STR.detailRule)}</h3><ul class="pts">${c.pts.map(p=>`<li>${T(p)}</li>`).join('')}</ul>
+  <h3>${T(STR.detailPen)}</h3><div class="chips">${chips}</div>
+  <h3>${T(STR.detailLaw)}</h3><div class="law">${T(c.law)}</div>
+  <div class="tip"><b>${T(STR.detailTip)}</b>${T(c.tip)}</div>
+  <div class="navbtns"><button id="dPrev" type="button" ${cur===0?'disabled':''}>${T(STR.prev)}</button><button id="dNext" type="button" class="primary">${cur===ORDER.length-1?T(STR.toQuiz):T(STR.next)}</button></div>`;
+  $('#dPrev').addEventListener('click',()=>loadChapter(cur-1,{scroll:true})); $('#dNext').addEventListener('click',()=>{ if(cur===ORDER.length-1) showTab('quiz'); else loadChapter(cur+1,{scroll:true}); });
+}
+function updateCaption(tt,force){
+  const caps=TEXT[ORDER[cur]].caps; let idx=0; for(let k=0;k<caps.length;k++) if(tt>=caps[k][0]) idx=k;
+  if(idx===capIndex&&!force) return; capIndex=idx; const c=caps[idx]; const el=$('#cap'),P=$('#capP'),S=$('#capS');
+  const swap=()=>{ P.textContent=lang==='ja'?c[2]:c[1]; S.textContent=lang==='ja'?c[1]:c[2]; P.classList.toggle('ja',lang==='ja'); S.classList.toggle('ja',lang!=='ja'); };
+  if(REDUCE||force){ swap(); el.classList.remove('swap'); return; }
+  el.classList.add('swap'); setTimeout(()=>{ swap(); el.classList.remove('swap'); },200);
+}
+function fmt(s){ s=Math.max(0,Math.floor(s)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
+function updateTime(){ if(!chapter) return; $('#time').textContent=fmt(t)+' / '+fmt(chapter.dur); const sc=$('#scrub'); if(document.activeElement!==sc) sc.value=Math.round(t/chapter.dur*1000); }
+function setPlayIcon(){ $('#playIco').innerHTML=playing?'<path d="M7 5h4v14H7zm6 0h4v14h-4z"/>':'<path d="M8 5v14l11-7z"/>'; $('#playBtn').setAttribute('aria-label',playing?'Pause':'Play'); }
+function resetDynamics(){ VEH.forEach(v=>{ v.userData.prev=null; v.userData.speed=0; delete v.userData.lx; }); }
+function loadChapter(i,opts){
+  i=(i+ORDER.length)%ORDER.length; const first=cur<0; cur=i; const id=ORDER[i];
+  renderChapterList(); renderDetail(); hudHide(); orbit.az=0; orbit.el=0; orbit.zoom=1; t=0; playing=true; setPlayIcon(); capIndex=-1; updateCaption(0,true);
+  if(threeOK){ clearStage(); VEH=[]; PEOPLE=[]; chapter=BUILD[id](); camInit=false; chapter.update(0,0,0); resetDynamics(); if(first&&!REDUCE) introUntil=performance.now()+2600; }
+  else chapter={dur:TEXT[id].caps[TEXT[id].caps.length-1][0]+4};
+  $('#sceneChipText').textContent=chapter.chip?T(chapter.chip):(TEXT[id].en);
+  updateTime(); try{ localStorage.setItem('dj-chapter',String(i)); }catch(e){}
+  if(opts&&opts.scroll&&window.innerWidth<=840){ try{ $('.stagewrap').scrollIntoView({behavior:REDUCE?'auto':'smooth',block:'start'}); }catch(e){} }
+}
+function applyCamera(c,dt,now){
+  const look=new THREE.Vector3(c.look[0],c.look[1],c.look[2]); const off=new THREE.Vector3(c.pos[0]-look.x,c.pos[1]-look.y,c.pos[2]-look.z);
+  if(orbit.az||orbit.el||orbit.zoom!==1){ off.applyAxisAngle(Y_AXIS,orbit.az); const axis=new THREE.Vector3().crossVectors(off,Y_AXIS); if(axis.lengthSq()>1e-6){ axis.normalize(); off.applyAxisAngle(axis,orbit.el); } off.multiplyScalar(orbit.zoom); }
+  const pos=look.clone().add(off); if(pos.y<1.3) pos.y=1.3;
+  if(!camInit){ camInit=true; if(introUntil>now){ camPos.set(pos.x-30,pos.y+45,pos.z+40); camLook.copy(look); } else { camPos.copy(pos); camLook.copy(look); } }
+  else { const intro=introUntil>now; const k=REDUCE?1:1-Math.exp(-dt*(intro?2.2:5.5)); camPos.lerp(pos,k); camLook.lerp(look,k); }
+  camera.position.copy(camPos); camera.lookAt(camLook);
+  sun.position.set(camLook.x+35,70,camLook.z+30); sun.target.position.copy(camLook);
+}
+function frame(now){
+  requestAnimationFrame(frame);
+  if(!threeOK||!chapter||!visible3D||document.hidden){ lastFrame=now; return; }
+  const dt=Math.min(0.05,Math.max(0,(now-lastFrame)/1000)); lastFrame=now; const wall=now/1000;
+  if(playing){ t+=dt; if(t>=chapter.dur){ t-=chapter.dur; resetDynamics(); } }
+  chapter.update(t,playing?dt:0,wall);
+  VEH.forEach(v=>tickVehicle(v,dt,wall));
+  updateCaption(t); updateTime();
+  applyCamera(chapter.cam(t),dt,now);
+  renderer.render(scene,camera);
+}
+function showTab(name){
+  $$('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===name?'true':'false'));
+  $$('.view').forEach(v=>v.classList.toggle('on',v.id===name));
+  visible3D=name==='learn'; if(!visible3D) { playing=false; setPlayIcon(); } 
+  if(name==='learn'&&threeOK){ resize(); }
+  try{ window.scrollTo({top:0,behavior:'auto'}); }catch(e){}
+}
+function applyStrings(){
+  document.documentElement.lang=lang; $('#langBtn').textContent=lang==='ja'?'EN':'日本語'; $('#langBtn').setAttribute('aria-pressed',lang==='ja'?'true':'false');
+  $('#tab-learn').textContent=T(STR.tabLearn); $('#tab-signs').textContent=T(STR.tabSigns); $('#tab-penalties').textContent=T(STR.tabPen); $('#tab-quiz').textContent=T(STR.tabQuiz);
+  $('.rail h2').textContent=T(STR.chapters); $('.brand span').textContent=T(STR.brandSub); $('#hint').textContent=T(STR.hint);
+  $('#signsTitle').textContent=T(STR.signsTitle); $('#signsLead').textContent=T(STR.signsLead); $('#marksTitle').textContent=T(STR.marksTitle); $('#lineTitle').textContent=T(STR.lineTitle);
+  $('#quizTitle').textContent=T(STR.quizTitle); $('#quizLead').textContent=T(STR.quizLead); $('#foot1').textContent=T(STR.foot1); $('#foot2').textContent=T(STR.foot2);
+  $('#nofx p:first-child b').textContent=T(STR.nofx1); $('#nofx p:last-child').textContent=T(STR.nofx2);
+  document.body.classList.toggle('ja',lang==='ja');
+}
+function setLang(l){ lang=l; try{ localStorage.setItem('dj-lang',l); }catch(e){} applyStrings(); renderSigns(); renderPenalties(); renderQuiz(); if(cur>=0){ renderChapterList(); renderDetail(); updateCaption(t,true); if(chapter) $('#sceneChipText').textContent=chapter.chip?T(chapter.chip):''; } }
+function setTheme(mode){ if(mode) document.documentElement.setAttribute('data-theme',mode); else document.documentElement.removeAttribute('data-theme'); try{ if(mode) localStorage.setItem('dj-theme',mode); else localStorage.removeItem('dj-theme'); }catch(e){} }
+
+/* ---------- events ---------- */
+function bind(){
+  $$('.tabs button').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+  $('#brand').addEventListener('click',e=>{ e.preventDefault(); showTab('learn'); });
+  $('#langBtn').addEventListener('click',()=>setLang(lang==='en'?'ja':'en'));
+  $('#themeBtn').addEventListener('click',()=>{ const dark=getComputedStyle(document.documentElement).colorScheme.indexOf('dark')>=0; setTheme(dark?'light':'dark'); });
+  $('#playBtn').addEventListener('click',()=>{ playing=!playing; setPlayIcon(); });
+  $('#replayBtn').addEventListener('click',()=>{ t=0; playing=true; setPlayIcon(); resetDynamics(); updateCaption(0,true); });
+  $('#prevBtn').addEventListener('click',()=>loadChapter(cur-1)); $('#nextBtn').addEventListener('click',()=>loadChapter(cur+1));
+  $('#scrub').addEventListener('input',e=>{ if(!chapter) return; t=e.target.value/1000*chapter.dur; resetDynamics(); if(chapter.update) chapter.update(t,0,performance.now()/1000); updateCaption(t,true); updateTime(); });
+  const st=$('#stage'); let drag=null;
+  st.addEventListener('pointerdown',e=>{ if(e.target.closest('.transport')||e.target.closest('button')||e.target.closest('input')) return; drag={x:e.clientX,y:e.clientY,id:e.pointerId}; st.setPointerCapture(e.pointerId); st.classList.add('drag'); $('#hint').classList.remove('on'); });
+  st.addEventListener('pointermove',e=>{ if(!drag||e.pointerId!==drag.id) return; const dx=e.clientX-drag.x,dy=e.clientY-drag.y; drag.x=e.clientX; drag.y=e.clientY; orbit.az-=dx*0.006; orbit.el=Math.max(-0.5,Math.min(1.1,orbit.el+dy*0.005)); });
+  const up=e=>{ if(drag&&e.pointerId===drag.id){ drag=null; st.classList.remove('drag'); } }; st.addEventListener('pointerup',up); st.addEventListener('pointercancel',up);
+  st.addEventListener('wheel',e=>{ if(e.target.closest('.transport')) return; e.preventDefault(); orbit.zoom=Math.max(0.45,Math.min(2.4,orbit.zoom*(1+e.deltaY*0.0012))); },{passive:false});
+  st.addEventListener('dblclick',e=>{ if(e.target.closest('.transport')) return; orbit.az=0; orbit.el=0; orbit.zoom=1; });
+  st.tabIndex=0; st.addEventListener('keydown',e=>{ if(e.target.tagName==='INPUT'||e.target.tagName==='BUTTON') return; if(e.code==='Space'){ e.preventDefault(); playing=!playing; setPlayIcon(); } else if(e.key==='ArrowRight'){ t=Math.min(chapter.dur-0.01,t+2); resetDynamics(); } else if(e.key==='ArrowLeft'){ t=Math.max(0,t-2); resetDynamics(); } else if(e.key==='PageDown'||e.key==='n'){ loadChapter(cur+1); } else if(e.key==='PageUp'||e.key==='p'){ loadChapter(cur-1); } });
+  document.addEventListener('visibilitychange',()=>{ lastFrame=performance.now(); });
+}
+
+/* ---------- boot ---------- */
+function boot(){
+  let stored=null; try{ stored=localStorage.getItem('dj-lang'); const th=localStorage.getItem('dj-theme'); if(th) setTheme(th); }catch(e){}
+  if(stored==='ja'||stored==='en') lang=stored; else if((navigator.language||'').toLowerCase().startsWith('ja')) lang='ja';
+  applyStrings(); renderSigns(); renderPenalties(); renderQuiz(); bind();
+  threeOK=(typeof THREE!=='undefined')&&initThree();
+  if(!threeOK){ $('#nofx').classList.add('on'); $('#sceneChipText').textContent=''; }
+  let start=0; try{ const s=parseInt(localStorage.getItem('dj-chapter')||'0',10); if(s>=0&&s<ORDER.length) start=s; }catch(e){}
+  loadChapter(start);
+  if(threeOK){ lastFrame=performance.now(); requestAnimationFrame(frame); if(!matchMedia('(pointer:coarse)').matches){ hintTimer=setTimeout(()=>{ $('#hint').classList.add('on'); setTimeout(()=>$('#hint').classList.remove('on'),4500); },3500); } }
+}
+window.__dj={get chapter(){return chapter;},get camera(){return camera;},get scene(){return scene;},get veh(){return VEH;},get t(){return t;},load:loadChapter};
+const fontsReady=(document.fonts&&document.fonts.ready)?document.fonts.ready:Promise.resolve();
+Promise.race([fontsReady,new Promise(r=>setTimeout(r,2500))]).then(()=>{ try{ boot(); }catch(err){ console.error(err); $('#nofx').classList.add('on'); } });
+})();
+</script>
+</body>
+</html>
