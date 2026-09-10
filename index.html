@@ -679,7 +679,8 @@ BUILD.speed=function(){
   const lab=makeLabel('中央線なし = 30 · no centre line = 30',{w:6.4,bg:YELB,fg:'#1b1f24'}),lab2=makeLabel('標識が優先 · the sign wins',{w:4.6}); g.add(lab,lab2);
   return {dur:19,chip:{en:'Ordinary road → residential street → expressway',ja:'一般道 → 生活道路 → 高速道路'},
     update(t){
-      const ax=kf(t,[[0,-95],[5,-10],[5.8,0],[10,36],[11.5,50],[14.5,84]]); a.position.set(ax,0,-1.75); a.rotation.y=DIR.E;
+      const ax=kf(t,[[0,-95],[5,-10],[5.8,0],[10,36],[11.5,50],[14.5,84]]);
+      const az=kf(t,[[0,-1.75],[5,-1.75],[5.8,0],[14.5,0]]); a.position.set(ax,0,az); a.rotation.y=DIR.E;
       const hx=kf(t,[[14,-70],[19,65]]); h.position.set(hx,0,-9.25); h.rotation.y=DIR.E;
       const tx=kf(t,[[14,-25],[19,85]]); tr.position.set(tx,0,-9.25); tr.rotation.y=DIR.E;
       const spd=kf(t,[[0,60],[4.6,60],[5.8,30],[10.2,30],[11.6,40],[14.4,40],[14.5,100],[19,100]]);
