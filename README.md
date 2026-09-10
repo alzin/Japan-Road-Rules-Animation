@@ -58,6 +58,17 @@ Issues and pull requests are welcome — especially corrections to the rules,
 penalties, or Japanese wording. Content and interaction logic live in `index.html`;
 the responsive design system lives in `styles.css`.
 
+Run the narration regression checks with Node.js (no packages to install):
+
+```bash
+node --test tests/narration.test.cjs
+```
+
+These checks simulate delayed speech cancellation and mobile chapter-picker
+events. Also check narration on a real iPhone/iPad: switch chapters quickly while
+a caption is speaking, open and close the chapter picker, pause or mute, and
+background then return to the page. Only the current scene should be heard.
+
 ## Disclaimer
 
 This is an educational project, not legal advice. Rules and penalties change;

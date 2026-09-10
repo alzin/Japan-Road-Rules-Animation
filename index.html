@@ -1245,6 +1245,7 @@ let cur=-1,chapter=null,t=0,playing=!REDUCE,lastFrame=0,capIndex=-1,visible3D=tr
 let activeTab=null,exploring=false,toastTimer=null;
 const canNarrate='speechSynthesis' in window&&'SpeechSynthesisUtterance' in window;
 let narrationEnabled=canNarrate,narrationUtterance=null;
+let narrationRequest=null,narrationTimer=null,narrationReadyAt=0,narrationPageActive=true;
 let fullscreenActive=false,fullscreenPending=false,fullscreenFocus=null,fullscreenScroll=0;
 let fullscreenInert=[];
 const tabScroll={learn:0,signs:0,penalties:0,quiz:0};
@@ -1291,8 +1292,18 @@ function renderDetail(){
   });
 }
 function cancelNarration(){
+  clearTimeout(narrationTimer); narrationTimer=null; narrationRequest=null;
   if(!canNarrate) return;
-  speechSynthesis.cancel(); narrationUtterance=null;
+  const busy=narrationUtterance||speechSynthesis.speaking||speechSynthesis.pending;
+  narrationUtterance=null;
+  if(busy){
+    // Native speech cancellation can finish asynchronously, especially on iOS.
+    narrationReadyAt=performance.now()+200;
+    speechSynthesis.cancel();
+  }
+}
+function canSpeakCaption(idx){
+  return canNarrate&&narrationEnabled&&narrationPageActive&&threeOK&&playing&&activeTab==='learn'&&visible3D&&!document.hidden&&!$('#chapterSheet').open&&cur>=0&&idx>=0&&idx===capIndex;
 }
 function narrationRate(text,idx){
   const caps=TEXT[ORDER[cur]].caps,start=caps[idx][0],end=idx+1<caps.length?caps[idx+1][0]:(chapter?chapter.dur:start+4);
@@ -1302,15 +1313,33 @@ function narrationRate(text,idx){
   return Math.max(.9,Math.min(1.7,units/seconds/normalPerSecond));
 }
 function speakCaption(idx=capIndex){
-  if(!canNarrate||!narrationEnabled||!playing||activeTab!=='learn'||!visible3D||document.hidden||cur<0||idx<0) return;
-  const c=TEXT[ORDER[cur]].caps[idx],text=lang==='ja'?c[2]:c[1],locale=lang==='ja'?'ja-JP':'en-US';
+  if(!canSpeakCaption(idx)) return;
+  // Loading a chapter, closing its picker and visibility changes can all request
+  // the same caption. Keep one pending/active request instead of restarting it.
+  if(narrationRequest&&narrationRequest.chapter===cur&&narrationRequest.idx===idx&&narrationRequest.lang===lang) return;
   cancelNarration();
-  const utterance=new SpeechSynthesisUtterance(text); narrationUtterance=utterance;
-  utterance.lang=locale; utterance.rate=narrationRate(text,idx); utterance.pitch=1; utterance.volume=1;
-  const voices=speechSynthesis.getVoices(),normalized=locale.toLowerCase();
-  utterance.voice=voices.find(v=>v.lang.replace('_','-').toLowerCase()===normalized)||voices.find(v=>v.lang.toLowerCase().startsWith(lang))||null;
-  utterance.onend=utterance.onerror=()=>{ if(narrationUtterance===utterance) narrationUtterance=null; };
-  speechSynthesis.speak(utterance);
+  const request={chapter:cur,idx,lang,expires:performance.now()+2000}; narrationRequest=request;
+  const start=()=>{
+    if(narrationRequest!==request) return;
+    narrationTimer=null;
+    if(!canSpeakCaption(idx)||cur!==request.chapter||lang!==request.lang){ cancelNarration(); return; }
+    // Wait for the old voice to stop; never queue a new scene behind stale audio.
+    const now=performance.now(),delay=narrationReadyAt-now;
+    if(now>=request.expires){ cancelNarration(); return; }
+    if(delay>0||speechSynthesis.speaking||speechSynthesis.pending){ narrationTimer=setTimeout(start,Math.max(50,delay)); return; }
+    const c=TEXT[ORDER[cur]].caps[idx],text=lang==='ja'?c[2]:c[1],locale=lang==='ja'?'ja-JP':'en-US';
+    const utterance=new SpeechSynthesisUtterance(text); narrationUtterance=utterance;
+    utterance.lang=locale; utterance.rate=narrationRate(text,idx); utterance.pitch=1; utterance.volume=1;
+    const voices=speechSynthesis.getVoices(),normalized=locale.toLowerCase();
+    utterance.voice=voices.find(v=>v.lang.replace('_','-').toLowerCase()===normalized)||voices.find(v=>v.lang.toLowerCase().startsWith(lang))||null;
+    utterance.onend=utterance.onerror=()=>{
+      if(narrationRequest!==request) return;
+      narrationUtterance=null; narrationRequest=null;
+    };
+    speechSynthesis.speak(utterance);
+  };
+  // Idle playback stays synchronous so the first tap can unlock speech on iOS.
+  start();
 }
 function updateNarrationButton(){
   const button=$('#narrationBtn'); if(!button) return;
@@ -1394,9 +1423,10 @@ async function toggleFullscreen(){
 }
 function loadChapter(i,opts={}){
   if(!Number.isInteger(i)||i<0||i>=ORDER.length) return; cancelNarration(); const first=cur<0; cur=i; const id=ORDER[i];
-  renderChapterList(); renderDetail(); hudHide(); setSceneTransition(0); orbit.az=0; orbit.el=0; orbit.zoom=1; setExplore(false); t=0; playing=opts.autoplay!==false; capIndex=-1; updateCaption(0,true);
+  renderChapterList(); renderDetail(); hudHide(); setSceneTransition(0); orbit.az=0; orbit.el=0; orbit.zoom=1; setExplore(false); t=0; playing=opts.autoplay!==false; capIndex=-1;
   if(threeOK){ clearStage(); VEH=[]; PEOPLE=[]; chapter=BUILD[id](); camInit=false; chapter.update(0,0,0); resetDynamics(); if(first&&!REDUCE) introUntil=performance.now()+1800; }
   else { chapter={dur:TEXT[id].caps[TEXT[id].caps.length-1][0]+4}; playing=false; }
+  updateCaption(0,true);
   $('#sceneChipText').textContent=chapter.chip?T(chapter.chip):(lang==='ja'?TEXT[id].ja:TEXT[id].en);
   $('#lessonDuration').textContent=lang==='ja'?`${Math.ceil(chapter.dur)}秒`:`${Math.ceil(chapter.dur)} sec`;
   $('#prevBtn').disabled=cur===0; $('#nextBtn').disabled=cur===ORDER.length-1;
@@ -1448,7 +1478,7 @@ function applyStrings(){
   setPlayIcon(); updateNarrationButton(); updateThemeButton(); updateFullscreenButton(); setExplore(exploring); if(cur>=0) updateProgress();
 }
 function setLang(l){
-  lang=l; try{ localStorage.setItem('dj-lang',l); }catch(e){}
+  cancelNarration(); lang=l; try{ localStorage.setItem('dj-lang',l); }catch(e){}
   applyStrings(); renderSigns(); renderPenalties(); renderQuiz();
   if(cur>=0){ renderChapterList(); renderDetail(); updateCaption(t,true); if(chapter){ $('#sceneChipText').textContent=chapter.chip?T(chapter.chip):(lang==='ja'?TEXT[ORDER[cur]].ja:TEXT[ORDER[cur]].en); $('#lessonDuration').textContent=lang==='ja'?`${Math.ceil(chapter.dur)}秒`:`${Math.ceil(chapter.dur)} sec`; } }
 }
@@ -1494,7 +1524,7 @@ function bind(){
   $$('[data-filter]').forEach(b=>b.addEventListener('click',()=>{ signFilter=b.dataset.filter; $$('[data-filter]').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); renderSignResults(); }));
   $('#playBtn').addEventListener('click',togglePlay);
   $('#narrationBtn').addEventListener('click',()=>setNarration(!narrationEnabled));
-  $('#replayBtn').addEventListener('click',()=>{ t=0; playing=true; setPlayIcon(); resetDynamics(); updateCaption(0,true); });
+  $('#replayBtn').addEventListener('click',()=>{ cancelNarration(); t=0; playing=true; setPlayIcon(); resetDynamics(); updateCaption(0,true); });
   $('#prevBtn').addEventListener('click',()=>loadChapter(cur-1,{focus:true})); $('#nextBtn').addEventListener('click',()=>loadChapter(cur+1,{focus:true}));
   $('#scrub').addEventListener('input',e=>{ if(!chapter) return; cancelNarration(); t=e.target.value/1000*chapter.dur; resetDynamics(); if(chapter.update) chapter.update(t,0,performance.now()/1000); updateCaption(t,true,false); updateTime(); });
   $('#scrub').addEventListener('change',()=>{ if(playing) speakCaption(); });
@@ -1528,11 +1558,13 @@ function bind(){
     if(e.target!==st||!chapter) return;
     if(e.code==='Space'){ e.preventDefault(); togglePlay(); }
     else if(e.key==='Escape'){ setExplore(false); }
-    else if(e.key==='ArrowRight'||e.key==='ArrowLeft'){ e.preventDefault(); t=Math.max(0,Math.min(chapter.dur-.001,t+(e.key==='ArrowRight'?2:-2))); resetDynamics(); updateCaption(t,true); updateTime(); }
+    else if(e.key==='ArrowRight'||e.key==='ArrowLeft'){ e.preventDefault(); cancelNarration(); t=Math.max(0,Math.min(chapter.dur-.001,t+(e.key==='ArrowRight'?2:-2))); resetDynamics(); updateCaption(t,true); updateTime(); }
     else if(e.key==='PageDown'||e.key==='n'){ e.preventDefault(); loadChapter(cur+1,{focus:true}); }
     else if(e.key==='PageUp'||e.key==='p'){ e.preventDefault(); loadChapter(cur-1,{focus:true}); }
   });
   document.addEventListener('visibilitychange',()=>{ lastFrame=performance.now(); if(document.hidden) cancelNarration(); else if(playing) speakCaption(); });
+  window.addEventListener('pagehide',()=>{ narrationPageActive=false; cancelNarration(); });
+  window.addEventListener('pageshow',()=>{ narrationPageActive=true; if(playing) speakCaption(); });
   if('IntersectionObserver' in window) new IntersectionObserver(entries=>{
     const visible=activeTab==='learn'&&entries[0].isIntersecting; if(visible===visible3D) return; visible3D=visible;
     if(visible&&playing) speakCaption(); else cancelNarration();
