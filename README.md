@@ -10,6 +10,16 @@ comes from.
 
 Bilingual: English / 日本語.
 
+Designed for phones and desktops, with bottom navigation on mobile, a searchable
+chapter picker, a searchable sign reference, and light and dark themes. Complete
+chapters to track your progress; your current chapter and quiz answers are saved
+on your device. The 3D viewer leaves normal page scrolling available — tap
+**Explore** to look around, then **Done** to return to scrolling. Selecting a
+chapter starts its animation automatically. Use the fullscreen button in the
+viewer to expand the animation with its captions and playback controls; use the
+same button or Escape to exit. Reduced-motion preferences pause the initial
+lesson on page load, while chapter selections still play immediately.
+
 ## Chapters
 
 | # | Chapter | # | Chapter |
@@ -29,8 +39,8 @@ changes, and a quiz to check what stuck.
 
 ## Running it locally
 
-It is a single self-contained HTML file — no build step, no dependencies to
-install. Open `index.html` in a browser, or serve the folder if you prefer:
+There is no build step and no dependencies to install. Keep `index.html` and
+`styles.css` together, then open `index.html` in a browser or serve the folder:
 
 ```bash
 python -m http.server 8000
@@ -44,7 +54,8 @@ from Google Fonts, so the 3D scenes need an internet connection the first time.
 ## Contributing
 
 Issues and pull requests are welcome — especially corrections to the rules,
-penalties, or Japanese wording. All the content lives in `index.html`.
+penalties, or Japanese wording. Content and interaction logic live in `index.html`;
+the responsive design system lives in `styles.css`.
 
 ## Disclaimer
 

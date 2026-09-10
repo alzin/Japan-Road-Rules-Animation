@@ -2,307 +2,83 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Japan Road Rules — the rules of the road, animated in 3D</title>
 <meta name="description" content="An interactive 3D guide to the rules of the road in Japan: keep left, 止まれ stop signs, crosswalk priority, railway crossings, the 2026 30 km/h residential limit, expressways, alcohol, phones, bicycles and more.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-:root{
-  --bg:#E4E8EC; --panel:#FFFFFF; --panel-2:#F2F4F6; --ink:#1B1F24; --muted:#535C66; --line:#CBD2D9;
-  --blue-bg:#1F4E9C; --blue-fg:#1F4E9C; --green-bg:#0B6B45; --green-fg:#0B6B45; --red-bg:#C8242C; --red-fg:#B8202A; --yellow:#F0C23B;
-  --focus:#1F4E9C;
-  --shadow:0 10px 30px rgba(27,31,36,.10);
-  --font:"Overpass","Zen Kaku Gothic New","Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",system-ui,sans-serif;
-  --fontja:"Zen Kaku Gothic New","Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic","Meiryo",system-ui,sans-serif;
-  color-scheme:light;
-}
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    --bg:#14171B; --panel:#1E2226; --panel-2:#262B31; --ink:#EDF0F3; --muted:#A4ADB7; --line:#373E46;
-    --blue-bg:#2D63BF; --blue-fg:#8FB8F0; --green-bg:#137A50; --green-fg:#55C892; --red-bg:#D0343B; --red-fg:#F27A78; --yellow:#F5CF5E;
-    --focus:#8FB8F0; --shadow:0 10px 30px rgba(0,0,0,.35); color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#14171B; --panel:#1E2226; --panel-2:#262B31; --ink:#EDF0F3; --muted:#A4ADB7; --line:#373E46;
-  --blue-bg:#2D63BF; --blue-fg:#8FB8F0; --green-bg:#137A50; --green-fg:#55C892; --red-bg:#D0343B; --red-fg:#F27A78; --yellow:#F5CF5E;
-  --focus:#8FB8F0; --shadow:0 10px 30px rgba(0,0,0,.35); color-scheme:dark;
-}
-*{box-sizing:border-box}
-html,body{margin:0;padding:0}
-body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;min-height:100vh}
-:lang(ja){font-family:var(--fontja)}
-.ja{font-family:var(--fontja)}
-h1,h2,h3{margin:0;line-height:1.2;font-weight:700}
-button{font:inherit;color:inherit;cursor:pointer}
-a{color:var(--blue-fg)}
-:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:6px}
-.sr{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
-
-/* ---------- header ---------- */
-.top{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line)}
-.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;min-width:0}
-.brand svg{width:34px;height:34px;flex:none}
-.brand b{font-size:19px;font-weight:800;letter-spacing:-.01em;white-space:nowrap}
-.brand span{display:block;font-size:12px;color:var(--muted);line-height:1.15;white-space:nowrap}
-.tabs{display:flex;gap:4px;margin-left:auto;background:var(--panel-2);padding:4px;border-radius:12px}
-.tabs button{border:0;background:transparent;padding:8px 14px;border-radius:9px;min-height:40px;color:var(--muted);font-weight:600;transition:background .18s,color .18s}
-.tabs button[aria-selected="true"]{background:var(--green-bg);color:#fff}
-.tabs button:hover:not([aria-selected="true"]){background:var(--line)}
-.ctl{display:flex;gap:6px}
-.ctl button{border:1px solid var(--line);background:var(--panel);border-radius:9px;min-width:44px;min-height:40px;padding:6px 10px;font-weight:700;transition:background .18s}
-.ctl button:hover{background:var(--panel-2)}
-.ctl button[aria-pressed="true"]{background:var(--blue-bg);color:#fff;border-color:var(--blue-bg)}
-.ctl svg{width:20px;height:20px;vertical-align:-5px}
-
-/* ---------- learn layout ---------- */
-.view{display:none}
-.view.on{display:block}
-#learn.on{display:grid;grid-template-columns:270px minmax(0,1fr) 380px;min-height:calc(100vh - 62px)}
-.rail{border-right:1px solid var(--line);background:var(--panel);overflow-y:auto;max-height:calc(100vh - 62px);position:sticky;top:62px}
-.rail h2{font-size:13px;font-weight:600;color:var(--muted);padding:16px 18px 6px}
-.chap{display:flex;gap:12px;align-items:center;width:100%;text-align:left;border:0;background:transparent;padding:10px 18px;min-height:52px;border-left:4px solid transparent;transition:background .18s}
-.chap:hover{background:var(--panel-2)}
-.chap[aria-current="true"]{background:var(--panel-2);border-left-color:var(--green-bg)}
-.chap .n{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;background:var(--panel-2);color:var(--muted);border:1px solid var(--line)}
-.chap[aria-current="true"] .n{background:var(--green-bg);color:#fff;border-color:var(--green-bg)}
-.chap .t{min-width:0}
-.chap .t b{display:block;font-size:15px;font-weight:700;line-height:1.25}
-.chap .t i{display:block;font-style:normal;font-size:12.5px;color:var(--muted);line-height:1.25;margin-top:2px}
-.chap.done .n{border-color:var(--green-fg);color:var(--green-fg)}
-
-.stagewrap{position:relative;background:#0f1216;min-height:420px}
-#stage{position:absolute;inset:0;overflow:hidden;touch-action:none;cursor:grab}
-#stage.drag{cursor:grabbing}
-#c{display:block;width:100%;height:100%}
-.hud{position:absolute;top:14px;right:14px;display:none;flex-direction:column;align-items:flex-end;padding:8px 12px;border-radius:12px;background:rgba(20,24,28,.78);color:#fff;backdrop-filter:blur(6px);min-width:96px}
-.hud.on{display:flex}
-.hud b{font-size:34px;font-weight:800;line-height:1;letter-spacing:-.02em}
-.hud small{font-size:12px;opacity:.85}
-.hud.warn b{color:#F5CF5E}
-.chip-scene{position:absolute;top:14px;left:14px;display:flex;gap:8px;align-items:center;padding:7px 12px;border-radius:999px;background:rgba(20,24,28,.72);color:#fff;font-size:13px;font-weight:600;backdrop-filter:blur(6px)}
-.chip-scene .dot{width:8px;height:8px;border-radius:50%;background:#F0C23B}
-.hint{position:absolute;bottom:126px;left:50%;transform:translateX(-50%);padding:6px 12px;border-radius:999px;background:rgba(20,24,28,.6);color:#fff;font-size:12.5px;opacity:0;transition:opacity .4s;pointer-events:none;white-space:nowrap}
-.hint.on{opacity:1}
-.cap{position:absolute;left:14px;right:14px;bottom:64px;display:flex;flex-direction:column;gap:3px;padding:14px 18px;border-radius:14px;background:rgba(20,24,28,.82);color:#fff;backdrop-filter:blur(8px);box-shadow:0 8px 30px rgba(0,0,0,.35);max-width:760px;margin:0 auto;transition:opacity .25s,transform .25s}
-.cap.swap{opacity:0;transform:translateY(6px)}
-.cap .p{font-size:17px;font-weight:600;line-height:1.35}
-.cap .s{font-size:13.5px;opacity:.78;line-height:1.35}
-.transport{position:absolute;left:14px;right:14px;bottom:12px;display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;background:rgba(20,24,28,.82);color:#fff;backdrop-filter:blur(8px);max-width:760px;margin:0 auto}
-.transport button{border:0;background:rgba(255,255,255,.08);color:#fff;border-radius:9px;width:40px;height:40px;display:grid;place-items:center;flex:none;transition:background .18s}
-.transport button:hover{background:rgba(255,255,255,.18)}
-.transport svg{width:20px;height:20px;fill:currentColor}
-.transport input[type=range]{flex:1;accent-color:#F0C23B;min-width:60px;height:34px;cursor:pointer}
-.transport .time{font-variant-numeric:tabular-nums;font-size:13px;opacity:.85;min-width:74px;text-align:center}
-.nofx{position:absolute;inset:0;display:none;place-items:center;text-align:center;padding:24px;color:#fff;background:#1a1f26}
-.nofx.on{display:grid}
-
-.detail{border-left:1px solid var(--line);background:var(--panel);padding:22px 22px 30px;overflow-y:auto;max-height:calc(100vh - 62px);position:sticky;top:62px}
-.detail .kicker{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:8px}
-.detail .kicker .n{width:26px;height:26px;border-radius:50%;background:var(--green-bg);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:800}
-.detail h2{font-size:26px;letter-spacing:-.01em}
-.detail h2 small{display:block;font-size:15px;color:var(--muted);font-weight:500;margin-top:4px}
-.detail .tag{margin:10px 0 18px;color:var(--muted);font-size:15px}
-.detail h3{font-size:13px;font-weight:600;color:var(--muted);margin:20px 0 8px}
-.pts{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px}
-.pts li{position:relative;padding-left:22px;font-size:15px;line-height:1.45}
-.pts li::before{content:"";position:absolute;left:0;top:.55em;width:10px;height:10px;border-radius:50%;background:var(--green-bg)}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{display:inline-flex;flex-direction:column;padding:8px 12px;border-radius:10px;background:var(--panel-2);border:1px solid var(--line);min-width:110px}
-.chip small{font-size:11.5px;color:var(--muted)}
-.chip b{font-size:15px;font-weight:800}
-.chip.red{background:var(--red-bg);border-color:var(--red-bg);color:#fff}
-.chip.red small{color:rgba(255,255,255,.85)}
-.chip.blue{background:var(--blue-bg);border-color:var(--blue-bg);color:#fff}
-.chip.blue small{color:rgba(255,255,255,.85)}
-.law{font-size:13.5px;color:var(--muted);padding:10px 12px;border-left:3px solid var(--blue-bg);background:var(--panel-2);border-radius:0 8px 8px 0}
-.tip{margin-top:18px;padding:12px 14px;border-radius:10px;background:var(--panel-2);border:1px dashed var(--line);font-size:14px}
-.tip b{display:block;font-size:12.5px;color:var(--green-fg);margin-bottom:4px}
-.navbtns{display:flex;gap:8px;margin-top:22px}
-.navbtns button{flex:1;border:1px solid var(--line);background:var(--panel);border-radius:10px;min-height:44px;font-weight:700;transition:background .18s}
-.navbtns button:hover{background:var(--panel-2)}
-.navbtns button.primary{background:var(--green-bg);color:#fff;border-color:var(--green-bg)}
-
-/* ---------- content pages ---------- */
-.page{max-width:1080px;margin:0 auto;padding:34px 20px 70px}
-.page h1{font-size:34px;letter-spacing:-.015em;margin-bottom:6px}
-.page .lead{font-size:17px;color:var(--muted);max-width:70ch;margin:0 0 26px}
-.page h2{font-size:22px;margin:34px 0 12px}
-.page p{max-width:72ch}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
-.sign{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
-.sign svg{width:96px;height:96px;flex:none}
-.sign b{font-size:16px;line-height:1.3}
-.sign span{font-size:14px;color:var(--muted);line-height:1.4}
-.sign .cat{font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--panel-2);border:1px solid var(--line);color:var(--muted)}
-.sign .cat.reg{color:var(--red-fg)} .sign .cat.warn{color:#9A6B00} .sign .cat.ins{color:var(--blue-fg)}
-:root[data-theme="dark"] .sign .cat.warn,:root:not([data-theme="light"]) .sign .cat.warn{color:var(--yellow)}
-.marks{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
-.mark{display:flex;gap:14px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
-.mark svg{width:120px;height:70px;flex:none}
-.mark b{display:block;font-size:15px}
-.mark span{font-size:13.5px;color:var(--muted)}
-table{border-collapse:collapse;width:100%;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:14.5px}
-th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
-th{background:var(--panel-2);font-weight:700;font-size:13px}
-tr:last-child td{border-bottom:0}
-td.num{font-weight:800;white-space:nowrap}
-.tw{overflow-x:auto;border-radius:12px}
-.red-t{color:var(--red-fg);font-weight:800}
-.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
-.card h3{font-size:16px;margin-bottom:8px}
-.card p{font-size:14.5px;color:var(--muted);margin:0}
-.ticket{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:6px;border:1px solid rgba(0,0,0,.2)}
-.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0;border-left:3px solid var(--line);margin-left:8px}
-.tl li{position:relative;padding:0 0 18px 22px}
-.tl li::before{content:"";position:absolute;left:-9px;top:6px;width:13px;height:13px;border-radius:50%;background:var(--green-bg);border:2px solid var(--panel)}
-.tl b{display:block;font-size:14px;color:var(--green-fg)}
-.tl span{font-size:14.5px}
-.tl li.future b{color:var(--muted)}
-
-/* ---------- quiz ---------- */
-.qbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:26px;max-width:760px}
-.qbox .prog{display:flex;gap:4px;margin-bottom:18px}
-.qbox .prog i{flex:1;height:5px;border-radius:3px;background:var(--line)}
-.qbox .prog i.ok{background:var(--green-bg)} .qbox .prog i.ng{background:var(--red-bg)} .qbox .prog i.cur{background:var(--blue-bg)}
-.qbox .qn{font-size:13px;color:var(--muted);font-weight:600}
-.qbox .q{font-size:21px;font-weight:700;margin:6px 0 4px;line-height:1.4}
-.qbox .qs{font-size:15px;color:var(--muted);margin-bottom:18px}
-.qbtns{display:flex;gap:10px}
-.qbtns button{flex:1;min-height:56px;border-radius:12px;border:2px solid var(--line);background:var(--panel-2);font-size:17px;font-weight:800;transition:background .18s,border-color .18s}
-.qbtns button:hover{border-color:var(--blue-bg)}
-.qbtns button.pick.ok{background:var(--green-bg);border-color:var(--green-bg);color:#fff}
-.qbtns button.pick.ng{background:var(--red-bg);border-color:var(--red-bg);color:#fff}
-.qbtns button.reveal{border-color:var(--green-fg)}
-.qbtns button:disabled{cursor:default}
-.expl{margin-top:16px;padding:14px;border-radius:10px;background:var(--panel-2);font-size:15px;display:none}
-.expl.on{display:block}
-.expl b{display:block;margin-bottom:4px}
-.qnext{margin-top:16px;display:flex;justify-content:flex-end;gap:10px}
-.qnext button{min-height:44px;padding:0 18px;border-radius:10px;border:0;background:var(--green-bg);color:#fff;font-weight:700}
-.qnext button.ghost{background:var(--panel-2);color:var(--ink);border:1px solid var(--line)}
-.score{font-size:44px;font-weight:800;letter-spacing:-.02em}
-
-footer{border-top:1px solid var(--line);padding:22px 20px 40px;font-size:13px;color:var(--muted);text-align:center}
-footer p{max-width:80ch;margin:0 auto 8px}
-
-/* ---------- responsive ---------- */
-@media (max-width:1180px){
-  #learn.on{grid-template-columns:minmax(0,1fr) 360px;grid-template-rows:auto auto}
-  .rail{grid-column:1/-1;position:static;max-height:none;border-right:0;border-bottom:1px solid var(--line);display:flex;overflow-x:auto;padding:8px 10px;gap:6px;scrollbar-width:thin}
-  .rail h2{display:none}
-  .chap{flex:none;width:auto;padding:8px 12px 8px 8px;border-left:0;border-radius:10px;border:1px solid transparent;min-height:44px}
-  .chap[aria-current="true"]{border-color:var(--green-bg)}
-  .chap .t i{display:none}
-  .stagewrap{min-height:460px}
-  .detail{position:static;max-height:none}
-}
-@media (max-width:840px){
-  #learn.on{grid-template-columns:1fr}
-  .stagewrap{min-height:min(62vh,520px)}
-  .detail{border-left:0;border-top:1px solid var(--line);padding:18px 16px 28px}
-  .top{padding:8px 10px;gap:8px;flex-wrap:wrap}
-  .brand span{display:none}
-  .tabs{margin-left:auto;order:3;width:100%;justify-content:space-between}
-  .tabs button{padding:8px 8px;flex:1;font-size:14px}
-  .cap{bottom:60px;padding:11px 13px}
-  .cap .p{font-size:15px} .cap .s{font-size:12.5px}
-  .hud b{font-size:26px}
-  .chip-scene{font-size:12px;padding:6px 10px}
-  .hint{display:none}
-  .page{padding:22px 14px 60px}
-  .page h1{font-size:26px}
-  .qbox{padding:18px}
-  .qbox .q{font-size:18px}
-}
-@media (prefers-reduced-motion:reduce){
-  *{transition:none !important}
-  .cap.swap{opacity:1;transform:none}
-}
-</style>
+<meta name="theme-color" content="#f5f6f3">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
 <header class="top">
-  <a class="brand" href="#" id="brand">
-    <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M4 6h32L20 36z" fill="#C8242C"/><path d="M8.6 9h22.8L20 30.5z" fill="none" stroke="#fff" stroke-width="2.2"/><text x="20" y="20" text-anchor="middle" font-size="9.5" font-weight="700" fill="#fff" font-family="Zen Kaku Gothic New, Hiragino Sans, sans-serif">止まれ</text></svg>
-    <div><b>Japan Road Rules</b><span>Every rule, animated in 3D</span></div>
+  <a class="brand" href="#learn" id="brand">
+    <svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="#f9ece8"/><path d="M7 10h26L20 33z" fill="#b9433e"/><path d="M11 12.5h18L20 28.5z" fill="none" stroke="#fff" stroke-width="1.3"/><text x="20" y="20" text-anchor="middle" font-size="6.5" font-weight="700" fill="#fff" font-family="sans-serif">止まれ</text></svg>
+    <div><b>Japan Road Rules</b><span data-i18n="brand">Learn. Explore. Drive.</span></div>
   </a>
-  <div class="tabs" role="tablist" aria-label="Sections">
-    <button role="tab" aria-selected="true" data-tab="learn" id="tab-learn">Learn</button>
-    <button role="tab" aria-selected="false" data-tab="signs" id="tab-signs">Signs</button>
-    <button role="tab" aria-selected="false" data-tab="penalties" id="tab-penalties">Penalties</button>
-    <button role="tab" aria-selected="false" data-tab="quiz" id="tab-quiz">Quiz</button>
-  </div>
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button type="button" role="tab" aria-selected="true" aria-controls="learn" tabindex="0" data-tab="learn" id="tab-learn">Learn</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="signs" tabindex="-1" data-tab="signs" id="tab-signs">Signs</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="penalties" tabindex="-1" data-tab="penalties" id="tab-penalties">Penalties</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="quiz" tabindex="-1" data-tab="quiz" id="tab-quiz">Quiz</button>
+  </nav>
   <div class="ctl">
-    <button id="langBtn" aria-pressed="false" title="Switch language / 言語を切り替え">日本語</button>
-    <button id="themeBtn" aria-label="Toggle dark mode" title="Toggle dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    <button type="button" id="langBtn" aria-pressed="false" title="Switch language / 言語を切り替え">日本語</button>
+    <button type="button" id="themeBtn" aria-label="Toggle dark mode" title="Toggle dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
   </div>
 </header>
-
-<main>
-<section id="learn" class="view on" role="tabpanel" aria-labelledby="tab-learn">
+<main id="main" tabindex="-1">
+<section id="learn" class="view on" role="tabpanel" aria-labelledby="tab-learn" tabindex="0">
   <nav class="rail" aria-label="Chapters">
-    <h2>16 chapters</h2>
+    <div class="rail-heading"><h2 data-i18n="curriculum">Your learning path</h2><span>16</span></div>
+    <div class="course-progress"><div class="progress-caption"><b data-i18n="progress">Your progress</b><span id="progressText">0 / 16 complete</span></div><div class="progress-track" role="progressbar" aria-label="Lessons completed" aria-valuemin="0" aria-valuemax="16" aria-valuenow="0" id="courseProgress"><span id="progressFill" style="width:0%"></span></div></div>
     <div id="chapList"></div>
+    <div class="rail-note"><span data-icon="bookmark"></span><span data-i18n="savedLocal">Your progress is saved on this device. Pick up whenever you’re ready.</span></div>
   </nav>
-  <div class="stagewrap">
-    <div id="stage">
-      <canvas id="c"></canvas>
+  <div class="learn-intro"><div><div class="eyebrow" data-i18n="eyebrow">A practical guide to driving in Japan</div><h1 data-i18n="welcome">New roads. More confidence.</h1><p data-i18n="intro">Learn the rules, see them in action, and enjoy the journey.</p></div><span class="intro-stamp"><span data-icon="globe"></span><span data-i18n="bilingual">English & 日本語</span></span></div>
+  <div class="chapter-mobile"><div class="chapter-mobile-row"><span class="mobile-course-label" id="mobileChapter">CHAPTER 01 / 16</span><button class="chapter-trigger" id="chapterPicker" type="button" aria-haspopup="dialog" aria-controls="chapterSheet"><span data-icon="list"></span><span data-i18n="allChapters">All chapters</span><span data-icon="chevronDown"></span></button></div><div class="mobile-progress" aria-hidden="true"><span id="mobileProgressFill" style="width:0%"></span></div></div>
+  <article class="stagewrap" aria-labelledby="lessonTitle">
+    <div class="lesson-heading"><span class="lesson-number" id="lessonNumber">01</span><div><h2 id="lessonTitle" tabindex="-1">Keep left</h2><small id="lessonJapanese" lang="ja">左側通行</small><p class="lesson-subtitle" id="lessonSubtitle"></p></div><span class="lesson-meta"><span data-icon="clock"></span><span id="lessonDuration">15 sec</span></span></div>
+    <div id="stage" role="region" aria-label="Interactive 3D driving scene" tabindex="0">
+      <canvas id="c" aria-label="Animated illustration of the selected road rule"></canvas>
       <div class="chip-scene" id="sceneChip"><span class="dot"></span><span id="sceneChipText">Loading 3D scene…</span></div>
       <div class="hud" id="hud"><b id="hudNum">60</b><small id="hudUnit">km/h</small></div>
-      <div class="hint" id="hint">Drag to look around · scroll to zoom</div>
-      <div class="cap" id="cap" aria-live="polite"><div class="p" id="capP"></div><div class="s" id="capS"></div></div>
-      <div class="transport">
-        <button id="prevBtn" aria-label="Previous chapter"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6L18 6v12z"/></svg></button>
-        <button id="playBtn" aria-label="Pause"><svg viewBox="0 0 24 24" id="playIco"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg></button>
-        <button id="replayBtn" aria-label="Replay this chapter"><svg viewBox="0 0 24 24"><path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg></button>
-        <input type="range" id="scrub" min="0" max="1000" value="0" aria-label="Scene position">
-        <span class="time" id="time">0:00 / 0:00</span>
-        <button id="nextBtn" aria-label="Next chapter"><svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg></button>
-      </div>
+      <div class="hint" id="hint">Drag to look around</div>
+      <div class="scene-tools"><button type="button" id="exploreBtn" aria-pressed="false"><span data-icon="move"></span><span data-i18n="explore">Explore</span></button><button type="button" id="resetView" aria-label="Reset camera"><span data-icon="reset"></span></button><button type="button" id="fullscreenBtn" aria-label="Enter fullscreen" aria-pressed="false" title="Enter fullscreen"><span data-icon="expand"></span></button></div>
       <div class="nofx" id="nofx"><div><p><b>The 3D engine could not start.</b></p><p>Your browser may not support WebGL, or the three.js script was blocked. The chapter text on this page still works.</p></div></div>
     </div>
-  </div>
-  <aside class="detail" id="detail"></aside>
+    <div class="cap" id="cap"><div class="p" id="capP"></div><div class="s" id="capS" lang="ja"></div></div>
+    <div class="transport" role="group" aria-label="Lesson playback">
+      <button type="button" id="prevBtn" aria-label="Previous chapter"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h2v12H6zm3.5 6L18 6v12z"/></svg></button>
+      <button type="button" id="playBtn" aria-label="Pause"><svg viewBox="0 0 24 24" id="playIco" aria-hidden="true"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg></button>
+      <button type="button" id="replayBtn" aria-label="Replay this chapter"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg></button>
+      <div class="timeline"><input type="range" id="scrub" min="0" max="1000" value="0" aria-label="Scene position">
+      <span class="time" id="time">0:00 / 0:00</span></div><span class="transport-label" data-i18n="sceneLabel">Animated lesson</span>
+      <button type="button" id="nextBtn" aria-label="Next chapter"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg></button>
+    </div>
+  </article>
+  <div class="detail" id="detail"></div>
 </section>
-
-<section id="signs" class="view" role="tabpanel" aria-labelledby="tab-signs">
-  <div class="page">
-    <h1 id="signsTitle">Signs and markings you must recognise</h1>
-    <p class="lead" id="signsLead">Japanese regulatory signs are round or triangular and mostly wordless, except for three famous exceptions: 止まれ (stop), 徐行 (slow down) and 通行止め (road closed). Warning signs are yellow diamonds; instruction signs are blue.</p>
-    <div class="grid" id="signGrid"></div>
-    <h2 id="marksTitle">Driver marks</h2>
-    <div class="marks" id="markGrid"></div>
-    <h2 id="lineTitle">Lines on the road</h2>
-    <div class="grid" id="lineGrid"></div>
-  </div>
-</section>
-
-<section id="penalties" class="view" role="tabpanel" aria-labelledby="tab-penalties">
-  <div class="page" id="penPage"></div>
-</section>
-
-<section id="quiz" class="view" role="tabpanel" aria-labelledby="tab-quiz">
-  <div class="page">
-    <h1 id="quizTitle">Test yourself, licence-conversion style</h1>
-    <p class="lead" id="quizLead">Since October 2025 the knowledge test for converting a foreign licence (外免切替) has 50 true/false questions and needs 90% to pass. Here are 15 in the same spirit — each explains the rule behind it.</p>
-    <div class="qbox" id="qbox"></div>
+<section id="signs" class="view" role="tabpanel" aria-labelledby="tab-signs" tabindex="0">
+  <div class="page"><div class="eyebrow" data-i18n="signsEyebrow">Your roadside reference</div><h1 id="signsTitle">Know the signs. Read the road.</h1><p class="lead" id="signsLead"></p>
+    <div class="reference-toolbar"><label class="search-field"><span data-icon="search"></span><span class="sr" data-i18n="searchSigns">Search signs</span><input type="search" id="signSearch" placeholder="Search signs in English or Japanese" autocomplete="off"></label><div class="filter-chips" role="group" aria-label="Sign category"><button type="button" data-filter="all" aria-pressed="true" data-i18n="allSigns">All signs</button><button type="button" data-filter="reg" aria-pressed="false" data-i18n="regulatory">Regulatory</button><button type="button" data-filter="warn" aria-pressed="false" data-i18n="warning">Warning</button><button type="button" data-filter="ins" aria-pressed="false" data-i18n="information">Information</button></div></div>
+    <p class="result-count" id="signCount" role="status" aria-live="polite"></p><div class="grid" id="signGrid"></div><h2 id="marksTitle">Driver marks</h2><div class="marks" id="markGrid"></div><h2 id="lineTitle">Lines on the road</h2><div class="grid" id="lineGrid"></div>
   </div>
 </section>
+<section id="penalties" class="view" role="tabpanel" aria-labelledby="tab-penalties" tabindex="0"><div class="page" id="penPage"></div></section>
+<section id="quiz" class="view" role="tabpanel" aria-labelledby="tab-quiz" tabindex="0"><div class="page"><div class="eyebrow" data-i18n="quizEyebrow">Put your knowledge in the driver’s seat</div><h1 id="quizTitle">Ready for the road?</h1><p class="lead" id="quizLead"></p><div class="qbox" id="qbox"></div></div></section>
 </main>
-
-<footer>
-  <p id="foot1">Built from the Road Traffic Act (道路交通法) and public guidance from the National Police Agency, JAF and prefectural police, current to September 2026. Points and fines shown are for a standard passenger car (普通車); larger vehicles pay more.</p>
-  <p id="foot2">This is a learning aid, not legal advice. Posted signs and police instructions always override the defaults described here.</p>
-</footer>
+<footer><p id="foot1"></p><p id="foot2"></p></footer>
+<dialog class="chapter-sheet" id="chapterSheet" aria-labelledby="sheetTitle"><div class="sheet-head"><div class="sheet-heading-row"><div><h2 id="sheetTitle" data-i18n="yourChapters">Your learning path</h2><p id="sheetProgress">16 bite-sized lessons</p></div><button type="button" class="sheet-close" id="closeSheet" aria-label="Close chapters" autofocus><span data-icon="close"></span></button></div><label class="search-field"><span data-icon="search"></span><span class="sr" data-i18n="searchChapters">Search chapters</span><input id="chapterSearch" type="search" placeholder="Find a chapter…" autocomplete="off"></label></div><div id="sheetList" class="sheet-list"></div></dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (function(){
 'use strict';
+if('scrollRestoration' in history) history.scrollRestoration='manual';
 const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
 const REDUCE=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let lang='en';
@@ -564,28 +340,40 @@ const PEN={
 /* ===================== 3D ENGINE ===================== */
 const CFONT='"Overpass","Zen Kaku Gothic New","Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",sans-serif';
 const JFONT='"Zen Kaku Gothic New","Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic","Meiryo",sans-serif';
-const Y_AXIS=new THREE.Vector3(0,1,0);
+let Y_AXIS=null;
 let renderer,scene,camera,stage,sun,hemi,threeOK=false;
 const stageEl=$('#stage'),canvas=$('#c');
 
 function initThree(){
   try{
+    if(typeof THREE==='undefined') return false;
+    const mobile=window.matchMedia('(max-width: 820px), (pointer: coarse)').matches;
+    Y_AXIS=new THREE.Vector3(0,1,0);
+    _wp=new THREE.Vector3();
     renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
-  }catch(e){ return false; }
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
-  renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-  renderer.outputEncoding=THREE.sRGBEncoding;
-  scene=new THREE.Scene();
-  camera=new THREE.PerspectiveCamera(48,1,0.5,700);
-  hemi=new THREE.HemisphereLight(0xdfe9f3,0x6f7f5f,0.95); scene.add(hemi);
-  sun=new THREE.DirectionalLight(0xfff1d8,1.15); sun.castShadow=true;
-  sun.shadow.mapSize.set(2048,2048);
-  const sc=sun.shadow.camera; sc.left=-48; sc.right=48; sc.top=48; sc.bottom=-48; sc.near=1; sc.far=220;
-  sun.shadow.bias=-0.0006; sun.shadow.normalBias=0.03;
-  scene.add(sun); scene.add(sun.target);
-  stage=new THREE.Group(); scene.add(stage);
-  resize(); new ResizeObserver(resize).observe(stageEl);
-  return true;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,mobile?1.5:2));
+    renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+    renderer.outputEncoding=THREE.sRGBEncoding;
+    scene=new THREE.Scene();
+    camera=new THREE.PerspectiveCamera(48,1,0.5,700);
+    hemi=new THREE.HemisphereLight(0xdfe9f3,0x6f7f5f,0.95); scene.add(hemi);
+    sun=new THREE.DirectionalLight(0xfff1d8,1.15); sun.castShadow=true;
+    const shadowSize=mobile?1024:2048;
+    sun.shadow.mapSize.set(shadowSize,shadowSize);
+    const sc=sun.shadow.camera; sc.left=-48; sc.right=48; sc.top=48; sc.bottom=-48; sc.near=1; sc.far=220;
+    sun.shadow.bias=-0.0006; sun.shadow.normalBias=0.03;
+    scene.add(sun); scene.add(sun.target);
+    stage=new THREE.Group(); scene.add(stage);
+    resize();
+    if(typeof ResizeObserver!=='undefined') new ResizeObserver(resize).observe(stageEl);
+    else window.addEventListener('resize',resize);
+    return true;
+  }catch(e){
+    try{ if(renderer) renderer.dispose(); }catch(disposeError){}
+    renderer=scene=camera=stage=sun=hemi=null;
+    Y_AXIS=_wp=null;
+    return false;
+  }
 }
 function resize(){
   if(!renderer) return;
@@ -850,7 +638,7 @@ function bezDir(p0,p1,p2,u){ return [2*(1-u)*(p1[0]-p0[0])+2*u*(p2[0]-p1[0]),2*(
 function placeBez(obj,p0,p1,p2,u){ const p=bez(p0,p1,p2,u),d=bezDir(p0,p1,p2,u); obj.position.x=p[0]; obj.position.z=p[1]; if(Math.abs(d[0])+Math.abs(d[1])>1e-4) heading(obj,d[0],d[1]); }
 function steer(obj,x,z){ const u=obj.userData; if(u.lx!==undefined){ const dx=x-u.lx,dz=z-u.lz; if(Math.abs(dx)+Math.abs(dz)>1e-4) heading(obj,dx,dz); } u.lx=x; u.lz=z; obj.position.x=x; obj.position.z=z; }
 function lerpCam(a,b,u){ return {pos:[0,1,2].map(i=>a.pos[i]+(b.pos[i]-a.pos[i])*u),look:[0,1,2].map(i=>a.look[i]+(b.look[i]-a.look[i])*u)}; }
-const _wp=new THREE.Vector3();
+let _wp=null;
 function follow(obj,off,lo){ obj.getWorldPosition(_wp); return {pos:[_wp.x+off[0],_wp.y+off[1],_wp.z+off[2]],look:[_wp.x+lo[0],_wp.y+lo[1],_wp.z+lo[2]]}; }
 function blendWin(t,t0,t1,a,b){ if(t<=t0) return a; if(t>=t1) return b; return lerpCam(a,b,smooth((t-t0)/(t1-t0))); }
 const RED='rgba(200,36,44,0.95)', YELB='rgba(240,194,59,0.96)';
@@ -1288,8 +1076,16 @@ const LINES=[
  {ja:'止まれ（路面標示）',en:'Painted stop',svg:`<svg viewBox="0 0 100 60" aria-hidden="true"><rect width="100" height="60" fill="#3d4147"/><rect x="12" y="10" width="76" height="5" fill="#f1f1ec"/><text x="50" y="46" text-anchor="middle" font-size="22" font-weight="700" fill="#f1f1ec" ${F_JA}>止まれ</text></svg>`,d:{en:'Same force as the sign: stop at the line, wheels stopped.',ja:'標識と同じ効力。停止線で完全停止。'}},
  {ja:'自転車ナビマーク',en:'Bicycle navigation mark',svg:`<svg viewBox="0 0 100 60" aria-hidden="true"><rect width="100" height="60" fill="#3d4147"/><path d="M40 44l10-16 10 16" fill="none" stroke="#3E8FE0" stroke-width="5"/>${BIKE(50,20,'#3E8FE0')}</svg>`,d:{en:'Blue chevrons show where cyclists should ride (on the left, with traffic). Expect bikes there.',ja:'自転車の走行位置を示す青い矢羽根。車はそこに自転車がいる前提で。'}}
 ];
+let signQuery='',signFilter='all';
+function renderSignResults(){
+  const query=signQuery.trim().toLowerCase();
+  const matches=SIGNS.filter(s=>(signFilter==='all'||s.cat===signFilter)&&(!query||`${s.en} ${s.ja} ${s.d.en} ${s.d.ja}`.toLowerCase().includes(query)));
+  $('#signCount').textContent=lang==='ja'?`${matches.length}件の標識`:`${matches.length} signs to know`;
+  $('#signGrid').innerHTML=matches.map(s=>`<div class="sign">${s.svg}<span class="cat ${s.cat}">${T(STR[s.cat==='reg'?'catReg':s.cat==='warn'?'catWarn':'catIns'])}</span><b>${lang==='ja'?s.ja:s.en}<br><span>${lang==='ja'?s.en:s.ja}</span></b><span>${T(s.d)}</span></div>`).join('');
+  if(!matches.length) $('#signGrid').innerHTML=`<div class="empty-state">${lang==='ja'?'標識が見つかりません。別のキーワードや分類をお試しください。':'No signs found. Try another search or category.'}</div>`;
+}
 function renderSigns(){
-  $('#signGrid').innerHTML=SIGNS.map(s=>`<div class="sign">${s.svg}<span class="cat ${s.cat}">${T(STR[s.cat==='reg'?'catReg':s.cat==='warn'?'catWarn':'catIns'])}</span><b>${lang==='ja'?s.ja:s.en}<br><span>${lang==='ja'?s.en:s.ja}</span></b><span>${T(s.d)}</span></div>`).join('');
+  renderSignResults();
   $('#markGrid').innerHTML=MARKS.map(m=>`<div class="mark">${m.svg}<div><b>${lang==='ja'?m.ja:m.en}</b><span>${lang==='ja'?m.en:m.ja} — ${T(m.d)}</span></div></div>`).join('');
   $('#lineGrid').innerHTML=LINES.map(l=>`<div class="sign"><svg viewBox="0 0 100 60" style="width:120px;height:72px;border-radius:6px" aria-hidden="true">${l.svg.replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'')}</svg><b>${lang==='ja'?l.ja:l.en}<br><span>${lang==='ja'?l.en:l.ja}</span></b><span>${T(l.d)}</span></div>`).join('');
 }
@@ -1299,7 +1095,7 @@ function renderPenalties(){
   const rows=PEN.rows.map(r=>`<tr><td>${lang==='ja'?r[1]:r[0]}<br><small style="color:var(--muted)">${lang==='ja'?r[0]:r[1]}</small></td><td class="num">${r[2]}</td><td class="${r[3]==='court'?'red-t':''}">${r[3]==='court'?T(STR.court):r[3]}</td></tr>`).join('');
   const thr=PEN.thresholds.map(x=>`<tr><td class="num">${x[0]}</td><td>${lang==='ja'?x[2]:x[1]}</td></tr>`).join('');
   const tl=PEN.timeline.map(x=>`<li><b>${lang==='ja'?x[1]:x[0]}</b><span>${T(x[2])}</span></li>`).join('');
-  $('#penPage').innerHTML=`<h1>${T(STR.penTitle)}</h1><p class="lead">${T(STR.penLead)}</p>
+  $('#penPage').innerHTML=`<div class="eyebrow">${lang==='ja'?'ルールと責任':'Understand the rules. Know the stakes.'}</div><h1>${T(STR.penTitle)}</h1><p class="lead">${T(STR.penLead)}</p>
   <div class="cols"><div class="card"><h3>${T(STR.tickets)}</h3><p><span class="ticket" style="background:#fff"></span>${T(STR.tW)}</p><p style="margin-top:8px"><span class="ticket" style="background:#1F4E9C"></span>${T(STR.tB)}</p><p style="margin-top:8px"><span class="ticket" style="background:#C8242C"></span>${T(STR.tR)}</p></div>
   <div class="card"><h3>${T(STR.thrTitle)}</h3><div class="tw"><table><thead><tr><th>${T(STR.colP)}</th><th></th></tr></thead><tbody>${thr}</tbody></table></div></div></div>
   <h2>${T(STR.penTable)}</h2><div class="tw"><table><thead><tr><th>${T(STR.colV)}</th><th>${T(STR.colP)}</th><th>${T(STR.colF)}</th></tr></thead><tbody>${rows}</tbody></table></div>
@@ -1307,140 +1103,366 @@ function renderPenalties(){
 }
 
 /* ===================== QUIZ ===================== */
-const Q={i:0,ans:[],done:false};
+const QUIZ_STORAGE='dj-quiz-v1';
+function restoreQuiz(){
+  const fresh={i:0,ans:[],done:false};
+  try{
+    const saved=JSON.parse(localStorage.getItem(QUIZ_STORAGE));
+    if(!saved||!Number.isInteger(saved.i)||saved.i<0||saved.i>=QUIZ.length||!Array.isArray(saved.ans)||typeof saved.done!=='boolean') return fresh;
+    if(!saved.ans.every(a=>typeof a==='boolean')||saved.ans.length<saved.i||saved.ans.length>saved.i+1) return fresh;
+    if(saved.done&&(saved.i!==QUIZ.length-1||saved.ans.length!==QUIZ.length)) return fresh;
+    return {i:saved.i,ans:saved.ans.slice(),done:saved.done};
+  }catch(e){ return fresh; }
+}
+const Q=restoreQuiz();
+function saveQuiz(){ try{ localStorage.setItem(QUIZ_STORAGE,JSON.stringify(Q)); }catch(e){} }
+function focusQuiz(){
+  const heading=$('#qHeading');
+  if(!heading) return;
+  try{ heading.focus({preventScroll:true}); heading.scrollIntoView({behavior:REDUCE?'auto':'smooth',block:'nearest'}); }catch(e){ heading.focus(); }
+}
+function quizProgressText(){ return lang==='ja'?`${QUIZ.length}問中${Q.ans.length}問に回答`:`${Q.ans.length} of ${QUIZ.length} answered`; }
 function renderQuiz(){
   const box=$('#qbox');
-  if(Q.done){ const score=Q.ans.filter((a,i)=>a===QUIZ[i].a).length; const pass=score/QUIZ.length>=0.9;
-    const missed=QUIZ.map((q,i)=>Q.ans[i]!==q.a?`<li style="margin-bottom:10px"><b>${T(q.q)}</b><br><span style="color:var(--muted)">${T(q.x)}</span></li>`:'').join('');
-    box.innerHTML=`<div class="qn">${T(STR.qOf)} ${QUIZ.length}/${QUIZ.length}</div><div class="score">${score} / ${QUIZ.length}</div><p class="qs">${score}${lang==='ja'?'':' '}${T(STR.qScore)} · ${pass?T(STR.qPass):T(STR.qFail)}</p>${missed?`<h3 style="font-size:15px;margin:14px 0 8px">${T(STR.qReview)}</h3><ul style="padding-left:18px;font-size:14.5px">${missed}</ul>`:''}<div class="qnext"><button id="qRetry">${T(STR.qRetry)}</button></div>`;
-    $('#qRetry').addEventListener('click',()=>{ Q.i=0; Q.ans=[]; Q.done=false; renderQuiz(); }); return; }
-  const q=QUIZ[Q.i], answered=Q.ans.length>Q.i;
+  box.classList.toggle('quiz-result',Q.done);
+  if(Q.done){
+    const score=Q.ans.filter((a,i)=>a===QUIZ[i].a).length,pass=score/QUIZ.length>=0.9;
+    const missed=QUIZ.map((q,i)=>Q.ans[i]!==q.a?`<li class="quiz-review-item"><span class="qn">${T(STR.qOf)} ${i+1}</span><b>${T(q.q)}</b><p>${T(q.x)}</p></li>`:'').join('');
+    box.innerHTML=`<div class="quiz-result-header" data-state="${pass?'correct':'incorrect'}"><span class="quiz-result-icon" aria-hidden="true">${pass?'✓':'↗'}</span><div><p class="quiz-eyebrow">${lang==='ja'?'練習完了':'Practice complete'}</p><h2 class="q" id="qHeading" tabindex="-1">${lang==='ja'?'結果を確認しましょう':'Here’s how you did'}</h2></div></div>
+    <div class="score" aria-label="${score} / ${QUIZ.length}">${score}<span> / ${QUIZ.length}</span></div><p class="quiz-result-copy qs">${score}${lang==='ja'?'':' '}${T(STR.qScore)} · ${pass?T(STR.qPass):T(STR.qFail)}</p>
+    <div class="qnext"><button id="qRetry" type="button">${T(STR.qRetry)} <span aria-hidden="true">↻</span></button></div>
+    ${missed?`<section class="quiz-review" aria-labelledby="qReviewHeading"><h3 id="qReviewHeading">${T(STR.qReview)}</h3><ul class="quiz-review-list">${missed}</ul></section>`:''}`;
+    $('#qRetry').addEventListener('click',()=>{ Q.i=0; Q.ans=[]; Q.done=false; saveQuiz(); renderQuiz(); focusQuiz(); });
+    return;
+  }
+  const q=QUIZ[Q.i],answered=Q.ans.length>Q.i;
   const prog=QUIZ.map((x,i)=>`<i class="${i<Q.ans.length?(Q.ans[i]===QUIZ[i].a?'ok':'ng'):(i===Q.i?'cur':'')}"></i>`).join('');
-  box.innerHTML=`<div class="prog">${prog}</div><div class="qn">${T(STR.qOf)} ${Q.i+1} / ${QUIZ.length}</div><div class="q">${T(q.q)}</div><div class="qs ${lang==='ja'?'':'ja'}">${lang==='ja'?q.q.en:q.q.ja}</div>
-  <div class="qbtns"><button id="qT" ${answered?'disabled':''}>${T(STR.qTrue)}</button><button id="qF" ${answered?'disabled':''}>${T(STR.qFalse)}</button></div>
-  <div class="expl ${answered?'on':''}" id="qX"></div><div class="qnext" id="qN" style="display:${answered?'flex':'none'}"><button id="qNext">${Q.i===QUIZ.length-1?T(STR.qResult):T(STR.qNext)}</button></div>`;
-  const show=()=>{ const a=Q.ans[Q.i]; const ok=a===q.a; $('#qX').innerHTML=`<b style="color:${ok?'var(--green-fg)':'var(--red-fg)'}">${ok?T(STR.qCorrect):T(STR.qWrong)}</b>${T(q.x)}`; $('#qX').classList.add('on'); $('#qN').style.display='flex'; $('#qT').disabled=$('#qF').disabled=true; $(a?'#qT':'#qF').classList.add('pick',ok?'ok':'ng'); $(q.a?'#qT':'#qF').classList.add('reveal'); };
-  $('#qT').addEventListener('click',()=>{ Q.ans[Q.i]=true; show(); }); $('#qF').addEventListener('click',()=>{ Q.ans[Q.i]=false; show(); });
-  $('#qNext').addEventListener('click',()=>{ if(Q.i===QUIZ.length-1) Q.done=true; else Q.i++; renderQuiz(); try{ $('#qbox').scrollIntoView({behavior:REDUCE?'auto':'smooth',block:'nearest'}); }catch(e){} });
+  box.innerHTML=`<div class="quiz-progress"><span class="qn">${T(STR.qOf)} ${Q.i+1} / ${QUIZ.length}</span><span class="quiz-progress-text" id="qProgressText">${quizProgressText()}</span></div>
+  <div class="prog" id="qProgress" role="progressbar" aria-label="${lang==='ja'?'クイズの進捗':'Quiz progress'}" aria-valuemin="0" aria-valuemax="${QUIZ.length}" aria-valuenow="${Q.ans.length}" aria-valuetext="${quizProgressText()}">${prog}</div>
+  <p class="quiz-eyebrow">${lang==='ja'?'正しい？ 誤り？':'True or false?'}</p><h2 class="q" id="qHeading" tabindex="-1">${T(q.q)}</h2><p class="qs ${lang==='ja'?'':'ja'}" lang="${lang==='ja'?'en':'ja'}">${lang==='ja'?q.q.en:q.q.ja}</p>
+  <div class="qbtns" role="group" aria-labelledby="qHeading"><button id="qT" type="button" aria-pressed="false" aria-disabled="${answered}"><span class="quiz-answer-label">${T(STR.qTrue)}</span><span class="quiz-answer-state"></span></button><button id="qF" type="button" aria-pressed="false" aria-disabled="${answered}"><span class="quiz-answer-label">${T(STR.qFalse)}</span><span class="quiz-answer-state"></span></button></div>
+  <div class="expl" id="qX" role="status" aria-live="polite" aria-atomic="true"></div><div class="qnext" id="qN" style="display:${answered?'flex':'none'}"><button id="qNext" type="button">${Q.i===QUIZ.length-1?T(STR.qResult):T(STR.qNext)} <span aria-hidden="true">→</span></button></div>`;
+  const show=()=>{
+    const a=Q.ans[Q.i],ok=a===q.a,feedback=$('#qX');
+    feedback.dataset.state=ok?'correct':'incorrect';
+    feedback.innerHTML=`<span class="quiz-feedback-icon" aria-hidden="true">${ok?'✓':'!'}</span><div class="quiz-feedback-copy"><b>${ok?T(STR.qCorrect):T(STR.qWrong)} ${lang==='ja'?'正しい答え：':'Correct answer: '}${q.a?T(STR.qTrue):T(STR.qFalse)}</b><p>${T(q.x)}</p></div>`;
+    feedback.classList.add('on'); $('#qN').style.display='flex';
+    [true,false].forEach(value=>{
+      const button=$(value?'#qT':'#qF'),selected=a===value,correct=q.a===value;
+      button.setAttribute('aria-disabled','true'); button.setAttribute('aria-pressed',String(selected));
+      button.classList.toggle('pick',selected); button.classList.toggle('ok',selected&&ok); button.classList.toggle('ng',selected&&!ok); button.classList.toggle('reveal',correct);
+      button.dataset.state=correct?'correct':'incorrect';
+      button.querySelector('.quiz-answer-state').textContent=selected?(lang==='ja'?'選んだ答え':'Your answer'):(correct?(lang==='ja'?'正解':'Correct answer'):'');
+    });
+    const progress=$('#qProgress');
+    progress.setAttribute('aria-valuenow',Q.ans.length); progress.setAttribute('aria-valuetext',quizProgressText());
+    progress.children[Q.i].className=ok?'ok':'ng'; $('#qProgressText').textContent=quizProgressText();
+  };
+  const answer=value=>{ if(Q.ans.length>Q.i) return; Q.ans[Q.i]=value; saveQuiz(); show(); };
+  $('#qT').addEventListener('click',()=>answer(true)); $('#qF').addEventListener('click',()=>answer(false));
+  $('#qNext').addEventListener('click',()=>{ if(Q.ans.length<=Q.i) return; if(Q.i===QUIZ.length-1) Q.done=true; else Q.i++; saveQuiz(); renderQuiz(); focusQuiz(); });
   if(answered) show();
 }
 
 /* ===================== LEARN UI ===================== */
-let cur=-1,chapter=null,t=0,playing=true,lastFrame=0,capIndex=-1,visible3D=true,introUntil=0,hintTimer=null;
+const ICONS={
+  learn:'<path d="M4 4h6a3 3 0 0 1 3 3v14a4 4 0 0 0-4-3H4z"/><path d="M13 7a3 3 0 0 1 3-3h5v14h-4a4 4 0 0 0-4 3"/>',
+  signs:'<path d="M12 3v18M5 5h12l4 4-4 4H5z"/>',
+  penalties:'<path d="M12 3v17M8 21h8M4 7h16M6 5l-4 9h8L6 5zm12 0-4 9h8l-4-9z"/>',
+  quiz:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2M9 12l2 2 4-4"/>',
+  list:'<path d="M9 6h12M9 12h12M9 18h12M3 6h1M3 12h1M3 18h1"/>',
+  chevronDown:'<path d="m7 10 5 5 5-5"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  globe:'<circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/>',
+  search:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/>',
+  bookmark:'<path d="M6 4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17l-6-4-6 4z"/>',
+  move:'<path d="M12 3v18M3 12h18M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3"/>',
+  reset:'<path d="M3 10a9 9 0 1 1 2 8M3 4v6h6"/>',
+  expand:'<path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5"/>',
+  collapse:'<path d="M3 8h5V3M21 8h-5V3M8 21v-5H3M16 21v-5h5"/>',
+  close:'<path d="m6 6 12 12M6 18 18 6"/>',
+  check:'<path d="m5 12 4 4L19 6"/>',
+  arrow:'<path d="M4 12h16m-6-6 6 6-6 6"/>',
+  bulb:'<path d="M9 18h6M10 21h4M8 14a6 6 0 1 1 8 0c-1 1-1 2-1 2H9s0-1-1-2"/>',
+  shield:'<path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6z"/><path d="m8 12 3 3 5-6"/>'
+};
+const icon=(name)=>`<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]||ICONS.learn}</svg>`;
+const UI={
+  skip:{en:'Skip to content',ja:'コンテンツへ'},brand:{en:'Learn. Explore. Drive.',ja:'学んで、安心のドライブ。'},
+  curriculum:{en:'Your learning path',ja:'学習コース'},progress:{en:'Your progress',ja:'学習の進捗'},
+  savedLocal:{en:'Your progress is saved on this device. Pick up whenever you’re ready.',ja:'学習の進捗はこの端末に保存されます。いつでも続きから学べます。'},
+  eyebrow:{en:'A practical guide to driving in Japan',ja:'日本の運転ルールを、わかりやすく'},welcome:{en:'New roads. More confidence.',ja:'日本の道を、もっと安心に。'},
+  intro:{en:'Learn the rules, see them in action, and enjoy the journey.',ja:'ルールを学んで、動きで理解。安心のドライブへ。'},
+  bilingual:{en:'English & 日本語',ja:'日本語 & English'},allChapters:{en:'All chapters',ja:'チャプター一覧'},
+  explore:{en:'Explore',ja:'見回す'},sceneLabel:{en:'Animated lesson',ja:'アニメーション'},
+  signsEyebrow:{en:'Your roadside reference',ja:'道路標識ガイド'},searchSigns:{en:'Search signs',ja:'標識を検索'},
+  allSigns:{en:'All signs',ja:'すべて'},regulatory:{en:'Regulatory',ja:'規制標識'},warning:{en:'Warning',ja:'警戒標識'},information:{en:'Information',ja:'指示標識'},
+  quizEyebrow:{en:'Put your knowledge in the driver’s seat',ja:'覚えたルールをチェック'},yourChapters:{en:'Your learning path',ja:'学習コース'},searchChapters:{en:'Search chapters',ja:'チャプターを検索'}
+};
+let cur=-1,chapter=null,t=0,playing=!REDUCE,lastFrame=0,capIndex=-1,visible3D=true,introUntil=0,hintTimer=null,captionTimer=null;
+let activeTab=null,exploring=false,toastTimer=null;
+let fullscreenActive=false,fullscreenPending=false,fullscreenFocus=null,fullscreenScroll=0;
+let fullscreenInert=[];
+const tabScroll={learn:0,signs:0,penalties:0,quiz:0};
 const orbit={az:0,el:0,zoom:1};
-const camPos=new THREE.Vector3(),camLook=new THREE.Vector3(); let camInit=false;
-function renderChapterList(){
-  const el=$('#chapList'); el.innerHTML='';
-  ORDER.forEach((id,i)=>{ const c=TEXT[id]; const b=document.createElement('button'); b.className='chap'; b.type='button'; b.setAttribute('aria-current',i===cur?'true':'false');
-    b.innerHTML=`<span class="n">${c.num}</span><span class="t"><b class="${lang==='ja'?'ja':''}">${lang==='ja'?c.ja:c.en}</b><i class="${lang==='ja'?'':'ja'}">${lang==='ja'?c.en:c.ja}</i></span>`;
-    b.addEventListener('click',()=>loadChapter(i,{scroll:true})); el.appendChild(b); });
-  const act=el.querySelector('[aria-current="true"]'); if(act&&act.scrollIntoView&&window.innerWidth<=1180){ try{ act.scrollIntoView({block:'nearest',inline:'center',behavior:'auto'}); }catch(e){} }
+let camPos=null,camLook=null,camInit=false;
+const completed=new Set();
+try{ const saved=JSON.parse(localStorage.getItem('dj-completed')||'[]'); if(Array.isArray(saved)) saved.filter(id=>ORDER.includes(id)).forEach(id=>completed.add(id)); }catch(e){}
+const groups={0:{en:'Start with the essentials',ja:'運転の基本'},4:{en:'Navigate with confidence',ja:'安全に走るために'},8:{en:'Stay safe on every journey',ja:'さまざまな場面'},12:{en:'Share the road',ja:'道路を共有する'}};
+function chapterButtons(container,query=''){
+  container.innerHTML=''; let count=0;
+  ORDER.forEach((id,i)=>{
+    const c=TEXT[id]; if(query&&!`${c.en} ${c.ja} ${T(c.tag)}`.toLowerCase().includes(query.toLowerCase())) return;
+    if(groups[i]&&!query){ const heading=document.createElement('h3'); heading.className='chapter-group'; heading.textContent=T(groups[i]); container.appendChild(heading); }
+    const b=document.createElement('button'); b.className='chap'+(completed.has(id)?' done':''); b.type='button'; b.dataset.chapter=i; b.setAttribute('aria-current',i===cur?'true':'false');
+    b.innerHTML=`<span class="n" aria-hidden="true">${completed.has(id)?'✓':String(c.num).padStart(2,'0')}</span><span class="t"><b lang="${lang}">${lang==='ja'?c.ja:c.en}</b><i lang="${lang==='ja'?'en':'ja'}">${lang==='ja'?c.en:c.ja}</i></span>${i===cur?'<span class="chapter-arrow" aria-hidden="true">›</span>':''}${completed.has(id)?`<span class="sr">${lang==='ja'?'完了':'Completed'}</span>`:''}`;
+    b.addEventListener('click',()=>{ if($('#chapterSheet').open) closeChapters(); loadChapter(i,{scroll:true,focus:true}); }); container.appendChild(b); count++;
+  });
+  if(!count){ const empty=document.createElement('p'); empty.className='empty-state'; empty.textContent=lang==='ja'?'該当するチャプターがありません。別のキーワードをお試しください。':'No chapters found. Try another search.'; container.appendChild(empty); }
 }
+function updateProgress(){
+  const n=completed.size;
+  $('#progressText').textContent=lang==='ja'?`${n} / 16 完了`:`${n} / 16 complete`;
+  $('#courseProgress').setAttribute('aria-valuenow',n); $('#courseProgress').setAttribute('aria-label',lang==='ja'?'完了したチャプター':'Lessons completed');
+  $('#progressFill').style.width=(n/16*100)+'%'; $('#mobileProgressFill').style.width=(n/16*100)+'%';
+  $('#sheetProgress').textContent=lang==='ja'?`全16チャプター · ${n}完了`:`16 bite-sized lessons · ${n} complete`;
+  $('#mobileChapter').textContent=lang==='ja'?`チャプター ${String(cur+1).padStart(2,'0')} / 16`:`CHAPTER ${String(cur+1).padStart(2,'0')} / 16`;
+}
+function renderChapterList(){ chapterButtons($('#chapList')); if($('#chapterSheet').open) chapterButtons($('#sheetList'),$('#chapterSearch').value); updateProgress(); }
 function renderDetail(){
-  const c=TEXT[ORDER[cur]]; const title=lang==='ja'?c.ja:c.en,sub=lang==='ja'?c.en:c.ja;
+  const c=TEXT[ORDER[cur]],done=completed.has(ORDER[cur]);
+  $('#lessonNumber').textContent=String(c.num).padStart(2,'0'); $('#lessonTitle').textContent=lang==='ja'?c.ja:c.en;
+  $('#lessonJapanese').textContent=lang==='ja'?c.en:c.ja; $('#lessonJapanese').lang=lang==='ja'?'en':'ja'; $('#lessonSubtitle').textContent=T(c.tag);
   const chips=c.chips.map(ch=>`<span class="chip ${ch.c||''}"><small>${T(ch.l)}</small><b>${T(ch.v)}</b></span>`).join('');
-  $('#detail').innerHTML=`<div class="kicker"><span class="n">${c.num}</span>${lang==='ja'?'第'+c.num+'章／全16章':'Chapter '+c.num+' of 16'}</div>
-  <h2 class="${lang==='ja'?'ja':''}">${title}<small class="${lang==='ja'?'':'ja'}">${sub}</small></h2><p class="tag">${T(c.tag)}</p>
-  <h3>${T(STR.detailRule)}</h3><ul class="pts">${c.pts.map(p=>`<li>${T(p)}</li>`).join('')}</ul>
-  <h3>${T(STR.detailPen)}</h3><div class="chips">${chips}</div>
-  <h3>${T(STR.detailLaw)}</h3><div class="law">${T(c.law)}</div>
-  <div class="tip"><b>${T(STR.detailTip)}</b>${T(c.tip)}</div>
-  <div class="navbtns"><button id="dPrev" type="button" ${cur===0?'disabled':''}>${T(STR.prev)}</button><button id="dNext" type="button" class="primary">${cur===ORDER.length-1?T(STR.toQuiz):T(STR.next)}</button></div>`;
-  $('#dPrev').addEventListener('click',()=>loadChapter(cur-1,{scroll:true})); $('#dNext').addEventListener('click',()=>{ if(cur===ORDER.length-1) showTab('quiz'); else loadChapter(cur+1,{scroll:true}); });
+  $('#detail').innerHTML=`<div class="rule-body"><h3>${icon('check')}${lang==='ja'?'覚えておきたいこと':'What to remember'}</h3><ul class="pts">${c.pts.map(p=>`<li>${T(p)}</li>`).join('')}</ul></div>
+  <aside class="rule-reference"><h3>${icon('shield')}${T(STR.detailPen)}</h3><div class="chips">${chips}</div><h3>${T(STR.detailLaw)}</h3><div class="law">${T(c.law)}</div></aside>
+  <div class="tip">${icon('bulb')}<div><b>${T(STR.detailTip)}</b>${T(c.tip)}</div></div>
+  <div class="navbtns"><button id="dPrev" type="button" ${cur===0?'disabled':''}>${T(STR.prev)}</button><span class="lesson-saved">${icon('bookmark')}${lang==='ja'?'進捗を自動保存':'Progress saved as you go'}</span><button id="dNext" type="button" class="primary">${done?(cur===ORDER.length-1?T(STR.toQuiz):T(STR.next)):(lang==='ja'?(cur===ORDER.length-1?'完了してクイズへ':'完了して次へ'):(cur===ORDER.length-1?'Complete & try the quiz':'Complete & continue'))}${icon('arrow')}</button></div>`;
+  $('#dPrev').addEventListener('click',()=>loadChapter(cur-1,{scroll:true,focus:true}));
+  $('#dNext').addEventListener('click',()=>{
+    completed.add(ORDER[cur]); try{ localStorage.setItem('dj-completed',JSON.stringify([...completed])); }catch(e){}
+    if(!done) toast(lang==='ja'?'チャプターを完了しました':'Chapter complete. Nice progress.');
+    if(cur===ORDER.length-1){ renderChapterList(); renderDetail(); showTab('quiz'); $('#quizTitle').tabIndex=-1; $('#quizTitle').focus({preventScroll:true}); }
+    else loadChapter(cur+1,{scroll:true,focus:true});
+  });
 }
 function updateCaption(tt,force){
   const caps=TEXT[ORDER[cur]].caps; let idx=0; for(let k=0;k<caps.length;k++) if(tt>=caps[k][0]) idx=k;
-  if(idx===capIndex&&!force) return; capIndex=idx; const c=caps[idx]; const el=$('#cap'),P=$('#capP'),S=$('#capS');
-  const swap=()=>{ P.textContent=lang==='ja'?c[2]:c[1]; S.textContent=lang==='ja'?c[1]:c[2]; P.classList.toggle('ja',lang==='ja'); S.classList.toggle('ja',lang!=='ja'); };
+  if(idx===capIndex&&!force) return; capIndex=idx; clearTimeout(captionTimer); const c=caps[idx],el=$('#cap'),P=$('#capP'),S=$('#capS');
+  const swap=()=>{ P.textContent=lang==='ja'?c[2]:c[1]; S.textContent=lang==='ja'?c[1]:c[2]; P.lang=lang; S.lang=lang==='ja'?'en':'ja'; };
   if(REDUCE||force){ swap(); el.classList.remove('swap'); return; }
-  el.classList.add('swap'); setTimeout(()=>{ swap(); el.classList.remove('swap'); },200);
+  el.classList.add('swap'); captionTimer=setTimeout(()=>{ swap(); el.classList.remove('swap'); },150);
 }
 function fmt(s){ s=Math.max(0,Math.floor(s)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
-function updateTime(){ if(!chapter) return; $('#time').textContent=fmt(t)+' / '+fmt(chapter.dur); const sc=$('#scrub'); if(document.activeElement!==sc) sc.value=Math.round(t/chapter.dur*1000); }
-function setPlayIcon(){ $('#playIco').innerHTML=playing?'<path d="M7 5h4v14H7zm6 0h4v14h-4z"/>':'<path d="M8 5v14l11-7z"/>'; $('#playBtn').setAttribute('aria-label',playing?'Pause':'Play'); }
+function updateTime(){
+  if(!chapter) return; $('#time').textContent=fmt(t)+' / '+fmt(chapter.dur);
+  const sc=$('#scrub'); sc.value=Math.round(t/chapter.dur*1000); sc.setAttribute('aria-valuetext',lang==='ja'?`${Math.floor(t)}秒 / ${chapter.dur}秒`:`${Math.floor(t)} of ${chapter.dur} seconds`);
+}
+function setPlayIcon(){
+  $('#playIco').innerHTML=playing?'<path d="M7 5h4v14H7zm6 0h4v14h-4z"/>':'<path d="M8 5v14l11-7z"/>';
+  $('#playBtn').setAttribute('aria-label',lang==='ja'?(playing?'一時停止':'再生'):(playing?'Pause':'Play'));
+}
 function resetDynamics(){ VEH.forEach(v=>{ v.userData.prev=null; v.userData.speed=0; delete v.userData.lx; }); }
-function loadChapter(i,opts){
-  i=(i+ORDER.length)%ORDER.length; const first=cur<0; cur=i; const id=ORDER[i];
-  renderChapterList(); renderDetail(); hudHide(); orbit.az=0; orbit.el=0; orbit.zoom=1; t=0; playing=true; setPlayIcon(); capIndex=-1; updateCaption(0,true);
-  if(threeOK){ clearStage(); VEH=[]; PEOPLE=[]; chapter=BUILD[id](); camInit=false; chapter.update(0,0,0); resetDynamics(); if(first&&!REDUCE) introUntil=performance.now()+2600; }
-  else chapter={dur:TEXT[id].caps[TEXT[id].caps.length-1][0]+4};
-  $('#sceneChipText').textContent=chapter.chip?T(chapter.chip):(TEXT[id].en);
-  updateTime(); try{ localStorage.setItem('dj-chapter',String(i)); }catch(e){}
-  if(opts&&opts.scroll&&window.innerWidth<=840){ try{ $('.stagewrap').scrollIntoView({behavior:REDUCE?'auto':'smooth',block:'start'}); }catch(e){} }
+function setExplore(on){
+  exploring=on; $('#stage').classList.toggle('exploring',on); $('#exploreBtn').setAttribute('aria-pressed',String(on));
+  $('#exploreBtn').innerHTML=icon(on?'check':'move')+`<span>${lang==='ja'?(on?'完了':'見回す'):(on?'Done':'Explore')}</span>`;
+  if(on) toast(lang==='ja'?'ドラッグで見回せます。「完了」でスクロールに戻ります。':'Drag to look around. Tap Done to scroll again.');
+}
+function updateFullscreenButton(){
+  const label=lang==='ja'?(fullscreenActive?'全画面表示を終了':'全画面表示'):(fullscreenActive?'Exit fullscreen':'Enter fullscreen');
+  const button=$('#fullscreenBtn'); button.innerHTML=icon(fullscreenActive?'collapse':'expand');
+  button.setAttribute('aria-label',label); button.setAttribute('aria-pressed',String(fullscreenActive)); button.title=label;
+}
+function setFullscreen(on){
+  if(on===fullscreenActive) return;
+  const viewer=$('.stagewrap'); fullscreenActive=on;
+  if(on){
+    fullscreenFocus=document.activeElement; fullscreenScroll=window.scrollY;
+    // Keep keyboard and assistive-technology navigation inside the expanded viewer.
+    for(let node=viewer;node.parentElement&&node!==document.body;node=node.parentElement){
+      Array.from(node.parentElement.children).forEach(sibling=>{ if(sibling!==node){ fullscreenInert.push([sibling,sibling.inert]); sibling.inert=true; } });
+    }
+    viewer.setAttribute('role','dialog'); viewer.setAttribute('aria-modal','true');
+  }
+  viewer.classList.toggle('is-fullscreen',on); document.body.classList.toggle('viewer-fullscreen',on);
+  updateFullscreenButton();
+  if(on){ visible3D=true; $('#fullscreenBtn').focus({preventScroll:true}); }
+  else {
+    fullscreenInert.forEach(([el,inert])=>el.inert=inert); fullscreenInert=[];
+    viewer.removeAttribute('role'); viewer.removeAttribute('aria-modal');
+    window.scrollTo({top:fullscreenScroll,behavior:'instant'});
+    if(fullscreenFocus&&fullscreenFocus.isConnected) fullscreenFocus.focus({preventScroll:true});
+  }
+  if(threeOK) resize();
+}
+function nativeFullscreenElement(){ return document.fullscreenElement||document.webkitFullscreenElement; }
+async function toggleFullscreen(){
+  if(fullscreenPending) return;
+  const viewer=$('.stagewrap'); fullscreenPending=true;
+  try{
+    if(fullscreenActive){
+      if(nativeFullscreenElement()===viewer){
+        const exit=document.exitFullscreen||document.webkitExitFullscreen;
+        if(exit){ try{ await exit.call(document); }catch(e){ return; } }
+      }
+      setFullscreen(false);
+    } else {
+      setFullscreen(true);
+      const enter=viewer.requestFullscreen||viewer.webkitRequestFullscreen;
+      // Browsers without element fullscreen still get an edge-to-edge viewer.
+      if(enter){ try{ await enter.call(viewer); }catch(e){} }
+    }
+  } finally { fullscreenPending=false; }
+}
+function loadChapter(i,opts={}){
+  if(!Number.isInteger(i)||i<0||i>=ORDER.length) return; const first=cur<0; cur=i; const id=ORDER[i];
+  renderChapterList(); renderDetail(); hudHide(); orbit.az=0; orbit.el=0; orbit.zoom=1; setExplore(false); t=0; playing=opts.autoplay!==false; capIndex=-1; updateCaption(0,true);
+  if(threeOK){ clearStage(); VEH=[]; PEOPLE=[]; chapter=BUILD[id](); camInit=false; chapter.update(0,0,0); resetDynamics(); if(first&&!REDUCE) introUntil=performance.now()+1800; }
+  else { chapter={dur:TEXT[id].caps[TEXT[id].caps.length-1][0]+4}; playing=false; }
+  $('#sceneChipText').textContent=chapter.chip?T(chapter.chip):(lang==='ja'?TEXT[id].ja:TEXT[id].en);
+  $('#lessonDuration').textContent=lang==='ja'?`${Math.ceil(chapter.dur)}秒`:`${Math.ceil(chapter.dur)} sec`;
+  $('#prevBtn').disabled=cur===0; $('#nextBtn').disabled=cur===ORDER.length-1;
+  ['playBtn','replayBtn','scrub','exploreBtn','resetView','fullscreenBtn'].forEach(id=>$('#'+id).disabled=!threeOK);
+  setPlayIcon(); updateTime(); try{ localStorage.setItem('dj-chapter',String(i)); }catch(e){}
+  if(opts.focus) $(fullscreenActive?'#stage':'#lessonTitle').focus({preventScroll:true});
+  if(opts.scroll&&!fullscreenActive) $('.stagewrap').scrollIntoView({behavior:REDUCE?'auto':'smooth',block:'start'});
 }
 function applyCamera(c,dt,now){
-  const look=new THREE.Vector3(c.look[0],c.look[1],c.look[2]); const off=new THREE.Vector3(c.pos[0]-look.x,c.pos[1]-look.y,c.pos[2]-look.z);
+  const look=new THREE.Vector3(c.look[0],c.look[1],c.look[2]),off=new THREE.Vector3(c.pos[0]-look.x,c.pos[1]-look.y,c.pos[2]-look.z);
   if(orbit.az||orbit.el||orbit.zoom!==1){ off.applyAxisAngle(Y_AXIS,orbit.az); const axis=new THREE.Vector3().crossVectors(off,Y_AXIS); if(axis.lengthSq()>1e-6){ axis.normalize(); off.applyAxisAngle(axis,orbit.el); } off.multiplyScalar(orbit.zoom); }
   const pos=look.clone().add(off); if(pos.y<1.3) pos.y=1.3;
   if(!camInit){ camInit=true; if(introUntil>now){ camPos.set(pos.x-30,pos.y+45,pos.z+40); camLook.copy(look); } else { camPos.copy(pos); camLook.copy(look); } }
-  else { const intro=introUntil>now; const k=REDUCE?1:1-Math.exp(-dt*(intro?2.2:5.5)); camPos.lerp(pos,k); camLook.lerp(look,k); }
-  camera.position.copy(camPos); camera.lookAt(camLook);
-  sun.position.set(camLook.x+35,70,camLook.z+30); sun.target.position.copy(camLook);
+  else { const k=REDUCE?1:1-Math.exp(-dt*(introUntil>now?2.2:5.5)); camPos.lerp(pos,k); camLook.lerp(look,k); }
+  camera.position.copy(camPos); camera.lookAt(camLook); sun.position.set(camLook.x+35,70,camLook.z+30); sun.target.position.copy(camLook);
 }
 function frame(now){
   requestAnimationFrame(frame);
-  if(!threeOK||!chapter||!visible3D||document.hidden){ lastFrame=now; return; }
-  const dt=Math.min(0.05,Math.max(0,(now-lastFrame)/1000)); lastFrame=now; const wall=now/1000;
-  if(playing){ t+=dt; if(t>=chapter.dur){ t-=chapter.dur; resetDynamics(); } }
-  chapter.update(t,playing?dt:0,wall);
-  VEH.forEach(v=>tickVehicle(v,dt,wall));
-  updateCaption(t); updateTime();
-  applyCamera(chapter.cam(t),dt,now);
-  renderer.render(scene,camera);
+  if(!threeOK||!chapter||!visible3D||document.hidden||$('#chapterSheet').open){ lastFrame=now; return; }
+  const dt=Math.min(0.05,Math.max(0,(now-lastFrame)/1000)); lastFrame=now; const wall=t;
+  if(playing){ t+=dt; if(t>=chapter.dur){ t=chapter.dur-0.001; playing=false; setPlayIcon(); } }
+  chapter.update(t,playing?dt:0,wall); VEH.forEach(v=>tickVehicle(v,playing?dt:0,wall));
+  updateCaption(t); updateTime(); applyCamera(chapter.cam(t),dt,now); renderer.render(scene,camera);
 }
-function showTab(name){
-  $$('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===name?'true':'false'));
-  $$('.view').forEach(v=>v.classList.toggle('on',v.id===name));
-  visible3D=name==='learn'; if(!visible3D) { playing=false; setPlayIcon(); } 
-  if(name==='learn'&&threeOK){ resize(); }
-  try{ window.scrollTo({top:0,behavior:'auto'}); }catch(e){}
+function showTab(name,opts={}){
+  if(!['learn','signs','penalties','quiz'].includes(name)) name='learn';
+  if(name!=='learn'&&fullscreenActive){ toggleFullscreen().then(()=>{ if(!fullscreenActive) showTab(name,opts); }); return; }
+  if(activeTab===name) return;
+  if(activeTab) tabScroll[activeTab]=window.scrollY;
+  activeTab=name; $$('.tabs button').forEach(b=>{ const selected=b.dataset.tab===name; b.setAttribute('aria-selected',String(selected)); b.tabIndex=selected?0:-1; });
+  $$('.view').forEach(v=>v.classList.toggle('on',v.id===name)); visible3D=name==='learn'; setExplore(false);
+  if(name==='learn'&&threeOK) resize();
+  if(opts.history!==false&&location.hash!=='#'+name) history.pushState({tab:name},'','#'+name);
+  window.scrollTo({top:tabScroll[name]||0,behavior:'instant'});
 }
 function applyStrings(){
-  document.documentElement.lang=lang; $('#langBtn').textContent=lang==='ja'?'EN':'日本語'; $('#langBtn').setAttribute('aria-pressed',lang==='ja'?'true':'false');
-  $('#tab-learn').textContent=T(STR.tabLearn); $('#tab-signs').textContent=T(STR.tabSigns); $('#tab-penalties').textContent=T(STR.tabPen); $('#tab-quiz').textContent=T(STR.tabQuiz);
-  $('.rail h2').textContent=T(STR.chapters); $('.brand span').textContent=T(STR.brandSub); $('#hint').textContent=T(STR.hint);
-  $('#signsTitle').textContent=T(STR.signsTitle); $('#signsLead').textContent=T(STR.signsLead); $('#marksTitle').textContent=T(STR.marksTitle); $('#lineTitle').textContent=T(STR.lineTitle);
-  $('#quizTitle').textContent=T(STR.quizTitle); $('#quizLead').textContent=T(STR.quizLead); $('#foot1').textContent=T(STR.foot1); $('#foot2').textContent=T(STR.foot2);
+  document.documentElement.lang=lang; document.body.classList.toggle('ja',lang==='ja');
+  $$('[data-i18n]').forEach(el=>el.textContent=T(UI[el.dataset.i18n])); $$('[data-icon]').forEach(el=>el.innerHTML=icon(el.dataset.icon));
+  $('#langBtn').textContent=lang==='ja'?'EN':'日本語'; $('#langBtn').setAttribute('aria-pressed',String(lang==='ja')); $('#langBtn').setAttribute('aria-label',lang==='ja'?'Switch to English':'日本語に切り替え');
+  [['learn','tabLearn'],['signs','tabSigns'],['penalties','tabPen'],['quiz','tabQuiz']].forEach(([id,key])=>$('#tab-'+id).innerHTML=icon(id)+'<span>'+T(STR[key])+'</span>');
+  $('#hint').textContent=lang==='ja'?'ドラッグで見回す · ダブルクリックでリセット':'Drag to look around · double-click to reset';
+  $('#signsTitle').textContent=lang==='ja'?'標識を知って、道を読む。':'Know the signs. Read the road.'; $('#signsLead').textContent=T(STR.signsLead); $('#marksTitle').textContent=T(STR.marksTitle); $('#lineTitle').textContent=T(STR.lineTitle);
+  $('#quizTitle').textContent=lang==='ja'?'運転の準備はできましたか？':'Ready for the road?'; $('#quizLead').textContent=T(STR.quizLead); $('#foot1').textContent=T(STR.foot1); $('#foot2').textContent=T(STR.foot2);
   $('#nofx p:first-child b').textContent=T(STR.nofx1); $('#nofx p:last-child').textContent=T(STR.nofx2);
-  document.body.classList.toggle('ja',lang==='ja');
+  $('#signSearch').placeholder=lang==='ja'?'日本語・英語で標識を検索':'Search signs in English or Japanese'; $('#chapterSearch').placeholder=lang==='ja'?'チャプターを検索…':'Find a chapter…';
+  const labels={prevBtn:['Previous chapter','前のチャプター'],nextBtn:['Next chapter','次のチャプター'],replayBtn:['Replay this chapter','チャプターを再生し直す'],scrub:['Scene position','再生位置'],resetView:['Reset camera','視点をリセット'],closeSheet:['Close chapters','一覧を閉じる'],stage:['Interactive 3D driving scene','インタラクティブ3Dシーン']};
+  Object.entries(labels).forEach(([id,label])=>$('#'+id).setAttribute('aria-label',label[lang==='ja'?1:0]));
+  setPlayIcon(); updateThemeButton(); updateFullscreenButton(); setExplore(exploring); if(cur>=0) updateProgress();
 }
-function setLang(l){ lang=l; try{ localStorage.setItem('dj-lang',l); }catch(e){} applyStrings(); renderSigns(); renderPenalties(); renderQuiz(); if(cur>=0){ renderChapterList(); renderDetail(); updateCaption(t,true); if(chapter) $('#sceneChipText').textContent=chapter.chip?T(chapter.chip):''; } }
-function setTheme(mode){ if(mode) document.documentElement.setAttribute('data-theme',mode); else document.documentElement.removeAttribute('data-theme'); try{ if(mode) localStorage.setItem('dj-theme',mode); else localStorage.removeItem('dj-theme'); }catch(e){} }
-
-/* ---------- events ---------- */
+function setLang(l){
+  lang=l; try{ localStorage.setItem('dj-lang',l); }catch(e){}
+  applyStrings(); renderSigns(); renderPenalties(); renderQuiz();
+  if(cur>=0){ renderChapterList(); renderDetail(); updateCaption(t,true); if(chapter){ $('#sceneChipText').textContent=chapter.chip?T(chapter.chip):(lang==='ja'?TEXT[ORDER[cur]].ja:TEXT[ORDER[cur]].en); $('#lessonDuration').textContent=lang==='ja'?`${Math.ceil(chapter.dur)}秒`:`${Math.ceil(chapter.dur)} sec`; } }
+}
+function updateThemeButton(){
+  const dark=getComputedStyle(document.documentElement).colorScheme.includes('dark');
+  $('#themeBtn').setAttribute('aria-pressed',String(dark)); $('#themeBtn').setAttribute('aria-label',lang==='ja'?(dark?'ライトモードに切り替え':'ダークモードに切り替え'):(dark?'Switch to light mode':'Switch to dark mode'));
+  document.querySelector('meta[name="theme-color"]').content=dark?'#1b2722':'#f5f6f3';
+}
+function setTheme(mode){ document.documentElement.setAttribute('data-theme',mode); try{ localStorage.setItem('dj-theme',mode); }catch(e){} updateThemeButton(); }
+function toast(message){ clearTimeout(toastTimer); $('#toast').textContent=message; $('#toast').classList.add('on'); toastTimer=setTimeout(()=>$('#toast').classList.remove('on'),3200); }
+function openChapters(push=true){
+  $('#chapterSearch').value=''; chapterButtons($('#sheetList')); updateProgress(); $('#chapterSheet').showModal(); document.body.classList.add('sheet-open');
+  if(push!==false) history.pushState({sheet:true},'',location.href);
+}
+function closeChapters(){ if(!$('#chapterSheet').open) return; $('#chapterSheet').close(); if(history.state&&history.state.sheet) history.back(); }
+function togglePlay(){ if(!threeOK) return; if(!playing&&t>=chapter.dur-.01){ t=0; resetDynamics(); } playing=!playing; setPlayIcon(); }
 function bind(){
-  $$('.tabs button').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
-  $('#brand').addEventListener('click',e=>{ e.preventDefault(); showTab('learn'); });
+  $$('.tabs button').forEach(b=>{
+    b.addEventListener('click',()=>showTab(b.dataset.tab));
+    b.addEventListener('keydown',e=>{ const tabs=$$('.tabs button'),i=tabs.indexOf(b); let next;
+      if(e.key==='ArrowRight') next=(i+1)%tabs.length; else if(e.key==='ArrowLeft') next=(i+tabs.length-1)%tabs.length; else if(e.key==='Home') next=0; else if(e.key==='End') next=tabs.length-1; else return;
+      e.preventDefault(); tabs[next].focus(); showTab(tabs[next].dataset.tab);
+    });
+  });
+  window.addEventListener('popstate',e=>{ if(e.state&&e.state.sheet){ showTab(location.hash.slice(1)||'learn',{history:false}); openChapters(false); return; } if($('#chapterSheet').open) $('#chapterSheet').close(); showTab(location.hash.slice(1)||'learn',{history:false}); });
+  window.addEventListener('hashchange',()=>{ const name=location.hash.slice(1); if(['learn','signs','penalties','quiz'].includes(name)) showTab(name,{history:false}); });
+  $('.skip-link').addEventListener('click',e=>{ e.preventDefault(); $('#main').focus({preventScroll:true}); });
+  $('#brand').addEventListener('click',e=>{ e.preventDefault(); showTab('learn'); window.scrollTo({top:0,behavior:'instant'}); });
   $('#langBtn').addEventListener('click',()=>setLang(lang==='en'?'ja':'en'));
-  $('#themeBtn').addEventListener('click',()=>{ const dark=getComputedStyle(document.documentElement).colorScheme.indexOf('dark')>=0; setTheme(dark?'light':'dark'); });
-  $('#playBtn').addEventListener('click',()=>{ playing=!playing; setPlayIcon(); });
+  $('#themeBtn').addEventListener('click',()=>setTheme(getComputedStyle(document.documentElement).colorScheme.includes('dark')?'light':'dark'));
+  matchMedia('(prefers-color-scheme:dark)').addEventListener('change',updateThemeButton);
+  $('#chapterPicker').addEventListener('click',openChapters); $('#closeSheet').addEventListener('click',closeChapters);
+  $('#chapterSheet').addEventListener('cancel',e=>{ e.preventDefault(); closeChapters(); });
+  $('#chapterSheet').addEventListener('close',()=>document.body.classList.remove('sheet-open'));
+  $('#chapterSheet').addEventListener('click',e=>{ if(e.target!==$('#chapterSheet')) return; const r=e.target.getBoundingClientRect(); if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom) closeChapters(); });
+  $('#chapterSearch').addEventListener('input',e=>chapterButtons($('#sheetList'),e.target.value));
+  $('#signSearch').addEventListener('input',e=>{ signQuery=e.target.value; renderSignResults(); });
+  $$('[data-filter]').forEach(b=>b.addEventListener('click',()=>{ signFilter=b.dataset.filter; $$('[data-filter]').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); renderSignResults(); }));
+  $('#playBtn').addEventListener('click',togglePlay);
   $('#replayBtn').addEventListener('click',()=>{ t=0; playing=true; setPlayIcon(); resetDynamics(); updateCaption(0,true); });
-  $('#prevBtn').addEventListener('click',()=>loadChapter(cur-1)); $('#nextBtn').addEventListener('click',()=>loadChapter(cur+1));
+  $('#prevBtn').addEventListener('click',()=>loadChapter(cur-1,{focus:true})); $('#nextBtn').addEventListener('click',()=>loadChapter(cur+1,{focus:true}));
   $('#scrub').addEventListener('input',e=>{ if(!chapter) return; t=e.target.value/1000*chapter.dur; resetDynamics(); if(chapter.update) chapter.update(t,0,performance.now()/1000); updateCaption(t,true); updateTime(); });
+  $('#exploreBtn').addEventListener('click',()=>setExplore(!exploring));
+  $('#fullscreenBtn').addEventListener('click',toggleFullscreen);
+  const syncFullscreen=()=>setFullscreen(nativeFullscreenElement()===$('.stagewrap'));
+  document.addEventListener('fullscreenchange',syncFullscreen);
+  document.addEventListener('webkitfullscreenchange',syncFullscreen);
+  document.addEventListener('keydown',e=>{
+    if(!fullscreenActive) return;
+    if(e.key==='Escape'){ e.preventDefault(); toggleFullscreen(); return; }
+    if(e.key!=='Tab') return;
+    const focusable=Array.from($('.stagewrap').querySelectorAll('button:not(:disabled),input:not(:disabled),[tabindex="0"]')).filter(el=>el.getClientRects().length);
+    const first=focusable[0],last=focusable[focusable.length-1];
+    if(e.shiftKey&&document.activeElement===first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey&&document.activeElement===last){ e.preventDefault(); first.focus(); }
+  });
+  const resetView=()=>{ orbit.az=0; orbit.el=0; orbit.zoom=1; };
+  $('#resetView').addEventListener('click',resetView);
   const st=$('#stage'); let drag=null;
-  st.addEventListener('pointerdown',e=>{ if(e.target.closest('.transport')||e.target.closest('button')||e.target.closest('input')) return; drag={x:e.clientX,y:e.clientY,id:e.pointerId}; st.setPointerCapture(e.pointerId); st.classList.add('drag'); $('#hint').classList.remove('on'); });
-  st.addEventListener('pointermove',e=>{ if(!drag||e.pointerId!==drag.id) return; const dx=e.clientX-drag.x,dy=e.clientY-drag.y; drag.x=e.clientX; drag.y=e.clientY; orbit.az-=dx*0.006; orbit.el=Math.max(-0.5,Math.min(1.1,orbit.el+dy*0.005)); });
+  st.addEventListener('pointerdown',e=>{
+    if(e.target.closest('button')||e.target.closest('input')||!threeOK||(e.pointerType==='touch'&&!exploring)) return;
+    if(e.pointerType==='mouse'&&e.button!==0) return;
+    drag={x:e.clientX,y:e.clientY,id:e.pointerId}; st.setPointerCapture(e.pointerId); st.classList.add('drag'); $('#hint').classList.remove('on');
+  });
+  st.addEventListener('pointermove',e=>{ if(!drag||e.pointerId!==drag.id) return; const dx=e.clientX-drag.x,dy=e.clientY-drag.y; drag.x=e.clientX; drag.y=e.clientY; orbit.az-=dx*.006; orbit.el=Math.max(-.5,Math.min(1.1,orbit.el+dy*.005)); });
   const up=e=>{ if(drag&&e.pointerId===drag.id){ drag=null; st.classList.remove('drag'); } }; st.addEventListener('pointerup',up); st.addEventListener('pointercancel',up);
-  st.addEventListener('wheel',e=>{ if(e.target.closest('.transport')) return; e.preventDefault(); orbit.zoom=Math.max(0.45,Math.min(2.4,orbit.zoom*(1+e.deltaY*0.0012))); },{passive:false});
-  st.addEventListener('dblclick',e=>{ if(e.target.closest('.transport')) return; orbit.az=0; orbit.el=0; orbit.zoom=1; });
-  st.tabIndex=0; st.addEventListener('keydown',e=>{ if(e.target.tagName==='INPUT'||e.target.tagName==='BUTTON') return; if(e.code==='Space'){ e.preventDefault(); playing=!playing; setPlayIcon(); } else if(e.key==='ArrowRight'){ t=Math.min(chapter.dur-0.01,t+2); resetDynamics(); } else if(e.key==='ArrowLeft'){ t=Math.max(0,t-2); resetDynamics(); } else if(e.key==='PageDown'||e.key==='n'){ loadChapter(cur+1); } else if(e.key==='PageUp'||e.key==='p'){ loadChapter(cur-1); } });
+  st.addEventListener('wheel',e=>{ if(!exploring||e.target.closest('button')) return; e.preventDefault(); orbit.zoom=Math.max(.45,Math.min(2.4,orbit.zoom*(1+e.deltaY*.0012))); },{passive:false});
+  st.addEventListener('dblclick',e=>{ if(!e.target.closest('button')) resetView(); });
+  st.addEventListener('keydown',e=>{
+    if(e.target!==st||!chapter) return;
+    if(e.code==='Space'){ e.preventDefault(); togglePlay(); }
+    else if(e.key==='Escape'){ setExplore(false); }
+    else if(e.key==='ArrowRight'||e.key==='ArrowLeft'){ e.preventDefault(); t=Math.max(0,Math.min(chapter.dur-.001,t+(e.key==='ArrowRight'?2:-2))); resetDynamics(); updateCaption(t,true); updateTime(); }
+    else if(e.key==='PageDown'||e.key==='n'){ e.preventDefault(); loadChapter(cur+1,{focus:true}); }
+    else if(e.key==='PageUp'||e.key==='p'){ e.preventDefault(); loadChapter(cur-1,{focus:true}); }
+  });
   document.addEventListener('visibilitychange',()=>{ lastFrame=performance.now(); });
+  if('IntersectionObserver' in window) new IntersectionObserver(entries=>{ visible3D=activeTab==='learn'&&entries[0].isIntersecting; },{rootMargin:'120px'}).observe(st);
 }
-
-/* ---------- boot ---------- */
 function boot(){
-  let stored=null; try{ stored=localStorage.getItem('dj-lang'); const th=localStorage.getItem('dj-theme'); if(th) setTheme(th); }catch(e){}
+  let stored=null; try{ stored=localStorage.getItem('dj-lang'); const th=localStorage.getItem('dj-theme'); if(th==='dark'||th==='light') document.documentElement.setAttribute('data-theme',th); }catch(e){}
   if(stored==='ja'||stored==='en') lang=stored; else if((navigator.language||'').toLowerCase().startsWith('ja')) lang='ja';
   applyStrings(); renderSigns(); renderPenalties(); renderQuiz(); bind();
   threeOK=(typeof THREE!=='undefined')&&initThree();
-  if(!threeOK){ $('#nofx').classList.add('on'); $('#sceneChipText').textContent=''; }
-  let start=0; try{ const s=parseInt(localStorage.getItem('dj-chapter')||'0',10); if(s>=0&&s<ORDER.length) start=s; }catch(e){}
-  loadChapter(start);
-  if(threeOK){ lastFrame=performance.now(); requestAnimationFrame(frame); if(!matchMedia('(pointer:coarse)').matches){ hintTimer=setTimeout(()=>{ $('#hint').classList.add('on'); setTimeout(()=>$('#hint').classList.remove('on'),4500); },3500); } }
+  if(threeOK){ camPos=new THREE.Vector3(); camLook=new THREE.Vector3(); } else $('#nofx').classList.add('on');
+  let start=0; try{ const s=Number(localStorage.getItem('dj-chapter')||0); if(Number.isInteger(s)&&s>=0&&s<ORDER.length) start=s; }catch(e){}
+  loadChapter(start,{autoplay:!REDUCE}); showTab(location.hash.slice(1)||'learn',{history:false});
+  if(threeOK){ lastFrame=performance.now(); requestAnimationFrame(frame); if(!matchMedia('(pointer:coarse)').matches&&!REDUCE) hintTimer=setTimeout(()=>{ $('#hint').classList.add('on'); setTimeout(()=>$('#hint').classList.remove('on'),4500); },2200); }
 }
 window.__dj={get chapter(){return chapter;},get camera(){return camera;},get scene(){return scene;},get veh(){return VEH;},get t(){return t;},load:loadChapter};
 const fontsReady=(document.fonts&&document.fonts.ready)?document.fonts.ready:Promise.resolve();
 Promise.race([fontsReady,new Promise(r=>setTimeout(r,2500))]).then(()=>{ try{ boot(); }catch(err){ console.error(err); $('#nofx').classList.add('on'); } });
+
 })();
 </script>
 </body>
