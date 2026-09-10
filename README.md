@@ -1,4 +1,4 @@
-# Drive Japan
+# Japan Road Rules
 
 An interactive 3D guide to the rules of the road in Japan — keep left, 止まれ stop
 signs, crosswalk priority, railway crossings, expressways, alcohol, phones,
@@ -6,7 +6,7 @@ bicycles and more. Every rule is shown as a small animated scene you can scrub
 through, alongside the penalty points and the article of the Road Traffic Act it
 comes from.
 
-**[▶ Open the guide](https://alzin.github.io/drive-japan/)**
+**[▶ Open the guide](https://alzin.github.io/japan-road-rules/)**
 
 Bilingual: English / 日本語.
 
