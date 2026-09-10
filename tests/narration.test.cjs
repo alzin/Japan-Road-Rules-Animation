@@ -9,7 +9,16 @@ const learnUI = html.slice(html.indexOf('/* ===================== LEARN UI'), ht
 
 // Run the real scene/picker handlers with a deterministic clock and native speech
 // stand-in. A canceled native voice may still be audible after cancel() returns.
-function setup({ cancelDelay = 80, reportIdleEarly = false, cancelEvents = true } = {}) {
+const UA = {
+  windowsChrome: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
+  iphoneSafari: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1',
+  iphoneChrome: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/128.0.0.0 Mobile/15E148 Safari/604.1',
+  ipadDesktop: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15',
+  macChrome: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
+  androidChrome: 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Mobile Safari/537.36'
+};
+
+function setup({ cancelDelay = 80, reportIdleEarly = false, cancelEvents = true, ua = UA.windowsChrome, voices = [], maxTouchPoints = 0 } = {}) {
   let now = 0, timerId = 0;
   const timers = new Map(), elements = new Map(), audible = new Set(), canceling = new Set();
   const calls = [];
@@ -49,7 +58,7 @@ function setup({ cancelDelay = 80, reportIdleEarly = false, cancelEvents = true 
   const synth = {
     get speaking() { return [...audible].some(u => !reportIdleEarly || !canceling.has(u)); },
     pending: false,
-    getVoices() { return []; },
+    getVoices() { return voices; },
     speak(utterance) {
       if (audible.size) overlaps++;
       audible.add(utterance); calls.push({ utterance, at: now });
@@ -78,6 +87,7 @@ function setup({ cancelDelay = 80, reportIdleEarly = false, cancelEvents = true 
   }]));
   const context = vm.createContext({
     window, document, speechSynthesis: synth, SpeechSynthesisUtterance: window.SpeechSynthesisUtterance,
+    navigator: { userAgent: ua, maxTouchPoints, language: 'en-US' },
     performance: { now: () => now }, setTimeout: later, clearTimeout: id => timers.delete(id),
     $, $$: () => [], ORDER, TEXT, T: x => x?.en || '', REDUCE: false, lang: 'en', threeOK: true,
     VEH: [], PEOPLE: [], localStorage: { getItem() { return null; }, setItem() {} },
@@ -236,4 +246,47 @@ test('paused chapters and unavailable 3D do not start narration', () => {
   const h = setup();
   h.run('loadChapter(0,{autoplay:false}); threeOK=false; loadChapter(1);'); h.tick(500);
   assert.equal(h.calls.length, 0);
+});
+
+// Speech engines disagree about what utterance.rate means: Windows voices compress it,
+// Android multiplies by it, and Apple's engine reaches its top speed at 2. A crowded
+// scene opener has to sound equally calm everywhere.
+const CROWDED = 'one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty';
+const near = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-9, `expected ${expected}, got ${actual}`);
+function crowdedOpener(options) {
+  const h = setup(options);
+  h.run(`TEXT.stop.caps[0][1]=${JSON.stringify(CROWDED)}; loadChapter(2);`);
+  assert.equal(h.calls.length, 1);
+  return h.calls[0].utterance;
+}
+const davidVoice = { name: 'Microsoft David', lang: 'en-US', localService: true, voiceURI: 'Microsoft David - English (United States)' };
+const samanthaVoice = { name: 'Samantha', lang: 'en-US', localService: true, voiceURI: 'com.apple.voice.compact.en-US.Samantha' };
+const googleVoice = { name: 'Google US English', lang: 'en-US', localService: false, voiceURI: 'Google US English' };
+
+test('a crowded caption still asks Windows voices for the full rate', () => {
+  const utterance = crowdedOpener({ voices: [davidVoice] });
+  near(utterance.rate, 1.7);
+  assert.equal(utterance.voice, davidVoice);
+});
+
+for (const [name, options] of Object.entries({
+  'Safari on iPhone': { ua: UA.iphoneSafari },
+  'Chrome on iPhone': { ua: UA.iphoneChrome },
+  'Safari on iPad with a desktop user agent': { ua: UA.ipadDesktop, maxTouchPoints: 5 },
+  'an Apple voice in any browser': { ua: UA.macChrome, voices: [samanthaVoice] }
+})) {
+  test(`${name} keeps the same caption close to Apple's normal pace`, () => {
+    near(crowdedOpener(options).rate, 1.105);
+  });
+}
+
+test('Android and network voices get a plain multiplier of about 1.25', () => {
+  near(crowdedOpener({ ua: UA.androidChrome }).rate, 1.252);
+  near(crowdedOpener({ voices: [googleVoice] }).rate, 1.252);
+});
+
+test('captions that already fit are never sped up on any engine', () => {
+  const h = setup({ ua: UA.iphoneSafari });
+  h.run('loadChapter(0)');
+  near(h.calls[0].utterance.rate, 0.9);
 });

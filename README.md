@@ -67,7 +67,10 @@ node --test tests/narration.test.cjs
 These checks simulate delayed speech cancellation and mobile chapter-picker
 events. Also check narration on a real iPhone/iPad: switch chapters quickly while
 a caption is speaking, open and close the chapter picker, pause or mute, and
-background then return to the page. Only the current scene should be heard.
+background then return to the page. Only the current scene should be heard, and a
+crowded caption should sound only a little brisker than the voice's normal pace:
+Apple's engine and Android honour `utterance.rate` far more literally than Windows
+voices, so the app asks them for a much smaller value.
 
 ## Disclaimer
 

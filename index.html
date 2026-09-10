@@ -1305,12 +1305,27 @@ function cancelNarration(){
 function canSpeakCaption(idx){
   return canNarrate&&narrationEnabled&&narrationPageActive&&threeOK&&playing&&activeTab==='learn'&&visible3D&&!document.hidden&&!$('#chapterSheet').open&&cur>=0&&idx>=0&&idx===capIndex;
 }
-function narrationRate(text,idx){
+// utterance.rate is not portable. Apple's engine (Safari, and every browser on iOS and
+// iPadOS) reaches its top pace, about four times normal, already at rate 2; Chromium and
+// Firefox on Windows compress the rate onto SAPI's logarithmic scale, so 1.7 reads only
+// about a quarter faster; Android and network voices apply it as a plain multiplier.
+const SPEECH_HEADROOM={sapi:1,linear:.36,apple:.15};
+function speechEngine(voice){
+  const ua=navigator.userAgent||'';
+  if((voice&&/^com\.apple\./.test(voice.voiceURI||''))||/iP(hone|ad|od)/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1)||(/AppleWebKit/.test(ua)&&/\bSafari\//.test(ua)&&!/Chrome|Chromium|CriOS|Edg|OPR|Firefox|FxiOS/.test(ua))) return 'apple';
+  if(/Windows/.test(ua)&&(!voice||voice.localService!==false)) return 'sapi';
+  return 'linear';
+}
+function narrationRate(text,idx,voice){
   const caps=TEXT[ORDER[cur]].caps,start=caps[idx][0],end=idx+1<caps.length?caps[idx+1][0]:(chapter?chapter.dur:start+4);
   const seconds=Math.max(2,end-start-.15);
   const units=lang==='ja'?text.replace(/[\s。、！？「」『』（）・]/g,'').length:text.trim().split(/\s+/).filter(Boolean).length;
   const normalPerSecond=lang==='ja'?5.2:2.8;
-  return Math.max(.9,Math.min(1.7,units/seconds/normalPerSecond));
+  const wanted=Math.max(.9,Math.min(1.7,units/seconds/normalPerSecond));
+  // Keep every engine at or below roughly 1.25x its natural pace, the speed the Windows
+  // voices already deliver at 1.7, so a scene opener sounds the same on a phone.
+  const headroom=wanted<=1?1:SPEECH_HEADROOM[speechEngine(voice)];
+  return headroom===1?wanted:1+(wanted-1)*headroom;
 }
 function speakCaption(idx=capIndex){
   if(!canSpeakCaption(idx)) return;
@@ -1328,10 +1343,10 @@ function speakCaption(idx=capIndex){
     if(now>=request.expires){ cancelNarration(); return; }
     if(delay>0||speechSynthesis.speaking||speechSynthesis.pending){ narrationTimer=setTimeout(start,Math.max(50,delay)); return; }
     const c=TEXT[ORDER[cur]].caps[idx],text=lang==='ja'?c[2]:c[1],locale=lang==='ja'?'ja-JP':'en-US';
-    const utterance=new SpeechSynthesisUtterance(text); narrationUtterance=utterance;
-    utterance.lang=locale; utterance.rate=narrationRate(text,idx); utterance.pitch=1; utterance.volume=1;
     const voices=speechSynthesis.getVoices(),normalized=locale.toLowerCase();
-    utterance.voice=voices.find(v=>v.lang.replace('_','-').toLowerCase()===normalized)||voices.find(v=>v.lang.toLowerCase().startsWith(lang))||null;
+    const voice=voices.find(v=>v.lang.replace('_','-').toLowerCase()===normalized)||voices.find(v=>v.lang.toLowerCase().startsWith(lang))||null;
+    const utterance=new SpeechSynthesisUtterance(text); narrationUtterance=utterance;
+    utterance.lang=locale; utterance.voice=voice; utterance.rate=narrationRate(text,idx,voice); utterance.pitch=1; utterance.volume=1;
     utterance.onend=utterance.onerror=()=>{
       if(narrationRequest!==request) return;
       narrationUtterance=null; narrationRequest=null;
